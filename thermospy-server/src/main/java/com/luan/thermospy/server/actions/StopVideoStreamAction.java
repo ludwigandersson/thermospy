@@ -6,7 +6,10 @@ package com.luan.thermospy.server.actions;
 public class StopVideoStreamAction implements CameraAction {
     public StopVideoStreamAction() {}
 
-    public int run() {
-        return 0;
+    public void start() {
     }
+
+    public void stop() {}
+    
+    public boolean isRunning() { return false;}
 }

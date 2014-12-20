@@ -24,8 +24,15 @@ public class CameraControlResource {
 
     @POST
     public Response set(Action actionReq) {
-        CameraAction action = controller.getCameraAction(actionReq.getActionId());
-        int result = action.run();
+        if (actionReq.getActionId() == 0) {
+            controller.start();
+        }
+        else
+        {
+            controller.stop();
+        }
+        int result = 0;
+
         return Response.created(UriBuilder.fromResource(CameraControlResource.class)
                 .build("result", result))
                 .build();

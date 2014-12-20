@@ -1,26 +1,47 @@
 package com.luan.thermospy.server.resources;
-import com.codahale.metrics.annotation.Timed;
-import com.luan.thermospy.server.actions.CameraAction;
-import com.luan.thermospy.server.core.Image;
-import com.luan.thermospy.server.core.ThermospyController;
+import com.luan.thermospy.server.core.CameraDeviceConfig;
+import com.luan.thermospy.server.hal.CameraDevice;
+import javax.ws.rs.core.Response;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+
+import java.awt.image.BufferedImage;
+import java.io.*;
 
 @Path("/thermospy-server/get-last-image")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces("image/png")
 public class GetLastImage {
-    private final ThermospyController controller;
-    public GetLastImage(ThermospyController controller)
+    private final CameraDevice cameraDevice;
+    public GetLastImage(CameraDevice controller)
     {
-        this.controller = controller;
+        this.cameraDevice = controller;
     }
 
     @GET
-    public Image fetch() {
-        return new Image("img/lastpic.png");
+    public Response fetch() {
+
+
+        try {
+            BufferedImage image = ImageIO.read(new File(cameraDevice.getConfig().getFilePath()));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            byte[] imageData = baos.toByteArray();
+            // uncomment line below to send streamed
+            return Response.ok(new ByteArrayInputStream(imageData)).build();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+        // uncomment line below to send non-streamed
+        return Response.status(Response.Status.NOT_FOUND).build();
+
+
+
+
     }
 }

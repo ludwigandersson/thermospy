@@ -25,8 +25,6 @@ public class GetTempResource {
     @Timed
     public Temperature fetch() {
         int temp = controller.getTemperature();
-        controller.setTemperature(temp+1);
-
         return new Temperature(temp);
     }
 }

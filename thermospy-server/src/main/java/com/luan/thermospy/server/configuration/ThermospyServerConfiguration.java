@@ -2,32 +2,71 @@ package com.luan.thermospy.server.configuration;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.luan.thermospy.server.core.Boundary;
+import com.luan.thermospy.server.core.CameraDeviceConfig;
+import com.luan.thermospy.server.core.DigitRecognizerConfig;
+import com.luan.thermospy.server.core.ThermospyController;
+import javax.annotation.Nonnull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 public class ThermospyServerConfiguration extends Configuration {
-    @NotEmpty
-    private String template;
+    @Nonnull
+    private CameraDeviceConfig cameraDeviceConfig = null;
 
-    @NotEmpty
-    private String defaultName = "Stranger";
+    @Nonnull
+    private DigitRecognizerConfig digitRecognizerConfig = null;
+    
+    @Nonnull
+    private ThermospyController controller = null;
 
+    /**
+     * @return the cameraDeviceConfig
+     */
     @JsonProperty
-    public String getTemplate() {
-        return template;
+    public CameraDeviceConfig getCameraDeviceConfig() {
+        return cameraDeviceConfig;
     }
 
+    /**
+     * @param cameraDeviceConfig the cameraDeviceConfig to set
+     */
     @JsonProperty
-    public void setTemplate(String template) {
-        this.template = template;
+    public void setCameraDeviceConfig(CameraDeviceConfig cameraDeviceConfig) {
+        this.cameraDeviceConfig = cameraDeviceConfig;
     }
 
+    /**
+     * @return the digitRecognizerConfig
+     */
     @JsonProperty
-    public String getDefaultName() {
-        return defaultName;
+    public DigitRecognizerConfig getDigitRecognizerConfig() {
+        return digitRecognizerConfig;
     }
 
+    /**
+     * @param digitRecognizerConfig the digitRecognizerConfig to set
+     */
     @JsonProperty
-    public void setDefaultName(String name) {
-        this.defaultName = name;
+    public void setDigitRecognizerConfig(DigitRecognizerConfig digitRecognizerConfig) {
+        this.digitRecognizerConfig = digitRecognizerConfig;
     }
+
+    /**
+     * @return the controller
+     */
+    @JsonProperty
+    public ThermospyController getController() {
+        return controller;
+    }
+
+    /**
+     * @param controller the controller to set
+     */
+    @JsonProperty
+    public void setController(ThermospyController controller) {
+        this.controller = controller;
+    }
+
+    
+    
 }

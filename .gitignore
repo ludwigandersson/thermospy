@@ -1,1 +1,7 @@
 thermospy-server/target
+*.log
+.idea/
+*.iml
+*.jpg
+nbactions.xml
+

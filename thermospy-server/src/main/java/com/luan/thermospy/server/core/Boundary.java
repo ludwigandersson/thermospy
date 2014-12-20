@@ -10,6 +10,7 @@ public class Boundary {
     private int y;
     private int width;
     private int height;
+    private Object lock1 = new Object();
 
     public Boundary() {}
     public Boundary(int x, int y, int width, int height)
@@ -22,34 +23,65 @@ public class Boundary {
 
     @JsonProperty
     public int getX() {
-        return x;
+        synchronized(lock1)
+        {
+            return x;
+        }
     }
 
+
     public void setX(int x) {
-        this.x = x;
+
+        synchronized(lock1)
+        {
+            this.x = x;
+        }
     }
     @JsonProperty
     public int getY() {
-        return y;
+
+        synchronized(lock1)
+        {
+            return y;
+        }
     }
 
     public void setY(int y) {
-        this.y = y;
+
+        synchronized(lock1)
+        {
+            this.y = y;
+        }
     }
     @JsonProperty
     public int getWidth() {
-        return width;
+
+        synchronized(lock1)
+        {
+            return width;
+        }
     }
 
     public void setWidth(int width) {
-        this.width = width;
+
+        synchronized(lock1)
+        {
+            this.width = width;
+        }
     }
     @JsonProperty
     public int getHeight() {
-        return height;
+
+        synchronized(lock1)
+        {
+            return height;
+        }
     }
 
     public void setHeight(int height) {
-        this.height = height;
+        synchronized(lock1)
+        {
+            this.height = height;
+        }
     }
 }

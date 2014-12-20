@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Temperature {
 
-    private int temperature;
+    private int temperature = 0;
+    private int id = 0;
     public Temperature(){}
 
     public Temperature(int temperature)
@@ -14,12 +15,22 @@ public class Temperature {
     @JsonProperty
     public int getId()
     {
-        return 0;
+        return id;
     }
 
     @JsonProperty
     public int getTemperature()
     {
         return this.temperature;
+    }
+    
+    public void setTemperature(int temperature)
+    {
+        this.temperature = temperature;
+    }
+    
+    public void setId(int id)
+    {
+        this.id = id;
     }
 }

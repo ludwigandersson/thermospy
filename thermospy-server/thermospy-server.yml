@@ -1,2 +1,13 @@
-template: Hello, %s!
-defaultName: Stranger
+cameraDeviceConfig:
+    height: 600
+    width: 800
+    enableGrayscale: true
+    cameraDevice: "/dev/video0"
+    cropImage: true
+    filePath: "thermopic.jpg"
+digitRecognizerConfig:
+    retryCount: 5
+    threshold: 0
+    cropImage: false
+controller:
+    refreshRate: 5

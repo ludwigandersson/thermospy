@@ -5,5 +5,8 @@ package com.luan.thermospy.server.actions;
  */
 public interface CameraAction
 {
-    public int run();
+    public void start();
+    public void stop();
+
+    public boolean isRunning();
 }

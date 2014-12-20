@@ -1,19 +1,22 @@
 package com.luan.thermospy.server.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.luan.thermospy.server.actions.CameraAction;
-import com.luan.thermospy.server.actions.TakePhotoAction;
-import javafx.scene.Camera;
 
-import java.awt.*;
 
 public class ThermospyController {
-    private Object myLock = new Object();
-    TakePhotoAction takePhotoAction = new TakePhotoAction();
-    private int temperature = 0;
+    @JsonProperty
     private int refreshRate = 0;
+    @JsonIgnore
+    final private Object myLock = new Object();
+    @JsonIgnore
+    CameraAction takePhotoAction = null;
+    @JsonIgnore
+    private int temperature = 0;
+    @JsonIgnore
     private Boundary displayBoundary = new Boundary(0,0,0,0);
-    private Point imageResolution = new Point(350, 350);
-
+    
     public int getTemperature() {
         synchronized(myLock){
             return temperature;
@@ -38,22 +41,15 @@ public class ThermospyController {
         }
     }
 
-    public Point getImageResolution() {
-        synchronized(myLock){
-            return imageResolution;
-        }
+    public void start() {
+        takePhotoAction.start();
     }
-
-    public void setImageResolution(Point imageResolution) {
-        synchronized(myLock){
-            this.imageResolution = imageResolution;
-        }
+    public void stop() {
+        takePhotoAction.stop();
     }
-
-    public CameraAction getCameraAction(int id) {
-        synchronized(myLock){
-            return takePhotoAction;
-        }
+    public void setCameraAction(CameraAction actionHandler)
+    {
+        this.takePhotoAction = actionHandler;
     }
 
     public int getRefreshRate() {
@@ -66,5 +62,9 @@ public class ThermospyController {
         synchronized(myLock) {
             this.refreshRate = refreshRate;
         }
+    }
+
+    public boolean getServiceStatus() {
+        return takePhotoAction.isRunning();
     }
 }

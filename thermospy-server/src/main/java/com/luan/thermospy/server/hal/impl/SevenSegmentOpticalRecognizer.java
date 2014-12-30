@@ -31,7 +31,7 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
     {
         ProcessBuilder builder = new ProcessBuilder();
         ArrayList<String> commands = new ArrayList<String>();
-        commands.add("/home/ludwig/Development/thermospy/thermospy-server/ssocr");
+        commands.add("ssocr");
         commands.add("-d");
         commands.add("-1");
         

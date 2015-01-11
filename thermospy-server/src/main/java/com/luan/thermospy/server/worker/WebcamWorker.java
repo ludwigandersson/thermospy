@@ -6,10 +6,8 @@ import com.luan.thermospy.server.hal.DigitRecognizer;
 import org.eclipse.jetty.util.log.Log;
 import com.luan.thermospy.server.core.Boundary;
 
-import java.awt.*;
 import java.io.File;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * Created by ludwig on 2014-12-24.
@@ -20,7 +18,7 @@ public class WebcamWorker extends Thread implements Runnable {
     private ThermospyController controller = null;
     private CameraDevice webCam = null;
     DigitRecognizer recognizer;
-    volatile boolean paused = false;
+    volatile boolean paused = true;
     private final Object lockObj = new Object();
     public WebcamWorker(ThermospyController controller, CameraDevice webCam, DigitRecognizer recognizer)
     {

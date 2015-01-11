@@ -4,4 +4,4 @@ thermospy-server/target
 *.iml
 *.jpg
 nbactions.xml
-
+.DS_Store

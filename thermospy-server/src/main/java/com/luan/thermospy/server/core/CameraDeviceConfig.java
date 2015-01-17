@@ -6,7 +6,6 @@
 package com.luan.thermospy.server.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.awt.Dimension;
 
 /**
  *

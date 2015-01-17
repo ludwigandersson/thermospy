@@ -29,16 +29,25 @@ public class CameraControlResource {
         }
         else if (actionReq.getActionId() == 1) 
         {
-            controller.singleshot();
+            boolean result = controller.singleshot();
+            if (result)
+            {
+                return Response.ok().build();
+            }
+            else
+            {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            
         }
         else
         {
             controller.stop();
         }
-        int result = 0;
+
 
         return Response.created(UriBuilder.fromResource(CameraControlResource.class)
-                .build("result", result))
+                .build("result", 0))
                 .build();
     }
 }

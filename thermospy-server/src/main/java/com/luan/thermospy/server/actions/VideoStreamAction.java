@@ -9,8 +9,9 @@ public class VideoStreamAction implements CameraAction {
     public void start() {
     }
     
-    public void singleshot()
+    public boolean singleshot()
     {
+        return false;
     }
 
     public void stop() {}

@@ -27,20 +27,15 @@ public class WebcamWorker extends Thread implements Runnable {
         this.recognizer = recognizer;
     }
     
-    public void runonce()
+    public boolean runonce()
     {
-        if (isPaused())
-        {
-            wakeUp();
-            pause();
-        }
-        else
-        {
-            wakeUp();
+        synchronized (lockObj) {
+            File snapshot = webCam.capture(controller.getDisplayBoundary());
+            return snapshot.exists();
         }
     }
 
-    public synchronized void pause()
+    public void pause()
     {
         synchronized (lockObj) {
             paused = true;
@@ -48,7 +43,7 @@ public class WebcamWorker extends Thread implements Runnable {
         }
     }
 
-    public synchronized void wakeUp()
+    public void wakeUp()
     {
         synchronized (lockObj) {
             paused = false;
@@ -56,7 +51,7 @@ public class WebcamWorker extends Thread implements Runnable {
         }
     }
 
-    public synchronized boolean isPaused()
+    public boolean isPaused()
     {
         synchronized (lockObj) {
             return paused;
@@ -70,15 +65,18 @@ public class WebcamWorker extends Thread implements Runnable {
             try {
                 
                 Boundary b = controller.getDisplayBoundary();
-                File imgFile = webCam.capture(b);
-                String tempString = recognizer.recognize(imgFile, b);
+                File imgFile;
+                String tempString;
+                synchronized (lockObj) {
+                   imgFile = webCam.capture(b);
+                   tempString = recognizer.recognize(imgFile, b);
+                }
 
+                
                 try {
                     controller.setTemperature(Integer.parseInt(tempString));
-
                 } catch (NumberFormatException nbrEx) {
-                    Log.getLog().info("Couldn't parsed temperature from: " + tempString, nbrEx);
-                    //controller.setTemperature(0xFFFF);
+                    controller.setTemperature(Integer.MIN_VALUE);
                 }
 
                 synchronized (lockObj) {

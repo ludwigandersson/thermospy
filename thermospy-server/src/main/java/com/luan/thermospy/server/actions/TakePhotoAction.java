@@ -13,6 +13,7 @@ public class TakePhotoAction implements CameraAction {
         this.worker = thread;
     }
 
+    @Override
     public void stop()
     {
         if (worker.isAlive()) {
@@ -22,7 +23,7 @@ public class TakePhotoAction implements CameraAction {
 
         }
     }
-
+    @Override
     public void start() {
         if (!worker.isAlive()) {
             Log.getLog().info("Start worker!");
@@ -34,12 +35,12 @@ public class TakePhotoAction implements CameraAction {
             worker.wakeUp();
         }
     }
-    
-    public void singleshot()
+    @Override
+    public boolean singleshot()
     {
-        worker.runonce();
+        return worker.runonce();
     }
-    
+    @Override
     public boolean isRunning()
     {
         return !worker.isPaused();

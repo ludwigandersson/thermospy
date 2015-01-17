@@ -2,12 +2,11 @@ package com.luan.thermospy.server.configuration;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.luan.thermospy.server.core.Boundary;
 import com.luan.thermospy.server.core.CameraDeviceConfig;
 import com.luan.thermospy.server.core.DigitRecognizerConfig;
 import com.luan.thermospy.server.core.ThermospyController;
 import javax.annotation.Nonnull;
-import org.hibernate.validator.constraints.NotEmpty;
+
 
 public class ThermospyServerConfiguration extends Configuration {
     @Nonnull

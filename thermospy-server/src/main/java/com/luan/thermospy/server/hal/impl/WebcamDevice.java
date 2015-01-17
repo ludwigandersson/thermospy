@@ -78,6 +78,7 @@ public class WebcamDevice extends CameraDevice {
             commands.add("--greyscale");
         }
         
+	commands.add("-S 2");
         commands.add("-r");
         commands.add(getConfig().getWidth()+"x"+getConfig().getHeight());
         

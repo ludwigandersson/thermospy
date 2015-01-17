@@ -27,6 +27,10 @@ public class CameraControlResource {
         if (actionReq.getActionId() == 0) {
             controller.start();
         }
+        else if (actionReq.getActionId() == 1) 
+        {
+            controller.singleshot();
+        }
         else
         {
             controller.stop();

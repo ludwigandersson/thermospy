@@ -26,6 +26,19 @@ public class WebcamWorker extends Thread implements Runnable {
         this.webCam = webCam;
         this.recognizer = recognizer;
     }
+    
+    public void runonce()
+    {
+        if (isPaused())
+        {
+            wakeUp();
+            pause();
+        }
+        else
+        {
+            wakeUp();
+        }
+    }
 
     public synchronized void pause()
     {
@@ -55,7 +68,7 @@ public class WebcamWorker extends Thread implements Runnable {
         while (!isInterrupted())
         {
             try {
-
+                
                 Boundary b = controller.getDisplayBoundary();
                 File imgFile = webCam.capture(b);
                 String tempString = recognizer.recognize(imgFile, b);

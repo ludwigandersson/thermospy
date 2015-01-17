@@ -8,7 +8,9 @@ public class StopVideoStreamAction implements CameraAction {
 
     public void start() {
     }
-
+    public void singleshot()
+    {
+    }
     public void stop() {}
     
     public boolean isRunning() { return false;}

@@ -44,6 +44,10 @@ public class ThermospyController {
     public void start() {
         takePhotoAction.start();
     }
+    public void singleshot() {
+        takePhotoAction.singleshot();
+    }
+    
     public void stop() {
         takePhotoAction.stop();
     }

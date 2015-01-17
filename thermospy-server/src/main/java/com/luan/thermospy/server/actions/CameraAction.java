@@ -7,6 +7,7 @@ public interface CameraAction
 {
     public void start();
     public void stop();
+    public void singleshot();
 
     public boolean isRunning();
 }

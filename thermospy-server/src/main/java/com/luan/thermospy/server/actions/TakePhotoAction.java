@@ -17,10 +17,8 @@ public class TakePhotoAction implements CameraAction {
     {
         if (worker.isAlive()) {
             Log.getLog().info("Pause worker!");
-
-                worker.pause();
-
-                Log.getLog().info("Worker status: "+(worker.isInterrupted() ? "Running" : "Stopped"));
+            worker.pause();
+            Log.getLog().info("Worker status: "+(worker.isInterrupted() ? "Running" : "Stopped"));
 
         }
     }
@@ -35,6 +33,11 @@ public class TakePhotoAction implements CameraAction {
             Log.getLog().info("Restart worker!");
             worker.wakeUp();
         }
+    }
+    
+    public void singleshot()
+    {
+        worker.runonce();
     }
     
     public boolean isRunning()

@@ -7,7 +7,6 @@ import org.eclipse.jetty.util.log.Log;
 //import org.opencv.highgui.Highgui;
 //import org.opencv.highgui.VideoCapture;
 
-import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;

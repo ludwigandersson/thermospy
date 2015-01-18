@@ -60,10 +60,14 @@ public class WebcamWorker extends Thread implements Runnable {
 
     @Override
     public void run() {
+        synchronized (lockObj) {
+            paused = false;
+        }
+        
         while (!isInterrupted())
         {
             try {
-                
+
                 Boundary b = controller.getDisplayBoundary();
                 File imgFile;
                 String tempString;

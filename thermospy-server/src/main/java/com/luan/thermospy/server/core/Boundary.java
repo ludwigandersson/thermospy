@@ -12,7 +12,12 @@ public class Boundary {
     private int height;
     private Object lock1 = new Object();
 
-    public Boundary() {}
+    public Boundary() {
+        x = 0;
+        y = 0;
+        width = 0;
+        height = 0;
+    }
     public Boundary(int x, int y, int width, int height)
     {
         this.setX(x);

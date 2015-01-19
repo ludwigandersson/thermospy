@@ -23,6 +23,8 @@ public class CameraControlResource {
 
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response set(Action actionReq) {
         if (actionReq.getActionId() == 0) {
             controller.start();
@@ -30,15 +32,10 @@ public class CameraControlResource {
         else if (actionReq.getActionId() == 1) 
         {
             boolean result = controller.singleshot();
-            if (result)
+            if (!result)
             {
-                return Response.ok().build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(actionReq).build();
             }
-            else
-            {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-            
         }
         else
         {
@@ -46,8 +43,6 @@ public class CameraControlResource {
         }
 
 
-        return Response.created(UriBuilder.fromResource(CameraControlResource.class)
-                .build("result", 0))
-                .build();
+        return Response.ok().entity(actionReq).build();
     }
 }

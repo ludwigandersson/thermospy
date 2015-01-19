@@ -27,10 +27,10 @@ public class ImageBoundaryResource {
     }
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response set(Boundary imgBoundary) {
         controller.setDisplayBoundary(imgBoundary);
-        return Response.created(UriBuilder.fromResource(ImageBoundaryResource.class)
-                .build("result", 0))
-                .build();
+        return Response.ok().entity(imgBoundary).build();
     }
 }

@@ -31,7 +31,17 @@ public class WebcamWorker extends Thread implements Runnable {
     {
         synchronized (lockObj) {
             File snapshot = webCam.capture(controller.getDisplayBoundary());
-            return snapshot.exists();
+            Boundary b = controller.getDisplayBoundary();
+            String tempString = recognizer.recognize(snapshot, b);
+            boolean result;
+            try {
+                controller.setTemperature(Integer.parseInt(tempString));
+                result = true;
+            } catch (NumberFormatException nbrEx) {
+                controller.setTemperature(Integer.MIN_VALUE);
+                result = false;
+            }
+            return result;
         }
     }
 
@@ -68,20 +78,7 @@ public class WebcamWorker extends Thread implements Runnable {
         {
             try {
 
-                Boundary b = controller.getDisplayBoundary();
-                File imgFile;
-                String tempString;
-                synchronized (lockObj) {
-                   imgFile = webCam.capture(b);
-                   tempString = recognizer.recognize(imgFile, b);
-                }
-
-                
-                try {
-                    controller.setTemperature(Integer.parseInt(tempString));
-                } catch (NumberFormatException nbrEx) {
-                    controller.setTemperature(Integer.MIN_VALUE);
-                }
+                runonce();
 
                 synchronized (lockObj) {
 

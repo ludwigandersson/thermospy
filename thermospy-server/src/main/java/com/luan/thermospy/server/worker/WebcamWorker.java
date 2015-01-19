@@ -20,6 +20,7 @@ public class WebcamWorker extends Thread implements Runnable {
     DigitRecognizer recognizer;
     volatile boolean paused = true;
     private final Object lockObj = new Object();
+    
     public WebcamWorker(ThermospyController controller, CameraDevice webCam, DigitRecognizer recognizer)
     {
         this.controller = controller;

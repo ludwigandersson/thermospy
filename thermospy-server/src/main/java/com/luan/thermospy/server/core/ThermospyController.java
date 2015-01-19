@@ -28,8 +28,8 @@ public class ThermospyController {
         synchronized(myLock){
             if (this.temperature != temperature)
             {
-                String fromTemperature = this.temperature == Integer.MIN_VALUE ? "--" : Integer.toString(temperature);
-                String toTemperature = this.temperature == Integer.MIN_VALUE ? "--" : Integer.toString(temperature);
+                String fromTemperature = this.temperature == Integer.MIN_VALUE ? "--" : Integer.toString(this.temperature);
+                String toTemperature = temperature == Integer.MIN_VALUE ? "--" : Integer.toString(temperature);
                 Log.getLog().info("Temperature changed from " + fromTemperature + " to " + toTemperature );
                 this.temperature = temperature;
             }

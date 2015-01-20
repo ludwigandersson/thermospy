@@ -34,15 +34,12 @@ public class WebcamWorker extends Thread implements Runnable {
             File snapshot = webCam.capture(controller.getDisplayBoundary());
             Boundary b = controller.getDisplayBoundary();
             String tempString = recognizer.recognize(snapshot, b);
-            boolean result;
             try {
                 controller.setTemperature(Integer.parseInt(tempString));
-                result = true;
             } catch (NumberFormatException nbrEx) {
                 controller.setTemperature(Integer.MIN_VALUE);
-                result = false;
             }
-            return result;
+            return true;
         }
     }
 

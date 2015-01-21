@@ -16,13 +16,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.eclipse.jetty.util.log.Log;
-import static org.opencv.core.CvType.CV_8U;
-import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
-import static org.opencv.highgui.Highgui.imread;
-import org.opencv.imgproc.Imgproc;
-import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
-import static org.opencv.imgproc.Imgproc.threshold;
+
 
 @Path("/thermospy-server/get-last-image")
 @Produces("image/png")

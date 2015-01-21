@@ -13,25 +13,27 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
-import org.opencv.imgproc.Imgproc;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+//import org.opencv.core.Mat;
+//import org.opencv.highgui.Highgui;
+//import org.opencv.imgproc.Imgproc;
 
 /**
  * Created by ludwig on 2014-12-24.
  */
 public class WebcamDevice extends CameraDevice {
 
-    private final static String IMAGE_FILENAME = "thermopic.jpg";
+    private final static String IMAGE_FILENAME = "thermopic.png";
 
    // private VideoCapture camera;
     private Lock mutex = new ReentrantLock();
 
-    static {
+   /* static {
         //System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
 
         nu.pattern.OpenCV.loadLibrary();
-    }
+    }*/
 
     public WebcamDevice()
     {
@@ -46,7 +48,7 @@ public class WebcamDevice extends CameraDevice {
 
     }
     
-    public boolean toMonochrome(File file)
+  /*  public boolean toMonochrome(File file)
     {
         //Our greyscale image
         Mat grayscaleMat = Highgui.imread(file.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_GRAYSCALE);
@@ -63,9 +65,14 @@ public class WebcamDevice extends CameraDevice {
         Highgui.imwrite(file.getAbsolutePath(), binaryMat);
         
         java.nio.file.Path path = Paths.get(new File("binary.png").getAbsolutePath());
-        byte[] imageData = Files.readAllBytes(path);
-        return true;
-    }
+        try {
+            byte[] imageData = Files.readAllBytes(path);
+            return true;
+        } catch (IOException ex) {
+            Logger.getLogger(WebcamDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }*/
 
     public File capture(Boundary bounds) {
 
@@ -132,7 +139,8 @@ public class WebcamDevice extends CameraDevice {
                 capturedFile = new File(IMAGE_FILENAME);
                 if (getConfig().isEnableMonochrome())
                 {
-                    toMonochrome(capturedFile);
+                    //toMonochrome(capturedFile);
+                    Log.getLog().debug("Not implemented img to monochrome...yet!");
                 }
             }
         }

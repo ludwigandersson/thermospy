@@ -24,6 +24,8 @@ public class CameraDeviceConfig {
     private boolean cropImage;
     @JsonProperty
     private String filePath;
+    @JsonProperty
+    private boolean enableMonochrome;
     
     public CameraDeviceConfig()
     {
@@ -117,6 +119,20 @@ public class CameraDeviceConfig {
 
     public synchronized String getFilePath() {
         return this.filePath;
+    }
+
+    /**
+     * @return the enableMonochrome
+     */
+    public synchronized boolean isEnableMonochrome() {
+        return enableMonochrome;
+    }
+
+    /**
+     * @param enableMonochrome the enableMonochrome to set
+     */
+    public synchronized void setEnableMonochrome(boolean enableMonochrome) {
+        this.enableMonochrome = enableMonochrome;
     }
     
     

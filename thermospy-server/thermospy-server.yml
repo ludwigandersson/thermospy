@@ -5,6 +5,7 @@ cameraDeviceConfig:
     cameraDevice: "/dev/video0"
     cropImage: true
     filePath: "thermopic.jpg"
+    enableMonochrome: false
 digitRecognizerConfig:
     retryCount: 5
     threshold: 0

@@ -18,26 +18,10 @@
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
-
 package com.luan.thermospy.server.core;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-/**
- * Data class. Contains information about what camera action to be run
- */
-public class Action {
-    private int actionId = 0;
-
-    public Action() {}
-
-    public Action(int actionId)
-    {
-        this.actionId = actionId;
-    }
-    @JsonProperty
-    public int getActionId()
-    {
-        return actionId;
-    }
+public enum ServerStatus {
+    UNKNOWN,
+    OK,
+    INTERNAL_SERVER_ERROR
 }

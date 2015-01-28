@@ -1,3 +1,23 @@
+/**
+ * 
+ * Copyright 2015 Ludwig Andersson
+ * 
+ * This file is part of Thermospy-server.
+ *
+ *  Thermospy-server is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ * Thermospy-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 package com.luan.thermospy.server.worker;
 
 import com.luan.thermospy.server.core.ThermospyController;
@@ -5,22 +25,19 @@ import com.luan.thermospy.server.hal.CameraDevice;
 import com.luan.thermospy.server.hal.DigitRecognizer;
 import org.eclipse.jetty.util.log.Log;
 import com.luan.thermospy.server.core.Boundary;
-
+import com.luan.thermospy.server.core.ServerStatus;
 import java.io.File;
+import java.io.IOException;
 
-
-/**
- * Created by ludwig on 2014-12-24.
- */
 public class WebcamWorker extends Thread implements Runnable {
 
-    private boolean running = true;
+    
     private ThermospyController controller = null;
     private CameraDevice webCam = null;
     DigitRecognizer recognizer;
     volatile boolean paused = true;
     private final Object lockObj = new Object();
-    
+   
     public WebcamWorker(ThermospyController controller, CameraDevice webCam, DigitRecognizer recognizer)
     {
         this.controller = controller;
@@ -31,15 +48,24 @@ public class WebcamWorker extends Thread implements Runnable {
     public boolean runonce()
     {
         synchronized (lockObj) {
-            File snapshot = webCam.capture(controller.getDisplayBoundary());
-            Boundary b = controller.getDisplayBoundary();
-            String tempString = recognizer.recognize(snapshot, b);
+            boolean result = true;
             try {
-                controller.setTemperature(Integer.parseInt(tempString));
-            } catch (NumberFormatException nbrEx) {
-                controller.setTemperature(Integer.MIN_VALUE);
+                File snapshot = webCam.capture(controller.getDisplayBoundary());
+                Boundary b = controller.getDisplayBoundary();
+
+                String tempString = recognizer.recognize(snapshot, b);
+                try {
+                    controller.setTemperature(Integer.parseInt(tempString));
+                } catch (NumberFormatException nbrEx) {
+                    controller.setTemperature(Integer.MIN_VALUE);
+                }
+                controller.setServerStatus(ServerStatus.OK);
+            } catch (IOException e)
+            {
+                controller.setServerStatus(ServerStatus.INTERNAL_SERVER_ERROR);
+                result = false;
             }
-            return true;
+            return result;
         }
     }
 
@@ -77,6 +103,11 @@ public class WebcamWorker extends Thread implements Runnable {
             try {
 
                 runonce();
+                
+                if (controller.getServerStatus() != ServerStatus.OK) {
+                    Log.getLog().info("Server error exists. Stopping thread...");
+                    pause();
+                }
 
                 synchronized (lockObj) {
 

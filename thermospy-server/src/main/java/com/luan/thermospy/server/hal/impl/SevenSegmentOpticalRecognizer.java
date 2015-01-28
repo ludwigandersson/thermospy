@@ -1,3 +1,23 @@
+/**
+ * 
+ * Copyright 2015 Ludwig Andersson
+ * 
+ * This file is part of Thermospy-server.
+ *
+ *  Thermospy-server is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ * Thermospy-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 package com.luan.thermospy.server.hal.impl;
 
 import com.luan.thermospy.server.core.Boundary;
@@ -9,7 +29,10 @@ import java.io.*;
 import java.util.ArrayList;
 
 /**
- * Created by ludwig on 2014-12-24.
+ * 
+ * The seven segment optical recognizer calls the program ssocr to parse 
+ * an image.If something goes wrong an IOException is thrown otherwise the
+ * output from the ssocr is returned
  */
 public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
 
@@ -17,7 +40,8 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
     private File img;
     private DigitRecognizerConfig config;
     
-    public String recognize(File imgFile, Boundary crop) {
+    @Override
+    public String recognize(File imgFile, Boundary crop) throws IOException {
         img = imgFile;
         imgBounds = crop;
         String result = "";
@@ -27,10 +51,10 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
         return result;
     }
 
-    public String runSSOCR()
+    public String runSSOCR() throws IOException
     {
         ProcessBuilder builder = new ProcessBuilder();
-        ArrayList<String> commands = new ArrayList<String>();
+        ArrayList<String> commands = new ArrayList<>();
         commands.add("ssocr");
         commands.add("-d");
         commands.add("-1");
@@ -84,20 +108,10 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
                     }
                 }
             }
-            catch (IOException ex)
-            {
-                Log.getLog().debug("Exception: "+ex.getMessage(), ex);
-                break;
-            }
-            catch (InterruptedException ex2)
-            {
-                Log.getLog().debug("Exception: "+ex2.getMessage(), ex2);
-                break;
-            }
             catch (Exception e)
             {
-                Log.getLog().debug("Exception: "+e.getMessage(), e);
-                break;
+                Log.getLog().info("Exception: "+e.getMessage(), e);
+                throw new IOException(e.getMessage(), e);
             }
             finally
             {

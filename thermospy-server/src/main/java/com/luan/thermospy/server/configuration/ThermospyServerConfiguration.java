@@ -1,3 +1,24 @@
+/**
+ * 
+ * Copyright 2015 Ludwig Andersson
+ * 
+ * This file is part of Thermospy-server.
+ *
+ *  Thermospy-server is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ * Thermospy-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
+
 package com.luan.thermospy.server.configuration;
 
 import io.dropwizard.Configuration;
@@ -7,7 +28,11 @@ import com.luan.thermospy.server.core.DigitRecognizerConfig;
 import com.luan.thermospy.server.core.ThermospyController;
 import javax.annotation.Nonnull;
 
-
+/**
+ * A configuration class. When starting the application the thermospy-server.yml
+ * is provided to the application. Upon start the file gets parsed and this
+ * Configuration object is created.
+ */
 public class ThermospyServerConfiguration extends Configuration {
     @Nonnull
     private CameraDeviceConfig cameraDeviceConfig = null;

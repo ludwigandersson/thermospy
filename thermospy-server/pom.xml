@@ -4,7 +4,7 @@
 
 <groupId>com.luan.thermospy.server</groupId>
 <artifactId>thermospy-server</artifactId>
-<version>0.0.1-SNAPSHOT</version>
+<version>0.9</version>
 
 <dependencies>
     <dependency>

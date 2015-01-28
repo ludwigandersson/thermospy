@@ -1,15 +1,27 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * 
+ * Copyright 2015 Ludwig Andersson
+ * 
+ * This file is part of Thermospy-server.
+ *
+ *  Thermospy-server is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ * Thermospy-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * 
  */
 package com.luan.thermospy.server.resources;
 
 import com.luan.thermospy.server.core.CameraDeviceConfig;
-import com.luan.thermospy.server.core.RefreshRate;
-import com.luan.thermospy.server.core.ThermospyController;
 import com.luan.thermospy.server.hal.CameraDevice;
-import com.luan.thermospy.server.hal.DigitRecognizer;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,11 +30,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import org.eclipse.jetty.util.log.Log;
 
 /**
- *
- * @author ludwig
+ * Receives commands from clients about camera device configuration.
  */
 @Path("/thermospy-server/camera-device-config")
 @Produces(MediaType.APPLICATION_JSON)

@@ -18,26 +18,41 @@
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
-
 package com.luan.thermospy.server.core;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * Data class. Contains information about what camera action to be run
+ * Contains the supported actions START; RUNONCE; STOP
  */
-public class Action {
-    private int actionId = 0;
-
-    public Action() {}
-
-    public Action(int actionId)
+public enum CameraControlAction {
+    UNKNOWN(-1),
+    START(0),
+    RUNONCE(1),
+    STOP(2);
+    
+    private int id;
+    CameraControlAction(int id) 
     {
-        this.actionId = actionId;
+        this.id = id;
     }
-    @JsonProperty
-    public int getActionId()
+    
+    public int getId()
     {
-        return actionId;
+        return id;
+    }
+    
+    public static CameraControlAction parse(int id)
+    {
+        switch (id)
+        {
+            case 0:
+                return START;
+            case 1:
+                return RUNONCE;
+            case 2:
+                return STOP;
+            default:
+                return UNKNOWN;
+                
+        }
     }
 }

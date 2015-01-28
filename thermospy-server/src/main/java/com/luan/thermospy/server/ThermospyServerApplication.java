@@ -1,10 +1,31 @@
 package com.luan.thermospy.server;
 
-import com.luan.thermospy.server.actions.TakePhotoAction;
+import com.luan.thermospy.server.actions.SingleShotAction;
 import com.luan.thermospy.server.configuration.ThermospyServerConfiguration;
 import com.luan.thermospy.server.core.ThermospyController;
 import com.luan.thermospy.server.hal.impl.SevenSegmentOpticalRecognizer;
 import com.luan.thermospy.server.hal.impl.WebcamDevice;
+/**
+ * 
+ * Copyright 2015 Ludwig Andersson
+ * 
+ * This file is part of Thermospy-server.
+ *
+ *  Thermospy-server is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ * Thermospy-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
+
 import com.luan.thermospy.server.resources.*;
 import com.luan.thermospy.server.worker.WebcamWorker;
 import io.dropwizard.Application;
@@ -12,6 +33,9 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.luan.thermospy.server.health.TemplateHealthCheck;
 
+/**
+ * Main app entrance. Setting up all relationships etc
+ */
 public class ThermospyServerApplication extends Application<ThermospyServerConfiguration> {
     public static void main(String[] args) throws Exception {
         new ThermospyServerApplication().run(args);
@@ -28,7 +52,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         webcamDevice.setConfig(configuration.getCameraDeviceConfig());
         WebcamWorker worker = new WebcamWorker(controller, webcamDevice, recognizer);
 
-        TakePhotoAction actionHandler = new TakePhotoAction(worker);
+        SingleShotAction actionHandler = new SingleShotAction(worker);
 
         controller.setCameraAction(actionHandler);
 

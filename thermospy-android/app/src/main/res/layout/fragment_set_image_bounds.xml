@@ -1,0 +1,44 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context="com.luan.thermospy.android.SetImageBounds">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="84dp"
+        android:layout_gravity="center_vertical|bottom">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_bounds_abort"
+            android:id="@+id/btnAbortBounds"
+            android:layout_marginStart="61dp"
+            android:layout_alignParentTop="false"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_bounds_ok"
+            android:id="@+id/btnBoundsOk"
+            android:layout_alignParentTop="false"
+            android:layout_toEndOf="@+id/btnAbortBounds"
+            android:layout_marginStart="49dp"
+            android:layout_alignParentBottom="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Press apply to set bounds!"
+            android:id="@+id/textView"
+            android:layout_alignStart="@+id/btnAbortBounds"
+            android:layout_alignParentTop="false"
+            android:layout_alignEnd="@+id/btnBoundsOk"
+            android:layout_above="@+id/btnAbortBounds" />
+    </RelativeLayout>
+
+</FrameLayout>

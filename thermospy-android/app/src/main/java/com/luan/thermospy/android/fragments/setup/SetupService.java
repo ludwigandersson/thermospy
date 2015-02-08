@@ -119,11 +119,11 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
 
     private void requestServerStatus()
     {
-        final String ip = editIp.getText().toString();
-        final String port = editPort.getText().toString();
+        mIpAddress = editIp.getText().toString();
 
-        if (android.text.TextUtils.isDigitsOnly(port)) {
-            mServerStatusReq.request(ip, Integer.parseInt(port));
+        if (android.text.TextUtils.isDigitsOnly(editPort.getText().toString())) {
+            mPort = Integer.parseInt(editPort.getText().toString());
+            mServerStatusReq.request(mIpAddress, mPort);
         }
         else
         {
@@ -134,18 +134,14 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
 
     private void requestResetImgBoundary()
     {
-        String ip = Coordinator.getInstance().getServerSettings().getIpAddress();
-        int port = Coordinator.getInstance().getServerSettings().getPort();
-        mSetImageBoundsReq.request(ip, port);
+
+        mSetImageBoundsReq.request(mIpAddress, mPort);
     }
 
     private void takePhoto()
     {
-        String ip = Coordinator.getInstance().getServerSettings().getIpAddress();
-        int port = Coordinator.getInstance().getServerSettings().getPort();
-
         mCameraControlReq.setCameraControlAction(new Action(CameraControlAction.RUNONCE));
-        mCameraControlReq.request(ip, port);
+        mCameraControlReq.request(mIpAddress, mPort);
     }
 
     @Override

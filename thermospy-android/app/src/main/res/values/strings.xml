@@ -34,7 +34,7 @@
     <string name="current_temperature">Current temperature</string>
     <string name="lost_connection">Lost contact with mServerSettings!</string>
     <string name="setup_aborted">Setup aborted!</string>
-    <string name="setup_server_failed">Failed to communicate with mServerSettings!</string>
+    <string name="setup_server_failed">Could not communicate with Server!</string>
     <string name="please_wait">Please wait</string>
     <string name="progress_fetching_temperature">Fetching temperature...</string>
     <string name="progress_starting_service">Starting thermospy service...</string>

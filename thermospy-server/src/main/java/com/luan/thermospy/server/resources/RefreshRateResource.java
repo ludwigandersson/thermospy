@@ -48,9 +48,7 @@ public class RefreshRateResource {
     public Response set(RefreshRate refreshRate) {
         Log.getLog().info("Received post request: "+refreshRate.getRefreshRate());
         controller.setRefreshRate(refreshRate.getRefreshRate());
-        return Response.created(UriBuilder.fromResource(RefreshRateResource.class)
-                .build("result", 0))
-                .build();
+        return Response.ok().entity(refreshRate).build();
     }
 
     @GET

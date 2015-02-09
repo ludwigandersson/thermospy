@@ -44,6 +44,9 @@ Start the server:
   $ cd ~/dev/thermospy/thermospy-server/target <br />
   $ java -jar thermospy-server-0.9.jar server ../thermospy-server.yml  <br />
 
+Android App
+===========
+
 Limitations
 ===========
   Not possible to decode decimals at the moment.<br />

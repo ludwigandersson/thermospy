@@ -1,6 +1,6 @@
 thermospy
 =========
-Monitor a digital thermometer device using webcamera and Raspberry Pi.
+Monitor a digital thermometer using webcamera and Raspberry Pi.
 
 Setup
 ========

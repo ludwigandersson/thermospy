@@ -78,6 +78,9 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     public static Alarm newInstance(String alarm, Boolean switchEnabled, ServerSettings serverSettings, AlarmCondition alarmCondition) {
         Alarm fragment = new Alarm();
         Bundle args = new Bundle();
+        if (alarm.isEmpty()) {
+            alarm = "0";
+        }
         args.putString(ARG_ALARM_STRING, alarm);
         args.putBoolean(ARG_ALARM_ENABLED, switchEnabled);
         args.putString(ARG_IP_ADDRESS, serverSettings.getIpAddress());

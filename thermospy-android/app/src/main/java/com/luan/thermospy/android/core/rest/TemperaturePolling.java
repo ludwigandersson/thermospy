@@ -47,6 +47,7 @@ public class TemperaturePolling implements GetTemperatureReq.OnGetTemperatureLis
 
     @Override
     public void onTemperatureError() {
+
         mListener.onError();
     }
 
@@ -59,6 +60,7 @@ public class TemperaturePolling implements GetTemperatureReq.OnGetTemperatureLis
     public void onSetRefreshRateError() {
         mSetRefreshRateReq.setRefreshRate(new RefreshRate(mInterval));
         mListener.onError();
+
     }
 
     public interface OnTemperatureChanged
@@ -90,6 +92,7 @@ public class TemperaturePolling implements GetTemperatureReq.OnGetTemperatureLis
     {
         mHandler.removeCallbacks(runnable);
         mGetTemperatureReq.cancel();
+        mSetRefreshRateReq.cancel();
     }
 
     public void clearListener()

@@ -1,6 +1,8 @@
 thermospy
 =========
-Monitor a digital thermometer using webcamera and Raspberry Pi.
+Monitor a digital thermometer using a webcamera and a Raspberry Pi
+
+![Alt text](/docs/gfx/thermospy.jpg "Thermospy in action")
 
 Setup
 ========

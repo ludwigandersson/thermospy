@@ -4,52 +4,51 @@ Monitor a digital thermometer device using webcamera and Raspberry Pi.
 
 Setup
 ========
-Raspbian 2015-01-31
-Raspberry PI 2 (also tested with Raspberry Model B+)
-Microsoft Lifecam HD-3000
-Digital Thermometer with a seven segment display
-WiFi module TP-LINK TL-WN725N
+  * Raspbian 2015-01-31
+  * Raspberry PI 2 (also tested with Raspberry Model B+)
+  * Microsoft Lifecam HD-3000
+  * Digital Thermometer with a seven segment display
+  * WiFi module TP-LINK TL-WN725N
 
 Pre-requisites
 ===============
-1. Make sure ”fswebcam” is working
-2. Assign the PI an IP the phone can access using WiFi.
+  1. Make sure the raspberry is on the same wifi network as the client.
 
-Software (Based on Raspbian)
+Setup the server
 ============
-$ Run rip-update, apt-get update, apt-get upgrade to make sure everything is up to date.
-$ Make sure java jdk8 and Maven 3.2.5 (@see http://taoofmac.com/space/hw/RaspberryPi/JDK%20Installation) is installed.
-$ sudo apt-get install fswebcam libimlib2 libx11-dev libimlib2-dev
-$ wget https://www.unix-ag.uni-kl.de/~auerswal/ssocr/ssocr-2.16.2.tar.bz2 ~/Downloads
-$ tar xfv ~/Downloads/ssocr-2.16.2.tar.bz2 && cd ~/Downloads/ssocr-2.16.2/ && make && sudo make install
-Java, ant maven: https://taoofmac.com/space/hw/RaspberryPi/JDK%20Installation
+$ Run rip-update, apt-get update, apt-get upgrade to make sure everything is up to date.<br />
+$ Make sure java jdk8 and Maven 3.2.5 (@see http://taoofmac.com/space/hw/RaspberryPi/JDK%20Installation) is installed.<br />
+$ sudo apt-get install fswebcam libimlib2 libx11-dev libimlib2-dev<br />
+$ wget https://www.unix-ag.uni-kl.de/~auerswal/ssocr/ssocr-2.16.2.tar.bz2 ~/Downloads<br />
+$ tar xfv ~/Downloads/ssocr-2.16.2.tar.bz2 && cd ~/Downloads/ssocr-2.16.2/ && make && sudo make install<br />
+Java, ant maven: https://taoofmac.com/space/hw/RaspberryPi/JDK%20Installation<br />
 
-Make sure the webcam is working, run:
-$ fswebcam
+Make sure the webcam is working, run:<br />
+  $ fswebcam
 
-Make sure ssocr is in the path, run:
-$ ssocr
+Make sure ssocr is in the path, run:<br />
+  $ ssocr<br />
 
 Get the source:
-$ mkdir ~/dev
-$ cd ~/dev
-$ git clone https://github.com/ludwigandersson/thermospy.git
+  $ mkdir ~/dev<br />
+  $ cd ~/dev<br />
+  $ git clone https://github.com/ludwigandersson/thermospy.git<br />
 
 Build the server
-$ cd ~/dev/thermospy/thermospy-server
-$ mvn package
+  $ cd ~/dev/thermospy/thermospy-server <br />
+  $ mvn package <br />
 
 Start the server:
-$ cd ~/dev/thermospy/thermospy-server/target
-$ java -jar thermospy-server-0.9.jar server ../thermospy-server.yml 
+  $ cd ~/dev/thermospy/thermospy-server/target <br />
+  $ java -jar thermospy-server-0.9.jar server ../thermospy-server.yml  <br />
 
 Limitations
 ===========
-Not possible to decode decimals at the moment.
+  Not possible to decode decimals at the moment.<br />
 
 Future improvements
 ===================
-Lots of stuff...
+  Lots of stuff...<br />
 
 
 

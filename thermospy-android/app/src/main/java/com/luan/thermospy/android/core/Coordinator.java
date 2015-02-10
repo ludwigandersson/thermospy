@@ -66,7 +66,7 @@ public class Coordinator {
             temperature = database.getString("temperature");
         } catch (Exception e) {
             mServerSettings = new ServerSettings(0, "", false);
-            mAlarmSettings = new AlarmSettings("", false, AlarmCondition.GREATER_THAN_OR_EQUAL);
+            mAlarmSettings = new AlarmSettings("0", false, AlarmCondition.GREATER_THAN_OR_EQUAL);
             temperature = "--";
         }
     }

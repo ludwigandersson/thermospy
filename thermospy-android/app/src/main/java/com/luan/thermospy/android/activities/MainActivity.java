@@ -141,6 +141,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+
         onSectionAttached(position);
         FragmentManager fragmentManager = getFragmentManager();
         final ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
@@ -170,8 +171,6 @@ public class MainActivity extends ActionBarActivity
                 }
                 transaction = fragmentManager.beginTransaction()
                         .replace(R.id.container, fragment);
-
-
             }
             else
             {
@@ -211,9 +210,7 @@ public class MainActivity extends ActionBarActivity
             case 2:
                 mTitle = getString(com.luan.thermospy.android.R.string.title_section3);
                 break;
-            case 3:
-                mTitle = getString(com.luan.thermospy.android.R.string.title_section4);
-                break;
+
         }
     }
 

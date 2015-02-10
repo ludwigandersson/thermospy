@@ -124,8 +124,7 @@ public class NavigationDrawerFragment extends Fragment {
                 new String[]{
                         getString(com.luan.thermospy.android.R.string.title_section1),
                         getString(com.luan.thermospy.android.R.string.title_section2),
-                        getString(com.luan.thermospy.android.R.string.title_section3),
-                        getString(com.luan.thermospy.android.R.string.title_section4),
+                        getString(com.luan.thermospy.android.R.string.title_section3)
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;

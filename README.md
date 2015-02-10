@@ -19,12 +19,11 @@ Pre-requisites
 Setup the server
 ================
   Run rip-update, apt-get update, apt-get upgrade to make sure everything is up to date.<br />
-  Make sure java jdk8 and Maven 3.2.5 (@see http://taoofmac.com/space/hw/RaspberryPi/JDK%20Installation) is installed.<br />
+  Make sure java jdk8 and Maven 3.2.5 is installed.<br />
   $ sudo apt-get install fswebcam libimlib2 libx11-dev libimlib2-dev<br />
   $ wget https://www.unix-ag.uni-kl.de/~auerswal/ssocr/ssocr-2.16.2.tar.bz2 ~/Downloads<br />
   $ tar xfv ~/Downloads/ssocr-2.16.2.tar.bz2 && cd ~/Downloads/ssocr-2.16.2/ && make && sudo make install<br />
-  Java, ant maven: https://taoofmac.com/space/hw/RaspberryPi/JDK%20Installation<br />
-
+  
 Make sure the webcam is working, run:<br />
   $ fswebcam
 

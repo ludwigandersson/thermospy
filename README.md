@@ -24,13 +24,6 @@ When the user starts the application he/she needs to setup the camera so the ser
 
 Pre-requisites (if you want to run the binaries)
 ===============
-## Raspberry
-   > 1. Make sure the raspberry is on the same wifi network as the client.
-   > 2. Java 8 installed
-   > 3. ...binary...
-   
-## App
- > 1. ---
   
 ## Build the server
   > 1. Java jdk8

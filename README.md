@@ -2,7 +2,7 @@ thermospy
 =========
 Monitor a digital thermometer using a webcam and a Raspberry Pi
 
-![Alt text](/docs/gfx/thermospy.jpg "Thermospy in action")
+![Alt text](../docs/docs/gfx/thermospy.jpg "Thermospy in action")
 
 Setup
 ========

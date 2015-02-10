@@ -8,7 +8,7 @@ cameraDeviceConfig:
     enableMonochrome: false
 digitRecognizerConfig:
     retryCount: 5
-    threshold: 0
+    threshold: 30
     cropImage: false
 controller:
     refreshRate: 5

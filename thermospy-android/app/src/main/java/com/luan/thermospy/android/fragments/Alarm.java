@@ -39,6 +39,7 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.ServerSettings;
@@ -78,9 +79,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     public static Alarm newInstance(String alarm, Boolean switchEnabled, ServerSettings serverSettings, AlarmCondition alarmCondition) {
         Alarm fragment = new Alarm();
         Bundle args = new Bundle();
-        if (alarm.isEmpty()) {
-            alarm = "0";
-        }
+
         args.putString(ARG_ALARM_STRING, alarm);
         args.putBoolean(ARG_ALARM_ENABLED, switchEnabled);
         args.putString(ARG_IP_ADDRESS, serverSettings.getIpAddress());
@@ -123,6 +122,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 mAlarmSwitchChecked = isChecked;
                 setAlarmText();
                 mListener.onAlarmSwitchChanged(isChecked);
+                maybeDisableAlarm();
             }
         });
 
@@ -158,6 +158,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 {
                     mAlarmCondition = selected;
                     mListener.onAlarmConditionChanged(mAlarmCondition);
+                    maybeDisableAlarm();
                 }
 
             }
@@ -315,6 +316,30 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     @Override
     public void onNewTemperature(String text) {
         mTemperatureText.setText(text);
+        mListener.onNewTemperature(text);
+        maybeDisableAlarm();
+    }
+
+    private void maybeDisableAlarm() {
+        if (mAlarmSwitchChecked) {
+            try {
+                // todo Ugly... I will need to do some rework on this. This code is duplicated.
+                int alarm = Integer.parseInt(mAlarmText.getText().toString());
+                int tval = Integer.parseInt(mTemperatureText.getText().toString());
+                boolean playSound = mAlarmCondition.evaluate(tval, alarm);
+                if (playSound) {
+
+                    mAlarmSwitchChecked = false;
+                    mAlarmSwitch.setChecked(false);
+                    Toast toast = Toast.makeText(getActivity(), "Alarm disabled", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+
+            } catch (NumberFormatException ex) {
+
+            }
+        }
+
     }
 
     @Override
@@ -332,6 +357,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
         public void onAlarmSwitchChanged(Boolean isChecked);
         public void onServiceStatus(ServiceStatus status);
         public void onAlarmConditionChanged(AlarmCondition mAlarmCondition);
+        public void onNewTemperature(String text);
     }
 
 }

@@ -406,18 +406,15 @@ public class MainActivity extends ActionBarActivity
             }
             else
             {
-                if (alarmSettings.isAlarmSwitchEnabled()) {
-                    mNotificationHandler.update(this, temperature, alarmSettings.getAlarm(), playSound);
-                }
-                else
-                {
+                if (!alarmSettings.isAlarmSwitchEnabled()) {
                     mNotificationHandler.cancel(this);
-                    mNotificationHandler = null;
+                } else {
+                    mNotificationHandler.update(this, temperature, alarmSettings.getAlarm(), playSound);
                 }
             }
             if (playSound)
             {
-                Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
+                //Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
             }
         } catch (Exception e) {
             e.printStackTrace();

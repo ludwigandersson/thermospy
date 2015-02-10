@@ -37,7 +37,7 @@ import com.luan.thermospy.android.R;
  */
 public class NotificationHandler {
     private final int mId = 1;
-
+    private boolean mActiveSound = false;
     public void show(Context c, String temperature, String alarm, boolean playSound)
     {
         NotificationCompat.Builder  mBuilder = createBuilder(c, temperature, alarm, playSound);
@@ -62,9 +62,12 @@ public class NotificationHandler {
 
     public void cancel(Context c)
     {
-        NotificationManager mNotificationManager =
-                (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.cancel(mId);
+        if (!mActiveSound) {
+            NotificationManager mNotificationManager =
+                    (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.cancel(mId);
+        }
+
 
     }
 
@@ -92,7 +95,7 @@ public class NotificationHandler {
 
         NotificationCompat.Builder mBuilder  = new NotificationCompat.Builder(c)
                 .setPriority(Notification.PRIORITY_HIGH)
-                .setAutoCancel(false)
+                .setAutoCancel(true)
                 .setOngoing(true)
                 .setContentTitle("Thermospy")
                 .setContentText(text)
@@ -104,16 +107,22 @@ public class NotificationHandler {
             int tVal = Integer.parseInt(temperature);
             int aVal = Integer.parseInt(alarm);
 
-            if (playSound)
+            if (playSound && !mActiveSound)
             {
                 alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
+                mActiveSound = true;
+            }
+            else if (mActiveSound) {
+                mActiveSound = false;
             }
 
             mBuilder.setSound(alarmSound);
         }
         catch (Exception e)
-        {}
+        {
+
+        }
 
         return mBuilder;
     }

@@ -1,6 +1,6 @@
 thermospy
 =========
-Monitor a digital thermometer using a webcamera and a Raspberry Pi
+Monitor a digital thermometer using a webcam and a Raspberry Pi
 
 ![Alt text](/docs/gfx/thermospy.jpg "Thermospy in action")
 
@@ -15,19 +15,19 @@ Setup
 Pre-requisites
 ===============
   1. Make sure the raspberry is on the same wifi network as the client.
-
+  2. Java jdk8 installed
+  3. Maven installed
+  
 Setup the server
 ================
-  Run rip-update, apt-get update, apt-get upgrade to make sure everything is up to date.<br />
-  Make sure java jdk8 and Maven 3.2.5 is installed.<br />
   $ sudo apt-get install fswebcam libimlib2 libx11-dev libimlib2-dev<br />
   $ wget https://www.unix-ag.uni-kl.de/~auerswal/ssocr/ssocr-2.16.2.tar.bz2 ~/Downloads<br />
   $ tar xfv ~/Downloads/ssocr-2.16.2.tar.bz2 && cd ~/Downloads/ssocr-2.16.2/ && make && sudo make install<br />
   
-Make sure the webcam is working, run:<br />
+Make sure the webcam is working:<br />
   $ fswebcam
 
-Make sure ssocr is in the path, run:<br />
+Make sure ssocr is in the path:<br />
   $ ssocr<br />
 
 Get the source:<br />
@@ -45,6 +45,13 @@ Start the server:
 
 Android App
 ===========
+ Clone the repository
+ Open Android studio.
+ Open an existing Android Studio project and go to the repository.
+   - Choose the "build.gradle" file within "thermospy-android".
+ Make sure to use:
+    - Use default gradle wrapper (not configured for the current project)
+    - Project form: .idea (directory based)
 
 Limitations
 ===========
@@ -52,7 +59,13 @@ Limitations
 
 Future improvements
 ===================
-  Lots of stuff...<br />
+  * Support decimals
+  * Support multiple cameras
+  * Support multiple measurements from one picture
+  * Support for a simple thermometer sensor 
+  * Add db support to the server and log temperatures over time.
+  * Use OpenCV or similar to fetch images from the webcam
+  * Add support for auto-scan (i.e auto detect the Seven Segment display).
 
 
 

@@ -4,6 +4,10 @@ Monitor a digital thermometer using a webcam and a Raspberry Pi
 
 ![Alt text](../docs/docs/gfx/thermospy.jpg "Thermospy in action")
 
+Demo
+========
+[![Alt text for your video](http://img.youtube.com/vi/Le5CVlUJAuE/0.jpg)](http://www.youtube.com/watch?v=Le5CVlUJAuE)
+
 Setup
 ========
   * Raspbian 2015-01-31

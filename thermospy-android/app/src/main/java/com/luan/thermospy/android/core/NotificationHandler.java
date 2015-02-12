@@ -29,56 +29,49 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
-import com.luan.thermospy.android.activities.MainActivity;
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.activities.MainActivity;
 
 /**
  * Responsible for displaying notifications, updating notifications and sounding the alarm.
  */
 public class NotificationHandler {
     private final int mId = 1;
-    private boolean mActiveSound = false;
     public void show(Context c, String temperature, String alarm, boolean playSound)
     {
         NotificationCompat.Builder  mBuilder = createBuilder(c, temperature, alarm, playSound);
 
-
-        Intent resultIntent = new Intent(c, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(c);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.notify(mId, mBuilder.build());
-
     }
 
     public void cancel(Context c)
     {
-        if (!mActiveSound) {
-            NotificationManager mNotificationManager =
-                    (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-            mNotificationManager.cancel(mId);
-        }
-
-
+        NotificationManager mNotificationManager =
+                (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(mId);
     }
 
-    public void update(Context c, String temperature, String alarm, boolean playSound)
+    public void update(Context c, String temperature, String alarm)
     {
-
 
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder builder = createBuilder(c, temperature, alarm, playSound);
+        NotificationCompat.Builder builder = createBuilder(c, temperature, alarm, false);
+
+        mNotificationManager.notify(
+                mId,
+                builder.build());
+    }
+
+    public void playSound(Context c, String temperature, String alarm) {
+        NotificationManager mNotificationManager =
+                (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        NotificationCompat.Builder builder = createBuilder(c, temperature, alarm, true);
 
         mNotificationManager.notify(
                 mId,
@@ -103,26 +96,23 @@ public class NotificationHandler {
                 .setSmallIcon(R.drawable.ic_stat_action_assignment_late);
 
         Uri alarmSound = null;
-        try {
-            int tVal = Integer.parseInt(temperature);
-            int aVal = Integer.parseInt(alarm);
-
-            if (playSound && !mActiveSound)
-            {
-                alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-
-                mActiveSound = true;
-            }
-            else if (mActiveSound) {
-                mActiveSound = false;
-            }
-
-            mBuilder.setSound(alarmSound);
-        }
-        catch (Exception e)
+        if (playSound )
         {
-
+            alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         }
+
+        mBuilder.setSound(alarmSound);
+
+        Intent resultIntent = new Intent(c, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(c);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
 
         return mBuilder;
     }

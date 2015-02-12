@@ -82,6 +82,7 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private boolean mAlarmActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,9 +114,19 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onResume()
+    {
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
+        if (mNotificationHandler != null)
+        {
+            mNotificationHandler.cancel(this);
+        }
         Coordinator.getInstance().save();
     }
 
@@ -315,34 +326,58 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onNewTemperature(String temperature) {
-        try {
-            Coordinator.getInstance().setTemperature(temperature);
-            handleNotification();
-            boolean isAlarmSwitchEnabled = Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled();
-            String alarm = Coordinator.getInstance().getAlarmSettings().getAlarm();
+        Coordinator.getInstance().setTemperature(temperature);
+        handleNotification();
+    }
 
-            if (isAlarmSwitchEnabled)
-            {
-                if ((Integer.parseInt(temperature) >= Integer.parseInt(alarm)))
-                {
+
+    public boolean checkAlarm() {
+
+        boolean result = false;
+        if (mAlarmActive) {
+            result = true;
+        }
+        else if (Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled()) {
+            final String temperature = Coordinator.getInstance().getTemperature();
+            final String alarm = Coordinator.getInstance().getAlarmSettings().getAlarm();
+            try {
+
+                int alarmVal = Integer.parseInt(alarm);
+                int temperatureVal = Integer.parseInt(temperature);
+                boolean playSound = Coordinator.getInstance().getAlarmSettings().getAlarmCondition().evaluate(temperatureVal, alarmVal);
+                if (playSound) {
+                    // Disable alarm
                     Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
+                    mNotificationHandler.playSound(this, temperature, alarm);
+                    result = true;
+                    mAlarmActive = true;
                 }
+
+            } catch (NumberFormatException ex) {
+
+            }
+            if (mNotificationHandler == null) {
+                mNotificationHandler = new NotificationHandler();
             }
 
-        } catch (Exception e) {
-
+            mNotificationHandler.playSound(this, temperature, alarm);
         }
+
+        return result;
     }
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
+        handleNotification();
     }
 
     @Override
     public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
             Coordinator.getInstance().getAlarmSettings().setAlarmCondition(alarmCondition);
+        if (!checkAlarm()) {
             handleNotification();
+        }
 
     }
 
@@ -351,7 +386,9 @@ public class MainActivity extends ActionBarActivity
         Coordinator.getInstance().getAlarmSettings().setAlarm(alarmText);
 
         // Update notification text if visible
-        handleNotification();
+        if (!checkAlarm()) {
+            handleNotification();
+        }
     }
 
     @Override
@@ -368,56 +405,29 @@ public class MainActivity extends ActionBarActivity
         toast.show();
         Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(isChecked);
 
-
-        handleNotification();
-
+        if (!checkAlarm()) {
+            handleNotification();
+        }
+        if (!isChecked) mAlarmActive = false;
     }
 
     void handleNotification()
     {
         final String temperature = Coordinator.getInstance().getTemperature();
         final AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
+        final boolean isRunning = Coordinator.getInstance().getServerSettings().isRunning();
+        final boolean isAlarmSwitchEnabled = Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled();
 
-        try {
-            boolean playSound = false;
-            if (alarmSettings.isAlarmSwitchEnabled()) {
-                try {
-                    int alarm = Integer.parseInt(alarmSettings.getAlarm());
-                    int tval = Integer.parseInt(temperature);
-                    playSound = alarmSettings.getAlarmCondition().evaluate(tval, alarm);
-                } catch (NumberFormatException ex) {
+        String alarm = isAlarmSwitchEnabled ? alarmSettings.getAlarm() : new String();
 
-                }
-            }
-
-            if (mNotificationHandler == null)
-            {
-                mNotificationHandler = new NotificationHandler();
-                if (alarmSettings.isAlarmSwitchEnabled()) {
-
-                    mNotificationHandler.show(this, temperature, alarmSettings.getAlarm(), playSound);
-                }
-                else
-                {
-                    mNotificationHandler.cancel(this);
-                    mNotificationHandler = null;
-
-                }
-            }
-            else
-            {
-                if (!alarmSettings.isAlarmSwitchEnabled()) {
-                    mNotificationHandler.cancel(this);
-                } else {
-                    mNotificationHandler.update(this, temperature, alarmSettings.getAlarm(), playSound);
-                }
-            }
-            if (playSound)
-            {
-                //Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (mNotificationHandler == null)
+        {
+            mNotificationHandler = new NotificationHandler();
+        }
+        if (isRunning) {
+            mNotificationHandler.update(this, temperature, alarm);
+        } else {
+            mNotificationHandler.cancel(this);
         }
 
     }

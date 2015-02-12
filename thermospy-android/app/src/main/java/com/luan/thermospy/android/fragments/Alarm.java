@@ -123,6 +123,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 setAlarmText();
                 mListener.onAlarmSwitchChanged(isChecked);
                 maybeDisableAlarm();
+
             }
         });
 
@@ -196,6 +197,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 mServerControl.setAlarmText(getString(R.string.not_enabled));
             }
         }
+
     }
 
     @Override
@@ -302,6 +304,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                                         Integer.toString(tens.getValue() * 10 + ones.getValue()) :
                                         Integer.toString(hundreds.getValue() * 100 + tens.getValue() * 10 + ones.getValue());
                                 setAlarmText();
+                                maybeDisableAlarm();
                             }
                         })
                 .setNegativeButton(R.string.dialog_cancel,
@@ -331,7 +334,8 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
 
                     mAlarmSwitchChecked = false;
                     mAlarmSwitch.setChecked(false);
-                    Toast toast = Toast.makeText(getActivity(), "Alarm disabled", Toast.LENGTH_SHORT);
+                    mListener.onAlarmSwitchChanged(false);
+                    Toast toast = Toast.makeText(getActivity(), "The alarm was automatically disabled", Toast.LENGTH_SHORT);
                     toast.show();
                 }
 
@@ -339,7 +343,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
 
             }
         }
-
     }
 
     @Override

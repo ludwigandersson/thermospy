@@ -59,8 +59,7 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
     private String mTemperatureStr = "";
     private RequestQueue mRequestQueue;
     private TextView mTemperature;
-    private TextView mTxtIpAddress;
-    private TextView mTxtStatus;
+
     private TextView mTemperatureScale;
 
     private ServerControl mServerControl;
@@ -238,13 +237,6 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
             mListener.onServerNotRunning();
         else
             mListener.onServiceStatus(status);
-        
-    }
-
-    public void onAlarmTextChanged(String alarmText) {
-
-        mAlarm = alarmText;
-        mServerControl.setAlarmText(alarmText);
     }
 
     @Override
@@ -263,7 +255,6 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
     public interface OnMonitorFragmentListener {
         public void onServerNotRunning();
         public void onNewTemperature(String temperature);
-
         public void onServiceStatus(ServiceStatus status);
     }
 

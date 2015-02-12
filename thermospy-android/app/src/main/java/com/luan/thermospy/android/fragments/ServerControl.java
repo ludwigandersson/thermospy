@@ -284,7 +284,8 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
       }
 
       @Override
-      public void onCameraControlResp(Action temperature) {
+      public void onCameraControlResp(Action action) {
+
           getStatus();
       }
 
@@ -299,9 +300,11 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
           mRunning = status.isRunning();
           mToggleServerStatus.setChecked(!mRunning);
           if (mRunning) {
+              mTemperaturePolling.start();
               mTxtViewServerStatus.setText(getString(R.string.running));
               mListener.onNewTemperature(mTemperaturePolling.toString());
           } else {
+              mTemperaturePolling.cancel();
               mTxtViewServerStatus.setText(getString(R.string.not_running));
               mListener.onNewTemperature("--");
           }

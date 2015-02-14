@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 2015-feb-14 09:17:56 by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="com.luan.thermospy.server.db.Session" table="SESSION" schema="APP" optimistic-lock="version">
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="assigned" />
+        </id>
+        <property name="fkFoodtypeId" type="java.lang.Integer">
+            <column name="FK_FOODTYPE_ID" />
+        </property>
+        <property name="fkCutId" type="java.lang.Integer">
+            <column name="FK_CUT_ID" />
+        </property>
+        <property name="name" type="string">
+            <column name="NAME" length="50" />
+        </property>
+        <property name="startTimestamp" type="timestamp">
+            <column name="START_TIMESTAMP" length="29" />
+        </property>
+        <property name="endTimestamp" type="timestamp">
+            <column name="END_TIMESTAMP" length="29" />
+        </property>
+        <property name="comment" type="string">
+            <column name="COMMENT" length="32700" />
+        </property>
+    </class>
+</hibernate-mapping>

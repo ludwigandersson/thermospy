@@ -3,6 +3,8 @@ package com.luan.thermospy.server;
 import com.luan.thermospy.server.actions.SingleShotAction;
 import com.luan.thermospy.server.configuration.ThermospyServerConfiguration;
 import com.luan.thermospy.server.core.ThermospyController;
+import com.luan.thermospy.server.db.Foodtype;
+import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
 import com.luan.thermospy.server.hal.impl.SevenSegmentOpticalRecognizer;
 import com.luan.thermospy.server.hal.impl.WebcamDevice;
 /**
@@ -32,6 +34,8 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.luan.thermospy.server.health.TemplateHealthCheck;
+import org.eclipse.jetty.util.log.Log;
+import org.hibernate.Query;
 
 /**
  * Main app entrance. Setting up all relationships etc
@@ -78,6 +82,19 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         environment.jersey().register(cameraDeviceConfigResource);
         environment.jersey().register(drcResource);
         environment.jersey().register(serviceStatusResource);
+        
+        Foodtype foodtype;
+        
+
+        try {
+            org.hibernate.Transaction tx = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().beginTransaction();
+            Query q = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().createQuery("FROM Foodtype AS F WHERE F.id=3");
+            foodtype = (Foodtype) q.uniqueResult();
+            Log.getLog().info("Foodtype: "+foodtype.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 
     @Override

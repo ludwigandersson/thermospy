@@ -3,7 +3,7 @@
 "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <!-- Generated 2015-feb-14 09:17:56 by Hibernate Tools 4.3.1 -->
 <hibernate-mapping>
-    <class name="com.luan.thermospy.server.db.Temperatureentry" table="TEMPERATUREENTRY" schema="APP">
+    <class name="com.luan.thermospy.server.db.Temperatureentry" table="TEMPERATUREENTRY" schema="THERMOSPY">
         <id name="id" type="int">
             <column name="ID" />
             <generator class="assigned" />

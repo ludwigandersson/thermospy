@@ -88,7 +88,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
 
         try {
             org.hibernate.Transaction tx = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().beginTransaction();
-            Query q = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().createQuery("FROM Foodtype AS F WHERE F.id=3");
+            Query q = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().createQuery("FROM Foodtype AS F WHERE F.id=1");
             foodtype = (Foodtype) q.uniqueResult();
             Log.getLog().info("Foodtype: "+foodtype.getName());
         } catch (Exception e) {

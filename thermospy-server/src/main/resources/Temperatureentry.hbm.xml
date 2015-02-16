@@ -16,4 +16,5 @@
             <column name="FK_SESSION_ID" />
         </property>
     </class>
+
 </hibernate-mapping>

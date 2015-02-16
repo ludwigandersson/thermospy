@@ -26,7 +26,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.luan.thermospy.server.core.CameraDeviceConfig;
 import com.luan.thermospy.server.core.DigitRecognizerConfig;
 import com.luan.thermospy.server.core.ThermospyController;
+import io.dropwizard.db.DataSourceFactory;
 import javax.annotation.Nonnull;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * A configuration class. When starting the application the thermospy-server.yml
@@ -43,6 +46,16 @@ public class ThermospyServerConfiguration extends Configuration {
     @Nonnull
     private ThermospyController controller = null;
 
+    
+    @Valid
+    @NotNull
+    @JsonProperty("database")
+    private final DataSourceFactory database = new DataSourceFactory();
+
+    public DataSourceFactory getDataSourceFactory() {
+        return database;
+    }
+    
     /**
      * @return the cameraDeviceConfig
      */

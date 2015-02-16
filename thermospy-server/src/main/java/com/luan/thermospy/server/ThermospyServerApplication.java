@@ -3,7 +3,14 @@ package com.luan.thermospy.server;
 import com.luan.thermospy.server.actions.SingleShotAction;
 import com.luan.thermospy.server.configuration.ThermospyServerConfiguration;
 import com.luan.thermospy.server.core.ThermospyController;
+import com.luan.thermospy.server.db.Cut;
 import com.luan.thermospy.server.db.Foodtype;
+import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.Temperatureentry;
+import com.luan.thermospy.server.db.dao.CutDAO;
+import com.luan.thermospy.server.db.dao.FoodTypeDAO;
+import com.luan.thermospy.server.db.dao.SessionDAO;
+import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
 import com.luan.thermospy.server.hal.impl.SevenSegmentOpticalRecognizer;
 import com.luan.thermospy.server.hal.impl.WebcamDevice;
@@ -34,6 +41,8 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.luan.thermospy.server.health.TemplateHealthCheck;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
 import org.eclipse.jetty.util.log.Log;
 import org.hibernate.Query;
 
@@ -71,9 +80,15 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         final TemplateHealthCheck healthCheck =
                 new TemplateHealthCheck("TEST");
         
+        // Hibernate DAO types
+        final SessionDAO dao = new SessionDAO(hibernate.getSessionFactory());
+        final TemperatureEntryDAO tempDAO = new TemperatureEntryDAO(hibernate.getSessionFactory());
+        final CutDAO cutDAO = new CutDAO(hibernate.getSessionFactory());
+        final FoodTypeDAO foodTypeDAO = new FoodTypeDAO(hibernate.getSessionFactory());
+        
+        
+        environment.jersey().register(new TemperatureEntryResource(tempDAO));
         environment.healthChecks().register("template", healthCheck);
-
-
         environment.jersey().register(tempResource);
         environment.jersey().register(cameraResource);
         environment.jersey().register(getLastImage);
@@ -83,17 +98,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         environment.jersey().register(drcResource);
         environment.jersey().register(serviceStatusResource);
         
-        Foodtype foodtype;
-        
-
-        try {
-            org.hibernate.Transaction tx = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().beginTransaction();
-            Query q = ThermospyHibernateUtil.getSessionFactory().getCurrentSession().createQuery("FROM Foodtype AS F WHERE F.id=1");
-            foodtype = (Foodtype) q.uniqueResult();
-            Log.getLog().info("Foodtype: "+foodtype.getName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+     
         
     }
 
@@ -104,7 +109,15 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
 
     @Override
     public void initialize(Bootstrap<ThermospyServerConfiguration> bootstrap) {
-        // nothing to do yet
+        
+        bootstrap.addBundle(hibernate);
     }
+    
+    private final HibernateBundle<ThermospyServerConfiguration> hibernate = new HibernateBundle<ThermospyServerConfiguration>(Session.class, Temperatureentry.class, Cut.class, Foodtype.class) {
+    @Override
+    public DataSourceFactory getDataSourceFactory(ThermospyServerConfiguration configuration) {
+        return configuration.getDataSourceFactory();
+    }
+};
 
 }

@@ -18,11 +18,7 @@
             <artifactId>hibernate-core</artifactId>
             <version>4.3.8.Final</version>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.3.8.Final</version>
-        </dependency>
+    
     <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
@@ -43,6 +39,11 @@
     <artifactId>derby</artifactId>
     <version>10.10.2.0</version>
   </dependency>
+  <dependency>
+	<groupId>io.dropwizard</groupId>
+	<artifactId>dropwizard-hibernate</artifactId>
+	<version>0.7.1</version>
+    </dependency>
 </dependencies>
 
 <properties>

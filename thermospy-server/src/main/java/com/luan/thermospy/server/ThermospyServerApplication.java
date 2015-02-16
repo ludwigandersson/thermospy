@@ -88,6 +88,10 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         
         
         environment.jersey().register(new TemperatureEntryResource(tempDAO));
+        environment.jersey().register(new SessionResource(dao));
+        environment.jersey().register(new CutResource(cutDAO));
+        environment.jersey().register(new FoodTypeResource(foodTypeDAO));
+        
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(tempResource);
         environment.jersey().register(cameraResource);

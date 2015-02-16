@@ -17,43 +17,57 @@
 package com.luan.thermospy.server.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.luan.thermospy.server.db.Foodtype;
+import com.luan.thermospy.server.db.Cut;
 import com.luan.thermospy.server.db.Session;
-import com.luan.thermospy.server.db.Temperatureentry;
-import com.luan.thermospy.server.db.dao.SessionDAO;
-import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
-import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
+import com.luan.thermospy.server.db.dao.CutDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.IntParam;
-import io.dropwizard.jersey.params.LongParam;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.eclipse.jetty.util.log.Log;
-import org.hibernate.Query;
+import javax.ws.rs.core.Response;
 
 /**
  *
  * @author ludde
  */
-
-@Path("/thermospy-server/get-temperature-entries")
+@Path("/thermospy-server/cuts")
 @Produces(MediaType.APPLICATION_JSON)
-public class TemperatureEntryResource {
-    private final TemperatureEntryDAO temperatureDao;
+public class CutResource {
+    private final CutDAO cutDao;
     
-    public TemperatureEntryResource(TemperatureEntryDAO dao) {
-        this.temperatureDao = dao;
+    public CutResource(CutDAO cutDAO) {
+        this.cutDao = cutDAO;
     }
     
     @GET
     @Timed
     @UnitOfWork
     @Path("/{id}")
-    public List<Temperatureentry> findTemperatureEntry(@PathParam("id") IntParam id) {
-        return temperatureDao.findAll(id.get());
+    public Cut findCutById(@PathParam("id") IntParam id) {
+        return cutDao.findById(id.get());
     }
+    
+    @GET
+    @Timed
+    @UnitOfWork
+    public List<Cut> findCuts() {
+        return cutDao.findAll();
+    }
+    
+    @DELETE
+    @Timed
+    @UnitOfWork
+    public Response delete(Cut cut)
+    {
+        boolean result = cutDao.delete(cut);
+        
+        if (result) return Response.ok().build();
+        else return Response.serverError().build();
+    }
+    
 }

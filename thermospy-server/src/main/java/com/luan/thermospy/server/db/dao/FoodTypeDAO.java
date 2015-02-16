@@ -20,6 +20,7 @@ package com.luan.thermospy.server.db.dao;
 import com.luan.thermospy.server.db.Foodtype;
 import io.dropwizard.hibernate.AbstractDAO;
 import java.util.List;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 /**
@@ -32,15 +33,21 @@ public class FoodTypeDAO extends AbstractDAO<Foodtype> {
         super(sessionFactory);
     }
     
-    public Foodtype findById(Long id) {
+    public Foodtype findById(int id) {
         return get(id);
     }
 
-    public long create(Foodtype foodType) {
+    public boolean delete(Foodtype foodType)
+    {
+       Query q = currentSession().createQuery("delete Foodtype where id = "+foodType.getId());
+       return q.executeUpdate() >= 1;
+    }
+    
+    public int create(Foodtype foodType) {
         return persist(foodType).getId();
     }
 
     public List<Foodtype> findAll() {
-        return list(namedQuery("com.luan.thermospy.server.db.Foodtype.findAll"));
+        return list(namedQuery("Foodtype.findAll"));
     }
 }

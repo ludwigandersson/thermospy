@@ -21,39 +21,54 @@ import com.luan.thermospy.server.db.Foodtype;
 import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
 import com.luan.thermospy.server.db.dao.SessionDAO;
-import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
-import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.IntParam;
 import io.dropwizard.jersey.params.LongParam;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.eclipse.jetty.util.log.Log;
-import org.hibernate.Query;
+import javax.ws.rs.core.Response;
 
 /**
  *
  * @author ludde
  */
 
-@Path("/thermospy-server/get-temperature-entries")
+@Path("/thermospy-server/log-sessions")
 @Produces(MediaType.APPLICATION_JSON)
-public class TemperatureEntryResource {
-    private final TemperatureEntryDAO temperatureDao;
-    
-    public TemperatureEntryResource(TemperatureEntryDAO dao) {
-        this.temperatureDao = dao;
+public class SessionResource {
+    private final SessionDAO sessionDao;
+    public SessionResource(SessionDAO dao) {
+        sessionDao = dao;
     }
     
     @GET
     @Timed
     @UnitOfWork
     @Path("/{id}")
-    public List<Temperatureentry> findTemperatureEntry(@PathParam("id") IntParam id) {
-        return temperatureDao.findAll(id.get());
+    public Session findSessionId(@PathParam("id") IntParam id) {
+        return sessionDao.findById(id.get());
+    }
+    
+    @GET
+    @Timed
+    @UnitOfWork
+    public List<Session> find() {
+        return sessionDao.findAll();
+    }
+    
+    @DELETE
+    @Timed
+    @UnitOfWork
+    public Response delete(Session session)
+    {
+        boolean result = sessionDao.delete(session);
+        
+        if (result) return Response.ok().build();
+        else return Response.serverError().build();
     }
 }

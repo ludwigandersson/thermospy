@@ -16,9 +16,11 @@
  */
 package com.luan.thermospy.server.db.dao;
 
+import com.luan.thermospy.server.db.Foodtype;
 import com.luan.thermospy.server.db.Session;
 import io.dropwizard.hibernate.AbstractDAO;
 import java.util.List;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 /**
@@ -31,7 +33,7 @@ public class SessionDAO  extends AbstractDAO<Session> {
         super(sessionFactory);
     }
     
-    public Session findById(Long id) {
+    public Session findById(int id) {
         return get(id);
     }
 
@@ -40,7 +42,12 @@ public class SessionDAO  extends AbstractDAO<Session> {
     }
 
     public List<Session> findAll() {
-        return list(namedQuery("com.luan.thermospy.server.db.Session.findAll"));
+        return list(namedQuery("Session.findAll"));
     }
     
+    public boolean delete(Session session)
+    {
+       Query q = currentSession().createQuery("delete Session where id = "+session.getId());
+       return q.executeUpdate() >= 1;
+    }
 }

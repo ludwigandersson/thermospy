@@ -19,6 +19,7 @@ package com.luan.thermospy.server.db.dao;
 import com.luan.thermospy.server.db.Cut;
 import io.dropwizard.hibernate.AbstractDAO;
 import java.util.List;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 /**
@@ -32,7 +33,7 @@ public class CutDAO extends AbstractDAO<Cut> {
     }
     
         
-    public Cut findById(Long id) {
+    public Cut findById(int id) {
         return get(id);
     }
 
@@ -40,8 +41,14 @@ public class CutDAO extends AbstractDAO<Cut> {
         return persist(cut).getId();
     }
 
+    public boolean delete(Cut cut)
+    {
+       Query q = currentSession().createQuery("delete Cut where id = "+cut.getId());
+       return q.executeUpdate() >= 1;
+    }
+    
     public List<Cut> findAll() {
-        return list(namedQuery("com.luan.thermospy.server.db.Cut.findAll"));
+        return list(namedQuery("Cut.findAll"));
     }
     
 }

@@ -52,7 +52,7 @@ public class TemperatureEntryResource {
     @GET
     @Timed
     @UnitOfWork
-    @Path("/{id}")
+    @Path("/list/{id}")
     public List<Temperatureentry> findTemperatureEntry(@PathParam("id") IntParam id) {
         return temperatureDao.findAll(id.get());
     }

@@ -56,6 +56,7 @@ public class CutResource {
     @GET
     @Timed
     @UnitOfWork
+    @Path("/list")
     public List<Cut> findCuts() {
         return cutDao.findAll();
     }

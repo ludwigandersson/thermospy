@@ -28,6 +28,7 @@ import io.dropwizard.jersey.params.LongParam;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -87,7 +88,7 @@ public class SessionResource {
         else return Response.serverError().build();
     }
     
-    @PUT
+    @POST
     @Timed
     @UnitOfWork
     @Path("/start")

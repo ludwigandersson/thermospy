@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
  *
  * @author ludde
  */
-@Path("/thermospy-server/food-types")
+@Path("/thermospy-server/food-type")
 @Produces(MediaType.APPLICATION_JSON)
 public class FoodTypeResource {
     private final FoodTypeDAO foodTypeDAO;
@@ -57,6 +57,7 @@ public class FoodTypeResource {
     @GET
     @Timed
     @UnitOfWork
+    @Path("/list")
     public List<Foodtype> findFoodtypes() {
         return foodTypeDAO.findAll();
     }
@@ -64,9 +65,10 @@ public class FoodTypeResource {
     @POST
     @Timed
     @UnitOfWork
-    public Foodtype createFoodType(Foodtype type)
+    public Response createFoodType(Foodtype type)
     {
-        return Response.ok(foodTypeDAO.create(type)).build();
+        Foodtype foodType = foodTypeDAO.create(type);
+        return Response.ok(foodType).build();
     }
     
     @DELETE

@@ -22,6 +22,7 @@ import com.luan.thermospy.server.db.Foodtype;
 import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
 import com.luan.thermospy.server.db.dao.SessionDAO;
+import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.IntParam;
 import io.dropwizard.jersey.params.LongParam;
@@ -46,9 +47,11 @@ import javax.ws.rs.core.Response;
 public class SessionResource {
     private final SessionDAO sessionDao;
     private final ThermospyController controller;
-    public SessionResource(SessionDAO dao, ThermospyController controller) {
+    private final TemperatureEntryDAO temperatureEntryDao;
+    public SessionResource(SessionDAO dao, TemperatureEntryDAO temperatureEntryDao, ThermospyController controller) {
         sessionDao = dao;
         this.controller = controller;
+        this.temperatureEntryDao = temperatureEntryDao;
     }
     
     @GET
@@ -82,7 +85,9 @@ public class SessionResource {
     @UnitOfWork
     public Response delete(Session session)
     {
-        boolean result = sessionDao.delete(session);
+        boolean result = temperatureEntryDao.deleteAllBySessionId(session.getId());
+        
+        result = result && sessionDao.delete(session);
         
         if (result) return Response.ok().build();
         else return Response.serverError().build();

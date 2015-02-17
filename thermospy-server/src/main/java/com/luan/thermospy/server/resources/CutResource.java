@@ -64,11 +64,13 @@ public class CutResource {
     @DELETE
     @Timed
     @UnitOfWork
-    public Response delete(Cut cut)
+    @Path("/{id}")
+    public Response delete(@PathParam("id") IntParam id)
     {
-        boolean result = cutDao.delete(cut);
+        Cut c = cutDao.findById(id.get());
+        boolean result = cutDao.delete(c);
         
-        if (result) return Response.ok().build();
+        if (result) return Response.ok(id.get().toString()).build();
         else return Response.serverError().build();
     }
     

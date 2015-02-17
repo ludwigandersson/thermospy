@@ -39,10 +39,14 @@ public class TemperatureEntryDAO extends AbstractDAO<Temperatureentry> {
         return get(id);
     }
 
-
     public List<Temperatureentry> findAll(int i) {
         Query q = namedQuery("Temperatureentry.findBySessionId").setParameter("fkSessionId", i);
         return list(q);
+    }
+
+    public boolean deleteAllBySessionId(int id) {
+       Query q = currentSession().createQuery("delete Temperatureentry where fkSessionId = "+id);
+       return q.executeUpdate() >= 1;
     }
     
 }

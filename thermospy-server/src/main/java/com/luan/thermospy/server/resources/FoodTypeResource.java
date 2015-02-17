@@ -25,6 +25,7 @@ import io.dropwizard.jersey.params.IntParam;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -59,12 +60,13 @@ public class FoodTypeResource {
     public List<Foodtype> findFoodtypes() {
         return foodTypeDAO.findAll();
     }
-    @PUT
+    
+    @POST
     @Timed
     @UnitOfWork
-    public int createFoodType(Foodtype type)
+    public Foodtype createFoodType(Foodtype type)
     {
-        return foodTypeDAO.create(type);
+        return Response.ok(foodTypeDAO.create(type)).build();
     }
     
     @DELETE

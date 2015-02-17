@@ -23,7 +23,15 @@ package com.luan.thermospy.server.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.luan.thermospy.server.actions.CameraAction;
+import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.Temperatureentry;
+import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
+import io.dropwizard.db.DataSourceFactory;
+import java.util.Date;
 import org.eclipse.jetty.util.log.Log;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.AnnotationConfiguration;
 
 /**
  * The man in the middle who connects all the dots.
@@ -43,6 +51,14 @@ public class ThermospyController {
     private Boundary displayBoundary = new Boundary(0,0,0,0);
     @JsonIgnore
     private ServerStatus serverStatus = ServerStatus.OK;
+    @JsonIgnore
+    private Session logSession = null;
+    @JsonIgnore
+    TemperatureEntryDAO temperatureEntryDao = null;
+    @JsonIgnore
+    private SessionFactory sessionFactory;
+    
+  
     
     public int getTemperature() {
         synchronized(myLock){
@@ -58,6 +74,30 @@ public class ThermospyController {
                 String toTemperature = temperature == Integer.MIN_VALUE ? "--" : Integer.toString(temperature);
                 Log.getLog().info("Temperature changed from " + fromTemperature + " to " + toTemperature );
                 this.temperature = temperature;
+            }
+            
+            if (this.logSession != null && this.temperature != Integer.MIN_VALUE)
+            {
+                org.hibernate.Session s = sessionFactory.openSession();
+                Transaction tx = null;
+                try {
+                    
+                    tx = s.beginTransaction();
+                    
+                    Temperatureentry entry = new Temperatureentry();
+                    entry.setTimestamp(new Date());
+                    entry.setFkSessionId(logSession.getId());
+                    entry.setTemperature((double)temperature);
+                    s.save(entry);
+                    tx.commit();
+                   
+                } catch (Exception e) {
+                    
+                    if (tx != null) tx.rollback();
+                    this.serverStatus = ServerStatus.INTERNAL_SERVER_ERROR;
+                }
+                s.close();
+                
             }
         }
     }
@@ -121,6 +161,26 @@ public class ThermospyController {
         synchronized(myLock) {
             this.serverStatus = serverStatus;
         }
+    }
+
+    public Session getLogSession() {
+        synchronized (myLock) {
+            return this.logSession;
+        }
+    }
+
+    public void setLogSession(Session session) {
+        synchronized(myLock) {
+            this.logSession = session;
+        }
+    }
+
+    public void setTemperatureDao(TemperatureEntryDAO tempDAO) {
+        this.temperatureEntryDao = tempDAO;
+    }
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
     
     

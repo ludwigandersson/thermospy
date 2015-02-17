@@ -5,10 +5,14 @@ package com.luan.thermospy.server.db;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
 
 
 /**
@@ -27,6 +31,9 @@ import javax.persistence.Table;
 public class Temperatureentry  implements java.io.Serializable {
     
      @Id
+     @GenericGenerator(name="id_generator", strategy="increment")
+     @GeneratedValue(generator="id_generator", strategy=GenerationType.SEQUENCE)
+     @Column(name = "id", unique = true, nullable = false)
      private int id;
      
      private Date timestamp;
@@ -41,6 +48,7 @@ public class Temperatureentry  implements java.io.Serializable {
     public Temperatureentry(int id) {
         this.id = id;
     }
+
     public Temperatureentry(int id, Double temperature, Integer fkSessionId) {
        this.id = id;
        this.temperature = temperature;

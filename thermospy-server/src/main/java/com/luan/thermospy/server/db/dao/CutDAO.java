@@ -37,8 +37,8 @@ public class CutDAO extends AbstractDAO<Cut> {
         return get(id);
     }
 
-    public long create(Cut cut) {
-        return persist(cut).getId();
+    public Cut create(Cut cut) {
+        return persist(cut);
     }
 
     public boolean delete(Cut cut)

@@ -37,8 +37,8 @@ public class SessionDAO  extends AbstractDAO<Session> {
         return get(id);
     }
 
-    public long create(Session person) {
-        return persist(person).getId();
+    public Session create(Session session) {
+        return persist(session);
     }
 
     public List<Session> findAll() {

@@ -17,6 +17,7 @@
 package com.luan.thermospy.server.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import com.luan.thermospy.server.core.ThermospyController;
 import com.luan.thermospy.server.db.Foodtype;
 import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
@@ -27,6 +28,7 @@ import io.dropwizard.jersey.params.LongParam;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -38,12 +40,24 @@ import javax.ws.rs.core.Response;
  * @author ludde
  */
 
-@Path("/thermospy-server/log-sessions")
+@Path("/thermospy-server/log-session")
 @Produces(MediaType.APPLICATION_JSON)
 public class SessionResource {
     private final SessionDAO sessionDao;
-    public SessionResource(SessionDAO dao) {
+    private final ThermospyController controller;
+    public SessionResource(SessionDAO dao, ThermospyController controller) {
         sessionDao = dao;
+        this.controller = controller;
+    }
+    
+    @GET
+    @Timed
+    @UnitOfWork
+    @Path("/active")
+    public Response getActiveSession() {
+        Session s = controller.getLogSession();
+        if (s != null) return Response.ok(s).build();
+        else return Response.status(Response.Status.NOT_FOUND).build();
     }
     
     @GET
@@ -57,6 +71,7 @@ public class SessionResource {
     @GET
     @Timed
     @UnitOfWork
+    @Path("/list")
     public List<Session> find() {
         return sessionDao.findAll();
     }
@@ -70,5 +85,26 @@ public class SessionResource {
         
         if (result) return Response.ok().build();
         else return Response.serverError().build();
+    }
+    
+    @PUT
+    @Timed
+    @UnitOfWork
+    @Path("/start")
+    public Response startSession(Session session)
+    {
+        Session s = sessionDao.create(session);
+        controller.setLogSession(s);
+        return Response.ok(s).build();
+    }
+    
+    @GET
+    @Timed
+    @UnitOfWork
+    @Path("/stop")
+    public Response stopSession()
+    {
+        controller.setLogSession(null);
+        return Response.ok().build();
     }
 }

@@ -28,6 +28,7 @@ import com.luan.thermospy.server.core.Boundary;
 import com.luan.thermospy.server.core.ServerStatus;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public class WebcamWorker extends Thread implements Runnable {
 
@@ -50,17 +51,23 @@ public class WebcamWorker extends Thread implements Runnable {
         synchronized (lockObj) {
             boolean result = true;
             try {
-                File snapshot = webCam.capture(controller.getDisplayBoundary());
+                /*File snapshot = webCam.capture(controller.getDisplayBoundary());
                 Boundary b = controller.getDisplayBoundary();
 
                 String tempString = recognizer.recognize(snapshot, b);
+                        */
+               Random rand = new Random();
+
+                // nextInt is normally exclusive of the top value,
+                // so add 1 to make it inclusive
+                String tempString = ""+rand.nextInt((55 - 20) + 1) + 20;
                 try {
                     controller.setTemperature(Integer.parseInt(tempString));
                 } catch (NumberFormatException nbrEx) {
                     controller.setTemperature(Integer.MIN_VALUE);
                 }
                 controller.setServerStatus(ServerStatus.OK);
-            } catch (IOException e)
+            } catch (Exception e)
             {
                 controller.setServerStatus(ServerStatus.INTERNAL_SERVER_ERROR);
                 result = false;

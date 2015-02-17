@@ -58,6 +58,8 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
     public void run(ThermospyServerConfiguration configuration,
                     Environment environment) {
 
+        
+        
         ThermospyController controller = configuration.getController();
         SevenSegmentOpticalRecognizer recognizer = new SevenSegmentOpticalRecognizer();
         recognizer.setConfig(configuration.getDigitRecognizerConfig());
@@ -68,6 +70,8 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         SingleShotAction actionHandler = new SingleShotAction(worker);
 
         controller.setCameraAction(actionHandler);
+        controller.setSessionFactory(hibernate.getSessionFactory());
+        
 
         final GetTempResource tempResource = new GetTempResource(controller);
         final CameraControlResource cameraResource = new CameraControlResource(controller);
@@ -86,9 +90,9 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         final CutDAO cutDAO = new CutDAO(hibernate.getSessionFactory());
         final FoodTypeDAO foodTypeDAO = new FoodTypeDAO(hibernate.getSessionFactory());
         
-        
+        controller.setTemperatureDao(tempDAO);
         environment.jersey().register(new TemperatureEntryResource(tempDAO));
-        environment.jersey().register(new SessionResource(dao));
+        environment.jersey().register(new SessionResource(dao, controller));
         environment.jersey().register(new CutResource(cutDAO));
         environment.jersey().register(new FoodTypeResource(foodTypeDAO));
         

@@ -16,11 +16,14 @@
  */
 package com.luan.thermospy.server.db.dao;
 
+import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
 import io.dropwizard.hibernate.AbstractDAO;
+import java.util.Date;
 import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -36,9 +39,6 @@ public class TemperatureEntryDAO extends AbstractDAO<Temperatureentry> {
         return get(id);
     }
 
-    public long create(Temperatureentry tempEntry) {
-        return persist(tempEntry).getId();
-    }
 
     public List<Temperatureentry> findAll(int i) {
         Query q = namedQuery("Temperatureentry.findBySessionId").setParameter("fkSessionId", i);

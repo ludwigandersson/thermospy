@@ -43,8 +43,8 @@ public class FoodTypeDAO extends AbstractDAO<Foodtype> {
        return q.executeUpdate() >= 1;
     }
     
-    public int create(Foodtype foodType) {
-        return persist(foodType).getId();
+    public Foodtype create(Foodtype foodType) {
+        return persist(foodType);
     }
 
     public List<Foodtype> findAll() {

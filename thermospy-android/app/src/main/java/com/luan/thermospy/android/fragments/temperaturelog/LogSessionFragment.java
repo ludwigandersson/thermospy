@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,10 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
+import com.luan.thermospy.android.core.pojo.CutType;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.pojo.TemperatureEntry;
+import com.luan.thermospy.android.core.rest.CreateCutTypeReq;
 import com.luan.thermospy.android.core.rest.GetLogSessionListReq;
 import com.luan.thermospy.android.core.rest.GetTemperatureEntryListReq;
 
@@ -32,12 +35,13 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnLogSessionFragmentListener}
  * interface.
  */
-public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, GetTemperatureEntryListReq.OnGetTemperatureEntryListener {
+public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, GetTemperatureEntryListReq.OnGetTemperatureEntryListener, CreateCutTypeReq.OnCutTypeListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM_IP_ADDRESS = "ipaddress";
     private static final String ARG_PARAM_PORT = "port";
+    private static final String LOG_TAG = LogSessionFragment.class.getSimpleName();
 
     // TODO: Rename and change types of parameters
     private String mIpAddress;
@@ -157,6 +161,8 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
             requestTemperatureEntryLog(session.getId());
 
+
+
         }
     }
 
@@ -216,6 +222,40 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     public void onTemperatureEntryError() {
         mProgressDialog.dismiss();
         mListener.onLogSessionListError();
+    }
+
+    @Override
+    public void onCutTypeRecv(CutType cut) {
+        Log.d(LOG_TAG, "Created new Cut type: "+cut.getName());
+    }
+
+    @Override
+    public void onCutTypeError() {
+        Log.d(LOG_TAG, "On cut type error! :(");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
+        mGetTemperatureEntryListReq.cancel();
+        mGetLogSessionListReq.cancel();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+
+        }
+
+        mGetTemperatureEntryListReq.cancel();
+        mGetLogSessionListReq.cancel();
+
     }
 
     /**

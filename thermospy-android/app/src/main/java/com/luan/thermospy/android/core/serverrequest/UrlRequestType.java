@@ -37,8 +37,8 @@ public enum UrlRequestType {
     STOP_LOG_SESSION(12, "log-session/stop"),
     FOOD_TYPE(13, "food-type"),
     FOOD_TYPE_LIST(14, "food-type/list"),
-    CUT_TYPE(15, "cut-type"),
-    CUT_TYPE_LIST(16, "cut-type/list"),
+    CUT_TYPE(15, "cuts"),
+    CUT_TYPE_LIST(16, "cuts/list"),
     TEMPERATURE_ENTRY_LIST(17, "get-temperature-entries/list"),
 
 

@@ -12,7 +12,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.luan.thermospy.android.core.pojo.Boundary;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
 import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
@@ -49,7 +48,7 @@ public class StartLogSessionReq implements AbstractServerRequest.ServerRequestLi
         Gson gson = new Gson();
 
         try {
-            return new JSONObject(gson.toJson(mLogSession, Boundary.class));
+            return new JSONObject(gson.toJson(mLogSession, LogSession.class));
         } catch (JSONException | JsonIOException e) {
             Log.e(LOG_TAG, "Failed to create json object of Camera Control Action object!", e);
             return null;

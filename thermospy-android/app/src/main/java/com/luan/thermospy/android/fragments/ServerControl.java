@@ -295,7 +295,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
           hideProgress();
       }
 
-      @Override
+      @Override 
       public void onServiceStatusRecv(ServiceStatus status) {
           mRunning = status.isRunning();
           mToggleServerStatus.setChecked(!mRunning);

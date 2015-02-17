@@ -24,6 +24,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Abstract class handling common functions for creating a requests. It builds the Url that the
  * derived class specifies and carries out the request to the server.
@@ -42,6 +45,7 @@ public abstract class AbstractServerRequest<T, R> implements RequestControl {
     private final ServerRequestListener<R> mListener;
     private final UrlRequestType mRequestType;
     private final RequestQueue mRequestQueue;
+    private List<String> requestParams = null;
 
     protected ServerRequestListener<R> getListener()
     {
@@ -57,9 +61,13 @@ public abstract class AbstractServerRequest<T, R> implements RequestControl {
 
     protected abstract Request<T> createRequest(String url);
 
+    public void setRequestParams(List<String> params)
+    {
+        requestParams = params;
+    }
     public void request(String ip, int port)
     {
-        final UrlRequest request = new UrlRequest.UrlRequestBuilder().setIpAddress(ip).setPort(port).setUrlRequest(mRequestType).build();
+        final UrlRequest request = new UrlRequest.UrlRequestBuilder().setIpAddress(ip).setPort(port).setUrlRequest(mRequestType).setRequestParams(requestParams).build();
         final String url = request.toString();
 
         Request<T> serverRequest = createRequest(url);

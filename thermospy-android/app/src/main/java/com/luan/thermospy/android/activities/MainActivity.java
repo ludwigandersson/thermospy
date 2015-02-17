@@ -201,6 +201,13 @@ public class MainActivity extends ActionBarActivity
             transaction = fragmentManager.beginTransaction()
                     .replace(R.id.container, SetupService.newInstance(ip, port));
         }
+        else if (position == 3)
+        {
+            Intent intent = new Intent(this, LogSessionActivity.class);
+            startActivity(intent);
+            transaction = fragmentManager.beginTransaction();
+
+        }
         else
         {
             transaction = fragmentManager.beginTransaction();
@@ -221,7 +228,12 @@ public class MainActivity extends ActionBarActivity
             case 2:
                 mTitle = getString(com.luan.thermospy.android.R.string.title_section3);
                 break;
-
+            case 3:
+                mTitle = getString(com.luan.thermospy.android.R.string.title_section4);
+                break;
+            default:
+                mTitle = "";
+                break;
         }
     }
 

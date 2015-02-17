@@ -31,6 +31,16 @@ public enum UrlRequestType {
     REFRESH_RATE(6, "refresh-rate"),
     CAMERA_DEVICE_CONFIG(7, "camera-device-config"),
     OCR_CONFIG(8, "digit-recognizer-config"),
+    LOG_SESSION_LIST(9, "log-session/list"),
+    LOG_SESSION(10, "log-session"),
+    START_LOG_SESSION(11, "log-session/start"),
+    STOP_LOG_SESSION(12, "log-session/stop"),
+    FOOD_TYPE(13, "food-type"),
+    FOOD_TYPE_LIST(14, "food-type/list"),
+    CUT_TYPE(15, "cut-type"),
+    CUT_TYPE_LIST(16, "cut-type/list"),
+    TEMPERATURE_ENTRY_LIST(17, "get-temperature-entries/list"),
+
 
     UNKNOWN(-1, "");
 

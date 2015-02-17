@@ -19,6 +19,8 @@
 
 package com.luan.thermospy.android.core.serverrequest;
 
+import java.util.List;
+
 /**
  * Builder class for creating a REST request to the thermospy server.
  */
@@ -26,12 +28,14 @@ public class UrlRequest {
     private String mIpAddress;
     private int mPort;
     private UrlRequestType mRequestType;
+    private List<String> mRequestParams;
 
     public UrlRequest(UrlRequestBuilder request)
     {
         this.mIpAddress = request.mIpAddress;
         this.mPort = request.mPort;
         this.mRequestType = request.mRequestType;
+        this.mRequestParams = request.requestParams;
     }
     @Override
     public String toString()
@@ -44,6 +48,13 @@ public class UrlRequest {
                 append("thermospy-server").
                 append("/").
                 append(mRequestType.toString());
+
+        if (mRequestParams != null) {
+            for (String s : mRequestParams) {
+                builder.append("/").append(s);
+            }
+        }
+
         return builder.toString();
     }
 
@@ -51,6 +62,7 @@ public class UrlRequest {
         private String mIpAddress;
         private int mPort;
         private UrlRequestType mRequestType;
+        private List<String> requestParams;
 
         public UrlRequestBuilder setIpAddress(String ipAddress) {
             this.mIpAddress = ipAddress;
@@ -68,6 +80,11 @@ public class UrlRequest {
         }
         public UrlRequest build() {
             return new UrlRequest(this);
+        }
+
+        public UrlRequestBuilder setRequestParams(List<String> requestParams) {
+            this.requestParams = requestParams;
+            return this;
         }
     }
 

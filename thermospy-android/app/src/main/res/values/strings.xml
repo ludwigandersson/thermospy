@@ -58,5 +58,7 @@
     <string name="pref_title_choose_degree_type">Choose degree scale</string>
     <string name="temperature_scale_celsius">°C</string>
     <string name="temperature_scale_fahrenheit">°F</string>
+    <string name="title_activity_log_session">LogSessionActivity</string>
+    <string name="title_section4">Temperature Log</string>
 
 </resources>

@@ -27,6 +27,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.luan.thermospy.android.activities.MainActivity" />
         </activity>
+        <activity
+            android:name=".activities.LogSessionActivity"
+            android:label="@string/title_activity_log_session"
+            android:parentActivityName=".activities.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.luan.thermospy.android.activities.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

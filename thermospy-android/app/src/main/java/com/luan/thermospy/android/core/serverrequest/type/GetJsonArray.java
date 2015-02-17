@@ -4,27 +4,27 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
+import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
 
-import org.json.JSONObject;
+import org.json.JSONArray;
 
 /**
  * Request a JSON Object
  */
-public class GetJsonObject extends AbstractServerRequest implements Response.Listener<JSONObject>, Response.ErrorListener {
-    public GetJsonObject(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType requestType) {
+public class GetJsonArray extends AbstractServerRequest implements Response.Listener<JSONArray>, Response.ErrorListener {
+    public GetJsonArray(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType requestType) {
         super(requestQueue, listener, requestType);
     }
 
-
     @Override
     public Request createRequest(String url) {
-        return new JsonObjectRequest(url, null, this, this);
+
+        return new JsonArrayRequest(url, this, this);
     }
     @Override
-    public void onResponse(JSONObject response) {
+    public void onResponse(JSONArray response) {
         getListener().onOkResponse(response);
     }
     @Override

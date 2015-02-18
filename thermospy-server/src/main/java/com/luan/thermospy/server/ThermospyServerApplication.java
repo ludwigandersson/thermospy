@@ -92,7 +92,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         
         controller.setTemperatureDao(tempDAO);
         environment.jersey().register(new TemperatureEntryResource(tempDAO));
-        environment.jersey().register(new SessionResource(dao, controller));
+        environment.jersey().register(new SessionResource(dao, tempDAO, controller));
         environment.jersey().register(new CutResource(cutDAO));
         environment.jersey().register(new FoodTypeResource(foodTypeDAO));
         

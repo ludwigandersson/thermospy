@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +16,8 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.pojo.CutType;
 import com.luan.thermospy.android.core.pojo.LogSession;
-import com.luan.thermospy.android.core.pojo.TemperatureEntry;
-import com.luan.thermospy.android.core.rest.CreateCutTypeReq;
 import com.luan.thermospy.android.core.rest.GetLogSessionListReq;
-import com.luan.thermospy.android.core.rest.GetTemperatureEntryListReq;
 
 import java.util.List;
 
@@ -35,7 +30,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnLogSessionFragmentListener}
  * interface.
  */
-public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, GetTemperatureEntryListReq.OnGetTemperatureEntryListener, CreateCutTypeReq.OnCutTypeListener {
+public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,8 +47,6 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     private ProgressDialog mProgressDialog;
 
     private GetLogSessionListReq mGetLogSessionListReq;
-
-    private GetTemperatureEntryListReq mGetTemperatureEntryListReq;
 
     private List<LogSession> mLogSessionList;
 
@@ -136,7 +129,6 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
             mPort = getArguments().getInt(ARG_PARAM_PORT);
             mRequestQueue = Coordinator.getInstance().getRequestQueue();
             mGetLogSessionListReq = new GetLogSessionListReq(mRequestQueue,this);
-            mGetTemperatureEntryListReq = new GetTemperatureEntryListReq(mRequestQueue,this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -159,25 +151,9 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
             LogSession session = mLogSessionList.get(position);
 
-            requestTemperatureEntryLog(session.getId());
-
-
+            mListener.onShowTemperatureList(session);
 
         }
-    }
-
-    private void requestTemperatureEntryLog(int id) {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity());
-        }
-        mProgressDialog.setCanceledOnTouchOutside(false);
-
-        mProgressDialog.setTitle("Please wait");
-        mProgressDialog.setMessage("Fetching temperature log...");
-        mGetTemperatureEntryListReq.setTemperatureEntryId(id);
-        mGetTemperatureEntryListReq.request(mIpAddress, mPort);
-        mProgressDialog.show();
-
     }
 
     /**
@@ -213,34 +189,12 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     }
 
     @Override
-    public void onTemperatureEntryRecv(List<TemperatureEntry> logSessionList) {
-        mListener.onShowTemperatureList(logSessionList);
-        mProgressDialog.dismiss();
-    }
-
-    @Override
-    public void onTemperatureEntryError() {
-        mProgressDialog.dismiss();
-        mListener.onLogSessionListError();
-    }
-
-    @Override
-    public void onCutTypeRecv(CutType cut) {
-        Log.d(LOG_TAG, "Created new Cut type: "+cut.getName());
-    }
-
-    @Override
-    public void onCutTypeError() {
-        Log.d(LOG_TAG, "On cut type error! :(");
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
         }
-        mGetTemperatureEntryListReq.cancel();
+
         mGetLogSessionListReq.cancel();
 
     }
@@ -253,7 +207,6 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
         }
 
-        mGetTemperatureEntryListReq.cancel();
         mGetLogSessionListReq.cancel();
 
     }
@@ -270,7 +223,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
      */
     public interface OnLogSessionFragmentListener {
         // TODO: Update argument type and name
-        public void onShowTemperatureList(List<TemperatureEntry> temperatureEntryList);
+        public void onShowTemperatureList(LogSession session);
 
         void onLogSessionListError();
     }

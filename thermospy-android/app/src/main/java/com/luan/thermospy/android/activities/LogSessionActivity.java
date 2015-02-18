@@ -9,12 +9,11 @@ import android.view.MenuItem;
 
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.pojo.TemperatureEntry;
+import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.fragments.temperaturelog.LogSessionFragment;
+import com.luan.thermospy.android.fragments.temperaturelog.TemperatureGraph;
 
-import java.util.List;
-
-public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener {
+public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener, TemperatureGraph.OnTemperatureGraphFragmentListener {
 
     private static final String LOG_TAG = LogSessionActivity.class.getSimpleName();
 
@@ -24,11 +23,13 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_session);
+        setTitle(getString(R.string.temperature_log));
         if (savedInstanceState == null) {
             int port = Coordinator.getInstance().getServerSettings().getPort();
             String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, LogSessionFragment.newInstance(ipAddress, port))
+                    .addToBackStack(null)
                     .commit();
         }
     }
@@ -59,12 +60,35 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
     }
 
     @Override
-    public void onShowTemperatureList(List<TemperatureEntry> temperatureEntryList) {
-        Log.d(LOG_TAG, "Show temperature list. Number of items: "+temperatureEntryList.size());
+    public void onShowTemperatureList(LogSession session) {
+
+        setTitle(session.getName());
+        int port = Coordinator.getInstance().getServerSettings().getPort();
+        String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, TemperatureGraph.newInstance(ipAddress, port, session.getId()))
+                .addToBackStack(null)
+                .commit();
+        getFragmentManager().executePendingTransactions();
+    }
+
+    @Override
+    public void onBackPressed() {
+        android.app.FragmentManager fm = getFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
     public void onLogSessionListError() {
         Log.d(LOG_TAG, "An error occured within the log session fragment...");
+    }
+
+    @Override
+    public void onError() {
+        Log.d(LOG_TAG, "An error occured within the temperature graph fragment...");
     }
 }

@@ -60,5 +60,6 @@
     <string name="temperature_scale_fahrenheit">°F</string>
     <string name="title_activity_log_session">LogSessionActivity</string>
     <string name="title_section4">Temperature Log</string>
+    <string name="temperature_log">Temperature Log</string>
 
 </resources>

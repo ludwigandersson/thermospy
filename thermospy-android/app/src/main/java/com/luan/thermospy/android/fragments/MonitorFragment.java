@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -30,11 +31,13 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.activities.NewTemperatureLogActivity;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.ServerStatus;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
@@ -62,6 +65,7 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
 
     private TextView mTemperatureScale;
 
+    private Button mStartStopLogSessionButton;
     private ServerControl mServerControl;
 
     private ProgressDialog mProgress = null;
@@ -124,7 +128,14 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
         mTemperatureScale.setText(mTemperatureScaleStr);
 
 
-
+        mStartStopLogSessionButton = (Button)v.findViewById(R.id.btnStartStopLogSession);
+        mStartStopLogSessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), NewTemperatureLogActivity.class);
+                startActivity(intent);
+            }
+        });
         getServerStatus();
 
         return v;

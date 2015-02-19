@@ -35,6 +35,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.luan.thermospy.android.activities.MainActivity" />
         </activity>
+        <activity
+            android:name=".activities.NewTemperatureLogActivity"
+            android:label="@string/title_activity_new_temperature_log"
+            android:parentActivityName=".activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.luan.thermospy.android.activities.MainActivity" />
+        </activity>
+
     </application>
 
 </manifest>

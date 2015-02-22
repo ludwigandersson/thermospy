@@ -22,6 +22,7 @@ package com.luan.thermospy.android.activities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -59,7 +60,8 @@ public class MainActivity extends ActionBarActivity
         SetupBoundary.OnSetupBoundaryListener,
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
-        Alarm.OnAlarmFragmentListener {
+        Alarm.OnAlarmFragmentListener,
+        NewTemperatureLogActivity.OnNewLogSessionListener{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -385,6 +387,15 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener) {
+        FragmentManager fm = getFragmentManager();
+        NewTemperatureLogActivity editNameDialog = NewTemperatureLogActivity.newInstance(Coordinator.getInstance().getServerSettings());
+        editNameDialog.setDismissListener(dismissListener);
+        editNameDialog.show(fm, "fragment_edit_name");
+
+    }
+
+    @Override
     public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
             Coordinator.getInstance().getAlarmSettings().setAlarmCondition(alarmCondition);
         if (!checkAlarm()) {
@@ -444,4 +455,13 @@ public class MainActivity extends ActionBarActivity
 
     }
 
+    @Override
+    public void onLogSessionCreated() {
+
+    }
+
+    @Override
+    public void onLogSessionCancel() {
+
+    }
 }

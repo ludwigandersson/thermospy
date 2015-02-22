@@ -1,7 +1,5 @@
 package com.luan.thermospy.android.core.rest;
 
-import android.util.Log;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
@@ -9,16 +7,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
 import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
-import com.luan.thermospy.android.core.serverrequest.type.PutJsonObject;
+import com.luan.thermospy.android.core.serverrequest.type.GetJsonObject;
 import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
@@ -35,29 +31,12 @@ public class StopLogSessionReq implements AbstractServerRequest.ServerRequestLis
 
     @Override
     public void request(String ip, int port) {
-        mPutJsonObjectReq.request(ip, port);
+        mGetJsonObjectReq.request(ip, port);
     }
 
     @Override
     public void cancel() {
-        mPutJsonObjectReq.cancel();
-    }
-
-    private JSONObject getJsonObject()
-    {
-        Gson gson = new Gson();
-
-        try {
-            return new JSONObject(gson.toJson(mLogSession, LogSession.class));
-        } catch (JSONException | JsonIOException e) {
-            Log.e(LOG_TAG, "Failed to create json object of Camera Control Action object!", e);
-            return null;
-        }
-    }
-
-    public void setLogSession(LogSession logSession) {
-        this.mLogSession = logSession;
-        mPutJsonObjectReq.setJSONObject(getJsonObject());
+        mGetJsonObjectReq.cancel();
     }
 
     public interface OnStopLogSessionListener
@@ -65,13 +44,12 @@ public class StopLogSessionReq implements AbstractServerRequest.ServerRequestLis
         void onStopLogSessionRecv(LogSession session);
         void onStopLogSessionError();
     }
-    private final PutJsonObject mPutJsonObjectReq;
+    private final GetJsonObject mGetJsonObjectReq;
 
-    public StopLogSessionReq(RequestQueue queue, OnStopLogSessionListener listener, LogSession logSession)
+    public StopLogSessionReq(RequestQueue queue, OnStopLogSessionListener listener)
     {
-        mLogSession = logSession;
         mListener = listener;
-        mPutJsonObjectReq = new PutJsonObject(queue, this, UrlRequestType.STOP_LOG_SESSION, getJsonObject());
+        mGetJsonObjectReq = new GetJsonObject(queue, this, UrlRequestType.STOP_LOG_SESSION);
     }
 
     @Override

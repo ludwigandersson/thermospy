@@ -1,7 +1,5 @@
 package com.luan.thermospy.android.core.rest;
 
-import android.util.Log;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
@@ -22,7 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by ludde on 15-02-17.
@@ -45,12 +45,22 @@ public class StartLogSessionReq implements AbstractServerRequest.ServerRequestLi
 
     private JSONObject getJsonObject()
     {
-        Gson gson = new Gson();
+        List<LogSession> logSessionsList = new ArrayList<LogSession>();
+        // Creates the json object which will manage the information received
+        GsonBuilder builder = new GsonBuilder();
+
+        // Register an adapter to manage the date types as long values
+        builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+            public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                return new Date(json.getAsJsonPrimitive().getAsLong());
+            }
+        });
+
+        Gson gson = builder.create();
 
         try {
             return new JSONObject(gson.toJson(mLogSession, LogSession.class));
         } catch (JSONException | JsonIOException e) {
-            Log.e(LOG_TAG, "Failed to create json object of Camera Control Action object!", e);
             return null;
         }
     }

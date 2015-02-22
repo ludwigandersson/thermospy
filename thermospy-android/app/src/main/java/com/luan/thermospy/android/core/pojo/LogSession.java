@@ -7,8 +7,25 @@ import java.util.Date;
  */
 public class LogSession {
     int id;
-    private Integer fkFoodtypeId;
-    private Integer fkCutId;
+    private Integer targettemperature;
+
+    public Boolean getIsopen() {
+        return isopen;
+    }
+
+    public void setIsOpen(Boolean isOpen) {
+        this.isopen = isOpen;
+    }
+
+    public Integer getTargetTemperature() {
+        return targettemperature;
+    }
+
+    public void setTargetTemperature(Integer targetTemperature) {
+        this.targettemperature = targetTemperature;
+    }
+
+    private Boolean isopen;
     private String name;
     private Date startTimestamp;
     private Date endTimestamp;
@@ -16,6 +33,7 @@ public class LogSession {
 
 
     public LogSession() {
+
     }
 
     public int getId() {
@@ -24,22 +42,6 @@ public class LogSession {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public Integer getFkFoodtypeId() {
-        return fkFoodtypeId;
-    }
-
-    public void setFkFoodtypeId(Integer fkFoodtypeId) {
-        this.fkFoodtypeId = fkFoodtypeId;
-    }
-
-    public Integer getFkCutId() {
-        return fkCutId;
-    }
-
-    public void setFkCutId(Integer fkCutId) {
-        this.fkCutId = fkCutId;
     }
 
     public String getName() {

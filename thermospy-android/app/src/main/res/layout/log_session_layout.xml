@@ -18,11 +18,12 @@ android:gravity="center_vertical|top">
             android:layout_alignParentEnd="false"
             android:gravity="center">
 
-            <Button
+            <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/btnStartStopLogSession"
-                android:text="@string/start_recording" />
+                android:textOff="@string/start_recording"
+                android:textOn="@string/stop_recording" />
         </LinearLayout>
 
     </RelativeLayout>

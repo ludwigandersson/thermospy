@@ -20,7 +20,7 @@
             android:text="@string/form_log_session_name" />
 
         <EditText
-            android:id="@+id/txtName"
+            android:id="@+id/txtLogSessionName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.75"
@@ -36,51 +36,9 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text="@string/form_food_type" />
-
-        <Spinner
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinnerFoodType"
-            android:layout_weight="0.75"
-            android:spinnerMode="dialog"
-            android:touchscreenBlocksFocus="true" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:text="@string/form_cut_type" />
-
-        <Spinner
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinnerCutType"
-            android:layout_weight="0.75"
-            android:touchscreenBlocksFocus="true"
-            android:spinnerMode="dialog" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="0.25"
-            android:text="@string/form_weight" />
+            android:text="@string/form_target_temperature" />
 
         <LinearLayout
             android:layout_width="0dp"

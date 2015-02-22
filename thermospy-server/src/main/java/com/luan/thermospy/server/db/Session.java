@@ -1,13 +1,11 @@
 package com.luan.thermospy.server.db;
-// Generated 2015-feb-14 09:17:56 by Hibernate Tools 4.3.1
-
-
+// Generated 2015-feb-22 22:32:42 by Hibernate Tools 4.3.1
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import static javax.persistence.GenerationType.IDENTITY;
+
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -35,10 +33,6 @@ public class Session  implements java.io.Serializable {
      @GeneratedValue(generator="id_generator", strategy=GenerationType.SEQUENCE)
      @Column(name = "id", unique = true, nullable = false)
      private int id;
-     @Column(name="FK_FOODTYPE_ID")
-     private Integer fkFoodtypeId;
-     @Column(name="FK_CUT_ID")
-     private Integer fkCutId;
      private String name;
      @Column(name="START_TIMESTAMP")
      private Date startTimestamp;
@@ -46,6 +40,8 @@ public class Session  implements java.io.Serializable {
      private Date endTimestamp;
      
      private String comment;
+     private Integer targettemperature;
+     private Boolean isopen;
 
     public Session() {
     }
@@ -54,14 +50,14 @@ public class Session  implements java.io.Serializable {
     public Session(int id) {
         this.id = id;
     }
-    public Session(int id, Integer fkFoodtypeId, Integer fkCutId, String name, Date startTimestamp, Date endTimestamp, String comment) {
+    public Session(int id, String name, Date startTimestamp, Date endTimestamp, String comment, Integer targettemperature, Boolean isopen) {
        this.id = id;
-       this.fkFoodtypeId = fkFoodtypeId;
-       this.fkCutId = fkCutId;
        this.name = name;
        this.startTimestamp = startTimestamp;
        this.endTimestamp = endTimestamp;
        this.comment = comment;
+       this.targettemperature = targettemperature;
+       this.isopen = isopen;
     }
    
     public int getId() {
@@ -70,20 +66,6 @@ public class Session  implements java.io.Serializable {
     
     public void setId(int id) {
         this.id = id;
-    }
-    public Integer getFkFoodtypeId() {
-        return this.fkFoodtypeId;
-    }
-    
-    public void setFkFoodtypeId(Integer fkFoodtypeId) {
-        this.fkFoodtypeId = fkFoodtypeId;
-    }
-    public Integer getFkCutId() {
-        return this.fkCutId;
-    }
-    
-    public void setFkCutId(Integer fkCutId) {
-        this.fkCutId = fkCutId;
     }
     public String getName() {
         return this.name;
@@ -112,6 +94,20 @@ public class Session  implements java.io.Serializable {
     
     public void setComment(String comment) {
         this.comment = comment;
+    }
+    public Integer getTargettemperature() {
+        return this.targettemperature;
+    }
+    
+    public void setTargetTemperature(Integer targettemperature) {
+        this.targettemperature = targettemperature;
+    }
+    public Boolean getIsopen() {
+        return this.isopen;
+    }
+    
+    public void setIsOpen(Boolean isopen) {
+        this.isopen = isopen;
     }
 
 

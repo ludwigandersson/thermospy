@@ -10,9 +10,7 @@
     <property name="hibernate.show_sql">true</property>
     <property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>
     <property name="hibernate.current_session_context_class">thread</property>
-    <mapping resource="Temperatureentry.hbm.xml"/>
-    <mapping resource="Foodtype.hbm.xml"/>
-    <mapping resource="Cut.hbm.xml"/>
-    <mapping resource="Session.hbm.xml"/>
+    <mapping resource="com/luan/thermospy/server/db/Temperatureentry.hbm.xml"/>
+    <mapping resource="com/luan/thermospy/server/db/Session.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

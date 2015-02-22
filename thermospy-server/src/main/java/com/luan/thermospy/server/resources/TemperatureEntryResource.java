@@ -17,15 +17,10 @@
 package com.luan.thermospy.server.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.luan.thermospy.server.db.Foodtype;
-import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
-import com.luan.thermospy.server.db.dao.SessionDAO;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
-import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.IntParam;
-import io.dropwizard.jersey.params.LongParam;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

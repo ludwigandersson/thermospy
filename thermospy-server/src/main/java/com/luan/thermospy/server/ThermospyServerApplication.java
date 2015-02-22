@@ -3,12 +3,10 @@ package com.luan.thermospy.server;
 import com.luan.thermospy.server.actions.SingleShotAction;
 import com.luan.thermospy.server.configuration.ThermospyServerConfiguration;
 import com.luan.thermospy.server.core.ThermospyController;
-import com.luan.thermospy.server.db.Cut;
-import com.luan.thermospy.server.db.Foodtype;
+
 import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
-import com.luan.thermospy.server.db.dao.CutDAO;
-import com.luan.thermospy.server.db.dao.FoodTypeDAO;
+
 import com.luan.thermospy.server.db.dao.SessionDAO;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
@@ -87,14 +85,11 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         // Hibernate DAO types
         final SessionDAO dao = new SessionDAO(hibernate.getSessionFactory());
         final TemperatureEntryDAO tempDAO = new TemperatureEntryDAO(hibernate.getSessionFactory());
-        final CutDAO cutDAO = new CutDAO(hibernate.getSessionFactory());
-        final FoodTypeDAO foodTypeDAO = new FoodTypeDAO(hibernate.getSessionFactory());
+
         
         controller.setTemperatureDao(tempDAO);
         environment.jersey().register(new TemperatureEntryResource(tempDAO));
         environment.jersey().register(new SessionResource(dao, tempDAO, controller));
-        environment.jersey().register(new CutResource(cutDAO));
-        environment.jersey().register(new FoodTypeResource(foodTypeDAO));
         
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(tempResource);
@@ -105,9 +100,6 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         environment.jersey().register(cameraDeviceConfigResource);
         environment.jersey().register(drcResource);
         environment.jersey().register(serviceStatusResource);
-        
-     
-        
     }
 
     @Override
@@ -121,7 +113,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         bootstrap.addBundle(hibernate);
     }
     
-    private final HibernateBundle<ThermospyServerConfiguration> hibernate = new HibernateBundle<ThermospyServerConfiguration>(Session.class, Temperatureentry.class, Cut.class, Foodtype.class) {
+    private final HibernateBundle<ThermospyServerConfiguration> hibernate = new HibernateBundle<ThermospyServerConfiguration>(Session.class, Temperatureentry.class) {
     @Override
     public DataSourceFactory getDataSourceFactory(ThermospyServerConfiguration configuration) {
         return configuration.getDataSourceFactory();

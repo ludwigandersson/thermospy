@@ -88,6 +88,7 @@ public class ThermospyController {
                     entry.setTimestamp(new Date());
                     entry.setFkSessionId(logSession.getId());
                     entry.setTemperature((double)temperature);
+                    
                     s.save(entry);
                     tx.commit();
                    
@@ -182,6 +183,8 @@ public class ThermospyController {
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
+    
+    
     
     
 }

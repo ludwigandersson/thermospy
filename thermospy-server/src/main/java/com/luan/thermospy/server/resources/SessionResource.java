@@ -17,15 +17,17 @@
 package com.luan.thermospy.server.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import com.luan.thermospy.server.core.ServerStatus;
 import com.luan.thermospy.server.core.ThermospyController;
-import com.luan.thermospy.server.db.Foodtype;
+
 import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
+
 import com.luan.thermospy.server.db.dao.SessionDAO;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.IntParam;
-import io.dropwizard.jersey.params.LongParam;
+import java.util.Date;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -36,6 +38,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -52,6 +55,7 @@ public class SessionResource {
         sessionDao = dao;
         this.controller = controller;
         this.temperatureEntryDao = temperatureEntryDao;
+        closeOpenLogSessions();
     }
     
     @GET
@@ -100,6 +104,8 @@ public class SessionResource {
     public Response startSession(Session session)
     {
         Session s = sessionDao.create(session);
+        s.setIsOpen(true);
+        s.setStartTimestamp(new Date());
         controller.setLogSession(s);
         return Response.ok(s).build();
     }
@@ -110,7 +116,19 @@ public class SessionResource {
     @Path("/stop")
     public Response stopSession()
     {
+        Session s = controller.getLogSession();
         controller.setLogSession(null);
-        return Response.ok().build();
+        if (s != null) {
+            s.setEndTimestamp(new Date());
+            s.setIsOpen(false);
+            s = sessionDao.create(s);
+            return Response.ok(s).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+
+    private void closeOpenLogSessions() {
+        
     }
 }

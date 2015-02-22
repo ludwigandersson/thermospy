@@ -2,8 +2,6 @@
 <!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd">
 <hibernate-reverse-engineering>
   <schema-selection match-schema="THERMOSPY"/>
-  <table-filter match-name="CUT"/>
-  <table-filter match-name="FOODTYPE"/>
   <table-filter match-name="TEMPERATUREENTRY"/>
   <table-filter match-name="SESSION"/>
 </hibernate-reverse-engineering>

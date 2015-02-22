@@ -35,7 +35,7 @@ database:
   maxWaitForConnection: 1s
 
   # the SQL query to run when validating a connection's liveness
-  validationQuery: "SELECT * FROM FOODTYPE"
+  validationQuery: "SELECT * FROM SESSION"
 
   # the minimum number of connections to keep open
   minSize: 8

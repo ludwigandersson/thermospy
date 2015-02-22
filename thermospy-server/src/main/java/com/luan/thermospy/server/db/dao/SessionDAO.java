@@ -16,7 +16,6 @@
  */
 package com.luan.thermospy.server.db.dao;
 
-import com.luan.thermospy.server.db.Foodtype;
 import com.luan.thermospy.server.db.Session;
 import io.dropwizard.hibernate.AbstractDAO;
 import java.util.List;

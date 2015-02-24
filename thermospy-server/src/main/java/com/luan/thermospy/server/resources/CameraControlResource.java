@@ -23,6 +23,8 @@ package com.luan.thermospy.server.resources;
 import com.luan.thermospy.server.core.Action;
 import com.luan.thermospy.server.core.ThermospyController;
 import com.luan.thermospy.server.core.CameraControlAction;
+import com.luan.thermospy.server.core.CameraDeviceConfig;
+import java.io.File;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -36,9 +38,11 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CameraControlResource {
     private final ThermospyController controller;
-    public CameraControlResource(ThermospyController controller)
+    private final CameraDeviceConfig cameraConfig;
+    public CameraControlResource(ThermospyController controller, CameraDeviceConfig cameraConfig)
     {
         this.controller = controller;
+        this.cameraConfig = cameraConfig;
     }
 
     @POST
@@ -46,6 +50,12 @@ public class CameraControlResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response set(Action actionReq) {
         CameraControlAction type = CameraControlAction.parse(actionReq.getActionId());
+        
+        File file = new File(cameraConfig.getFilePath());
+        if (file.exists()) {
+           file.delete();
+        }
+        
         boolean result = true;
         switch (type) {
          case START:
@@ -56,6 +66,7 @@ public class CameraControlResource {
             break;
          case STOP:
             controller.stop();
+            
             break;
          default:
              break;

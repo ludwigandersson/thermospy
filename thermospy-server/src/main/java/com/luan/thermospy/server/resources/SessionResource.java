@@ -87,13 +87,18 @@ public class SessionResource {
     @DELETE
     @Timed
     @UnitOfWork
-    public Response delete(Session session)
+    @Path("/{id}")
+    public Response delete(@PathParam("id") IntParam id)
     {
-        boolean result = temperatureEntryDao.deleteAllBySessionId(session.getId());
+        Session s = controller.getLogSession();
+        if (s != null && s.getId() == id.get())
+        {
+            controller.setLogSession(null);
+        }
+        boolean result = temperatureEntryDao.deleteAllBySessionId(id.get());  
+        result = result && sessionDao.delete(id.get());
         
-        result = result && sessionDao.delete(session);
-        
-        if (result) return Response.ok().build();
+        if (result) return Response.ok(id.get()).build();
         else return Response.serverError().build();
     }
     

@@ -44,9 +44,9 @@ public class SessionDAO  extends AbstractDAO<Session> {
         return list(namedQuery("Session.findAll"));
     }
     
-    public boolean delete(Session session)
+    public boolean delete(int sessionId)
     {
-       Query q = currentSession().createQuery("delete Session where id = "+session.getId());
+       Query q = currentSession().createQuery("delete Session where id = "+sessionId);
        return q.executeUpdate() >= 1;
     }
 }

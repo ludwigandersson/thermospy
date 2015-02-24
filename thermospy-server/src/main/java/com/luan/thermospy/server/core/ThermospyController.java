@@ -27,6 +27,7 @@ import com.luan.thermospy.server.db.Session;
 import com.luan.thermospy.server.db.Temperatureentry;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import io.dropwizard.db.DataSourceFactory;
+import java.io.File;
 import java.util.Date;
 import org.eclipse.jetty.util.log.Log;
 import org.hibernate.SessionFactory;
@@ -124,6 +125,8 @@ public class ThermospyController {
     
     public void stop() {
         camera.stop();
+        temperature = Integer.MIN_VALUE;
+        
     }
     public void setCameraAction(CameraAction actionHandler)
     {

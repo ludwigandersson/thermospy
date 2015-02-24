@@ -60,7 +60,7 @@ public class WebcamWorker extends Thread implements Runnable {
 
                 // nextInt is normally exclusive of the top value,
                 // so add 1 to make it inclusive
-                String tempString = ""+rand.nextInt((55 - 20) + 1) + 20;
+                String tempString = ""+rand.nextInt(10) + 20;
                 try {
                     controller.setTemperature(Integer.parseInt(tempString));
                 } catch (NumberFormatException nbrEx) {

@@ -70,9 +70,8 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         controller.setCameraAction(actionHandler);
         controller.setSessionFactory(hibernate.getSessionFactory());
         
-
         final GetTempResource tempResource = new GetTempResource(controller);
-        final CameraControlResource cameraResource = new CameraControlResource(controller);
+        final CameraControlResource cameraResource = new CameraControlResource(controller, configuration.getCameraDeviceConfig());
         final GetLastImage getLastImage = new GetLastImage(webcamDevice);
         final ImageBoundaryResource imgBoundaryResource = new ImageBoundaryResource(controller);
         final RefreshRateResource refreshRateResource = new RefreshRateResource(controller);

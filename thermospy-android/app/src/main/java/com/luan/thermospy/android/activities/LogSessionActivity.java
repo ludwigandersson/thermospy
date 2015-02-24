@@ -1,10 +1,8 @@
 package com.luan.thermospy.android.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.luan.thermospy.android.R;
@@ -17,8 +15,6 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
 
     private static final String LOG_TAG = LogSessionActivity.class.getSimpleName();
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,36 +25,26 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
             String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, LogSessionFragment.newInstance(ipAddress, port))
-                    .addToBackStack(null)
                     .commit();
         }
     }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_log_session, menu);
-        return true;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                android.app.FragmentManager fm = getFragmentManager();
+                if (fm.getBackStackEntryCount() > 0) {
+                    setTitle(getString(R.string.temperature_log));
+                    fm.popBackStack();
+                    return true;
+                }
+                break;
+            default:
+                break;
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
         }
-
-        return super.onOptionsItemSelected(item);
+        return false;
     }
-
     @Override
     public void onShowTemperatureList(LogSession session) {
 
@@ -74,12 +60,20 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
 
     @Override
     public void onBackPressed() {
+        setTitle(getString(R.string.temperature_log));
         android.app.FragmentManager fm = getFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStack();
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
     }
 
     @Override

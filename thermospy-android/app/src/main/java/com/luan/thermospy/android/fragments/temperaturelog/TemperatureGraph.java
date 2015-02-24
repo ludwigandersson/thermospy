@@ -3,12 +3,18 @@ package com.luan.thermospy.android.fragments.temperaturelog;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ShareActionProvider;
 
 import com.android.volley.RequestQueue;
 import com.github.mikephil.charting.charts.BarLineChartBase;
@@ -25,6 +31,10 @@ import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.TemperatureEntry;
 import com.luan.thermospy.android.core.rest.GetTemperatureEntryListReq;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +64,7 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
     private GetTemperatureEntryListReq mGetTemperatureEntryListReq;
 
     private ShareActionProvider mShareActionProvider;
+    private List<TemperatureEntry> mTemperatureList;
 
     /**
      * Use this factory method to create a new instance of
@@ -87,6 +98,76 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
             mPort = getArguments().getInt(ARG_PORT);
             mSessionId = getArguments().getInt(ARG_SESSION_ID);
         }
+
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // TODO Add your menu entries here
+        super.onCreateOptionsMenu(menu, inflater);
+
+        // Inflate menu resource file.
+        inflater.inflate(R.menu.menu_share, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+        mShareActionProvider = new ShareActionProvider(getActivity());
+        MenuItemCompat.setActionProvider(item, mShareActionProvider);
+
+
+    }
+
+    private Intent createShareIntent() {
+        File outputDir = getActivity().getExternalCacheDir(); // context being the Activity pointer
+        File outputFile = null;
+        try {
+            outputFile = File.createTempFile("export", ".csv", outputDir);
+
+            BufferedWriter writer = null;
+            try
+            {
+                writer = new BufferedWriter( new FileWriter( outputFile.getAbsolutePath()));
+
+                for (TemperatureEntry entry : mTemperatureList)
+                {
+                    writer.write(entry.toCsv()+"\n");
+                }
+                writer.flush();
+
+
+            }
+            catch ( IOException e)
+            {
+            }
+            finally
+            {
+                try
+                {
+                    if ( writer != null)
+                        writer.close( );
+                }
+                catch ( IOException e)
+                {
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (outputFile != null) {
+            Uri u1 = Uri.fromFile(outputFile);
+
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Temperature log from Thermospy");
+            sendIntent.putExtra(Intent.EXTRA_STREAM, u1);
+            sendIntent.setType("application/csv");
+            sendIntent.addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            return sendIntent;
+        }
+        return null;
     }
 
     @Override
@@ -142,6 +223,9 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
     @Override
     public void onTemperatureEntryRecv(List<TemperatureEntry> logSessionList) {
         if (logSessionList.size() > 0) {
+            mTemperatureList =logSessionList;
+            mShareActionProvider.setShareIntent(createShareIntent());
+
             setupLineChart();
             setData(logSessionList);
         }

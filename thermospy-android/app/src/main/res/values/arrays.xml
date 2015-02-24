@@ -8,4 +8,8 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="menu">
+        <item>Open</item>
+        <item>Delete</item>
+    </string-array>
 </resources>

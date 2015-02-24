@@ -42,4 +42,14 @@ public class TemperatureEntry {
     public void setFkSessionId(int fkSessionId) {
         this.fkSessionId = fkSessionId;
     }
+
+    public String toCsv() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(id).append(",")
+               .append(timestamp).append(",")
+               .append(temperature);
+
+        return builder.toString();
+
+    }
 }

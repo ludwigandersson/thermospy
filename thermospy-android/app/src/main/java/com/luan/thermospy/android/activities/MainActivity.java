@@ -19,12 +19,16 @@
 
 package com.luan.thermospy.android.activities;
 
+import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -50,6 +54,8 @@ import com.luan.thermospy.android.fragments.NavigationDrawerFragment;
 import com.luan.thermospy.android.fragments.setup.SetupBoundary;
 import com.luan.thermospy.android.fragments.setup.SetupConfirm;
 import com.luan.thermospy.android.fragments.setup.SetupService;
+import com.luan.thermospy.android.fragments.temperaturelog.LogSessionDialogFragment;
+import com.luan.thermospy.android.service.TemperatureMonitorService;
 
 /**
  * Main activity
@@ -60,8 +66,7 @@ public class MainActivity extends ActionBarActivity
         SetupBoundary.OnSetupBoundaryListener,
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
-        Alarm.OnAlarmFragmentListener,
-        NewTemperatureLogActivity.OnNewLogSessionListener{
+        Alarm.OnAlarmFragmentListener{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -119,6 +124,10 @@ public class MainActivity extends ActionBarActivity
     protected void onResume()
     {
         super.onResume();
+        if (mLastSelected > -1)
+        {
+            mNavigationDrawerFragment.selectItem(0);
+        }
     }
 
     @Override
@@ -336,12 +345,28 @@ public class MainActivity extends ActionBarActivity
         onServiceStatus(new ServiceStatus());
         mNavigationDrawerFragment.selectItem(2);
         mLastSelected = -1;
+
+        if (isMyServiceRunning(TemperatureMonitorService.class)) {
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            stopService(intent);
+        }
     }
 
     @Override
     public void onNewTemperature(String temperature) {
         Coordinator.getInstance().setTemperature(temperature);
-        handleNotification();
+        //handleNotification();
+
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -383,13 +408,35 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onServiceStatus(ServiceStatus status) {
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
-        handleNotification();
+        //handleNotification();
+        if (status.isRunning()) {
+            if (!isMyServiceRunning(TemperatureMonitorService.class)) {
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+                int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
+
+                Intent intent = new Intent(this, TemperatureMonitorService.class);
+                Bundle bundle = new Bundle();
+                bundle.putString(TemperatureMonitorService.ServiceArguments.IP_ADDRESS, Coordinator.getInstance().getServerSettings().getIpAddress());
+                bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
+                bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+                bundle.putInt(TemperatureMonitorService.ServiceArguments.NOTIFICATION_ID, 1);
+                intent.putExtras(bundle);
+                startService(intent);
+            }
+        }
+        else
+        {
+            if (isMyServiceRunning(TemperatureMonitorService.class)) {
+                Intent intent = new Intent(this, TemperatureMonitorService.class);
+                stopService(intent);
+            }
+        }
     }
 
     @Override
     public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener) {
         FragmentManager fm = getFragmentManager();
-        NewTemperatureLogActivity editNameDialog = NewTemperatureLogActivity.newInstance(Coordinator.getInstance().getServerSettings());
+        LogSessionDialogFragment editNameDialog = LogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings());
         editNameDialog.setDismissListener(dismissListener);
         editNameDialog.show(fm, "fragment_edit_name");
 
@@ -455,13 +502,5 @@ public class MainActivity extends ActionBarActivity
 
     }
 
-    @Override
-    public void onLogSessionCreated() {
 
-    }
-
-    @Override
-    public void onLogSessionCancel() {
-
-    }
 }

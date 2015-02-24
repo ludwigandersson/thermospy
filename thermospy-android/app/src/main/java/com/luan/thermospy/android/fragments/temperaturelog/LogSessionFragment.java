@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -17,6 +21,7 @@ import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.LogSession;
+import com.luan.thermospy.android.core.rest.DeleteLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetLogSessionListReq;
 
 import java.util.List;
@@ -30,7 +35,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnLogSessionFragmentListener}
  * interface.
  */
-public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener {
+public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -50,6 +55,8 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
     private List<LogSession> mLogSessionList;
 
+    private LogSession mToBeDeleted = null;
+
     /**
      * The fragment's ListView/GridView.
      */
@@ -61,6 +68,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
      */
     private ListAdapter mAdapter;
     private RequestQueue mRequestQueue;
+    private DeleteLogSessionReq mDeleteLogSessionReq;
 
     // TODO: Rename and change types of parameters
     public static LogSessionFragment newInstance(String ipAddress, int port) {
@@ -100,11 +108,41 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
-
+        registerForContextMenu(mListView);
 
         requestLogSessionItems();
 
         return view;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        if (v.getId()==android.R.id.list) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+            menu.setHeaderTitle(mLogSessionList.get(info.position).getName());
+            String[] menuItems = getResources().getStringArray(R.array.menu);
+            for (int i = 0; i<menuItems.length; i++) {
+                menu.add(Menu.NONE, i, i, menuItems[i]);
+            }
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        int menuItemIndex = item.getItemId();
+
+        LogSession logSession = mLogSessionList.get(info.position);
+        if (menuItemIndex == 0) {
+            mListener.onShowTemperatureList(logSession);
+        } else if (menuItemIndex == 1)
+        {
+            mToBeDeleted = logSession;
+            mDeleteLogSessionReq.setLogSessionTypeId(logSession.getId());
+            mDeleteLogSessionReq.request(mIpAddress, mPort);
+        }
+        return true;
     }
 
     private void requestLogSessionItems() {
@@ -129,6 +167,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
             mPort = getArguments().getInt(ARG_PARAM_PORT);
             mRequestQueue = Coordinator.getInstance().getRequestQueue();
             mGetLogSessionListReq = new GetLogSessionListReq(mRequestQueue,this);
+            mDeleteLogSessionReq = new DeleteLogSessionReq(mRequestQueue, this, -1);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -196,7 +235,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         }
 
         mGetLogSessionListReq.cancel();
-
+        mDeleteLogSessionReq.cancel();
     }
 
     @Override
@@ -204,11 +243,26 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         super.onStop();
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
-
         }
 
         mGetLogSessionListReq.cancel();
+        mDeleteLogSessionReq.cancel();
 
+    }
+
+    @Override
+    public void onLogSessionTypeDeleted(int id) {
+        if (mToBeDeleted != null && mToBeDeleted.getId() == id)
+        {
+            mLogSessionList.remove(mToBeDeleted);
+            mListView.invalidateViews();
+        }
+    }
+
+    @Override
+    public void onLogSessionTypeError() {
+        mToBeDeleted = null;
+        Log.d(LOG_TAG, "Failed to delete log session.");
     }
 
     /**

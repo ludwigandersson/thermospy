@@ -36,6 +36,7 @@ import com.luan.thermospy.android.activities.MainActivity;
  * Responsible for displaying notifications, updating notifications and sounding the alarm.
  */
 public class NotificationHandler {
+    public static final String NOTIFICATION_ID = "notification_id";
     private final int mId = 1;
     public void show(Context c, String temperature, String alarm, boolean playSound)
     {
@@ -89,7 +90,6 @@ public class NotificationHandler {
         NotificationCompat.Builder mBuilder  = new NotificationCompat.Builder(c)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setAutoCancel(true)
-                .setOngoing(true)
                 .setContentTitle("Thermospy")
                 .setContentText(text)
                 .setOnlyAlertOnce(false)

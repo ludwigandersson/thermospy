@@ -1,4 +1,4 @@
-package com.luan.thermospy.android.activities;
+package com.luan.thermospy.android.fragments.temperaturelog;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -19,7 +18,7 @@ import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.rest.StartLogSessionReq;
 
-public class NewTemperatureLogActivity extends DialogFragment implements StartLogSessionReq.OnStartLogSessionListener {
+public class LogSessionDialogFragment extends DialogFragment implements StartLogSessionReq.OnStartLogSessionListener {
 
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
@@ -30,9 +29,6 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
     int mPort;
 
     TextView mLogNameTxt;
-    Spinner mSpinnerFoodType;
-    Spinner mSpinnerCutType;
-    TextView mWeightTxt;
     TextView mTargetTemperature;
 
     Button mBtnSubmit;
@@ -41,17 +37,16 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
     ProgressDialog mProgressDialog;
 
     StartLogSessionReq mStartLogSessionReq;
-    private OnNewLogSessionListener mListener;
     private RequestQueue mRequestQueue;
     private DialogInterface.OnDismissListener mDissmissListener;
 
-    public NewTemperatureLogActivity()
+    public LogSessionDialogFragment()
     {
 
     }
 
-    public static NewTemperatureLogActivity newInstance(ServerSettings serverSettings) {
-        NewTemperatureLogActivity fragment = new NewTemperatureLogActivity();
+    public static LogSessionDialogFragment newInstance(ServerSettings serverSettings) {
+        LogSessionDialogFragment fragment = new LogSessionDialogFragment();
         Bundle args = new Bundle();
         args.putString(ARG_IP_ADDRESS, serverSettings.getIpAddress());
         args.putInt(ARG_PORT, serverSettings.getPort());
@@ -75,7 +70,7 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
         super.onCreate(savedInstanceState);
         View v = inflater.inflate(R.layout.activity_new_temperature_log, container);
         mLogNameTxt = (TextView)v.findViewById(R.id.txtLogSessionName);
-        mWeightTxt = (TextView)v.findViewById(R.id.txtWeight);
+        mTargetTemperature = (TextView)v.findViewById(R.id.txtTargetTemperature);
         mBtnCancel = (Button)v.findViewById(R.id.btnCancel);
         mBtnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,7 +79,7 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
             }
         });
 
-       mBtnSubmit = (Button)v.findViewById(R.id.btnSubmit);
+        mBtnSubmit = (Button)v.findViewById(R.id.btnSubmit);
         mBtnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +87,7 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
             }
         });
 
+        getDialog().setTitle(getString(R.string.start_log_session));
 
         return v;
     }
@@ -135,21 +131,14 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
 
     }
 
-
-
-
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnNewLogSessionListener) activity;
+
             if (getArguments() != null) {
                 mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
                 mPort = getArguments().getInt(ARG_PORT);
-
-
-
             }
 
 
@@ -184,6 +173,8 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
         mStartLogSessionReq.cancel();
 
     }
+
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -193,13 +184,12 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
 
     @Override
     public void onStartLogSessionRecv(LogSession session) {
-        mListener.onLogSessionCreated();
         dismiss();
     }
 
     @Override
     public void onStartLogSessionError() {
-        mListener.onLogSessionCancel();
+        dismiss();
     }
 
     public void setDismissListener(DialogInterface.OnDismissListener dismissListener) {
@@ -213,9 +203,4 @@ public class NewTemperatureLogActivity extends DialogFragment implements StartLo
 
     }
 
-    public interface OnNewLogSessionListener {
-        public void onLogSessionCreated();
-        public void onLogSessionCancel();
-
-    }
 }

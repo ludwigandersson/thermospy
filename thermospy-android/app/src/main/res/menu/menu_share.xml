@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.luan.thermospy.android.activities.SettingsActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_item_share"
-        app:showAsAction="ifRoom"
-        android:title="Share"
+        android:title="Export as csv"
+        app:showAsAction="never"
+        android:icon="@drawable/ic_action_share"
         android:actionProviderClass=
-            "android.widget.ShareActionProvider" />
+            "android.widget.ShareActionProvider"
+       />
 </menu>

@@ -14,12 +14,14 @@ import com.android.volley.toolbox.Volley;
 import com.luan.thermospy.android.core.NotificationHandler;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetTemperatureReq;
+import com.luan.thermospy.android.fragments.AlarmCondition;
 
 /**
  * Created by ludde on 15-02-24.
  */
 public class TemperatureMonitorService extends Service {
 
+    private ServiceBinder mBinder = new ServiceBinder();
 
     public interface ServiceArguments {
         static final String REFRESH_RATE = "refreshrate";
@@ -46,12 +48,12 @@ public class TemperatureMonitorService extends Service {
         public void handleMessage(Message msg) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
-            final long refreshInterval = msg.getData().getInt(ServiceArguments.REFRESH_RATE)*1000;
+            long refreshInterval = msg.getData().getInt(ServiceArguments.REFRESH_RATE)*1000;
             final String ip = msg.getData().getString(ServiceArguments.IP_ADDRESS);
             final int port = msg.getData().getInt(ServiceArguments.PORT);
 
             RequestQueue requestQueue = Volley.newRequestQueue(TemperatureMonitorService.this);
-
+            boolean mAlarmFired =false;
             final GetTemperatureReq temperatureReq = new GetTemperatureReq(requestQueue, new GetTemperatureReq.OnGetTemperatureListener() {
 
 
@@ -88,8 +90,29 @@ public class TemperatureMonitorService extends Service {
                 {
                     break;
                 }
-                mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), "");
+
+                boolean alarmEnabled = mBinder.isAlarmEnabled();
+
+                if (!mAlarmFired && alarmEnabled) {
+                    int alarm = mBinder.getAlarm();
+                    AlarmCondition alarmCondition = mBinder.getAlarmCondition();
+                    boolean triggerAlarm = alarmCondition.evaluate(alarm, m_temperature.getTemperature());
+                    if (triggerAlarm) {
+                        mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString(), Integer.toString(alarm));
+                        mAlarmFired = true;
+                    }
+                    else
+                    {
+                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), Integer.toString(alarm));
+                    }
+                } else {
+                    if (mAlarmFired && !alarmEnabled) {
+                        mAlarmFired = false;
+                    }
+                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), "");
+                }
                 try {
+                    refreshInterval = mBinder.getRefreshInterval() * 1000;
                     Thread.sleep(refreshInterval);
                 } catch (InterruptedException e) {
                     break;

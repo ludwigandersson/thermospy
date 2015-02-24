@@ -23,11 +23,14 @@ import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -55,6 +58,8 @@ import com.luan.thermospy.android.fragments.setup.SetupBoundary;
 import com.luan.thermospy.android.fragments.setup.SetupConfirm;
 import com.luan.thermospy.android.fragments.setup.SetupService;
 import com.luan.thermospy.android.fragments.temperaturelog.LogSessionDialogFragment;
+import com.luan.thermospy.android.service.LocalService;
+import com.luan.thermospy.android.service.ServiceBinder;
 import com.luan.thermospy.android.service.TemperatureMonitorService;
 
 /**
@@ -78,6 +83,27 @@ public class MainActivity extends ActionBarActivity
     private NotificationHandler mNotificationHandler = null;
 
     private String degree = "°";
+
+    LocalService mService;
+    boolean mBound = false;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ServiceBinder binder = (ServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     /**
      * Displays the server status
@@ -114,10 +140,24 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onStart()
+    {
+        super.onStart();
+        checkAlarm();
+
+    }
+
+    @Override
     protected void onStop()
     {
         super.onStop();
         Coordinator.getInstance().save();
+        if (isMyServiceRunning(TemperatureMonitorService.class)) {
+            if (mBound) {
+                unbindService(mConnection);
+                mBound = false;
+            }
+        }
     }
 
     @Override
@@ -127,6 +167,15 @@ public class MainActivity extends ActionBarActivity
         if (mLastSelected > -1)
         {
             mNavigationDrawerFragment.selectItem(0);
+        }
+
+        if (mBound) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
+            if (mService.getRefreshInterval() != interval)
+            {
+                mService.setRefreshInterval(interval);
+            }
         }
     }
 
@@ -347,6 +396,11 @@ public class MainActivity extends ActionBarActivity
         mLastSelected = -1;
 
         if (isMyServiceRunning(TemperatureMonitorService.class)) {
+            if (mBound) {
+                unbindService(mConnection);
+                mBound = false;
+            }
+
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             stopService(intent);
         }
@@ -371,6 +425,24 @@ public class MainActivity extends ActionBarActivity
 
 
     public boolean checkAlarm() {
+
+        if (isMyServiceRunning(TemperatureMonitorService.class))
+        {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
+            // Bind to LocalService
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM_CONDITION, Coordinator.getInstance().getAlarmSettings().getAlarmCondition().getId());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
+            intent.putExtras(bundle);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+
+        return true;
+        /*
 
         boolean result = false;
         if (mAlarmActive) {
@@ -402,8 +474,9 @@ public class MainActivity extends ActionBarActivity
             mNotificationHandler.playSound(this, temperature, alarm);
         }
 
-        return result;
+        return result;*/
     }
+
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
@@ -422,15 +495,23 @@ public class MainActivity extends ActionBarActivity
                 bundle.putInt(TemperatureMonitorService.ServiceArguments.NOTIFICATION_ID, 1);
                 intent.putExtras(bundle);
                 startService(intent);
+
+
             }
         }
         else
         {
             if (isMyServiceRunning(TemperatureMonitorService.class)) {
+                if (mBound) {
+                    unbindService(mConnection);
+                    mBound = false;
+                }
                 Intent intent = new Intent(this, TemperatureMonitorService.class);
                 stopService(intent);
             }
         }
+
+
     }
 
     @Override
@@ -448,7 +529,10 @@ public class MainActivity extends ActionBarActivity
         if (!checkAlarm()) {
             handleNotification();
         }
-
+        if (mBound)
+        {
+            mService.setAlarmCondition(alarmCondition);
+        }
     }
 
     @Override
@@ -458,6 +542,11 @@ public class MainActivity extends ActionBarActivity
         // Update notification text if visible
         if (!checkAlarm()) {
             handleNotification();
+        }
+
+        if (mBound)
+        {
+            mService.setAlarm(Integer.parseInt(alarmText));
         }
     }
 
@@ -479,6 +568,11 @@ public class MainActivity extends ActionBarActivity
             handleNotification();
         }
         if (!isChecked) mAlarmActive = false;
+
+        if (mBound)
+        {
+            mService.setAlarmEnabled(isChecked);
+        }
     }
 
     void handleNotification()

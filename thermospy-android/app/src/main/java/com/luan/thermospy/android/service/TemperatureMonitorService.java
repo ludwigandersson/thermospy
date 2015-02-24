@@ -16,18 +16,25 @@ import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetTemperatureReq;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Created by ludde on 15-02-24.
  */
 public class TemperatureMonitorService extends Service {
 
-    private ServiceBinder mBinder = new ServiceBinder();
+    private LocalService mService = new LocalService();
+    private ServiceBinder mBinder = new ServiceBinder(mService);
 
     public interface ServiceArguments {
         static final String REFRESH_RATE = "refreshrate";
         static final String NOTIFICATION_ID = "notificationid";
         static final String IP_ADDRESS = "ipaddress";
         static final String PORT = "port";
+        static final String ALARM_CONDITION = "alarmcondition";
+        static final String ALARM_ENABLED = "alarmenabled";
+        static final String ALARM = "alarm";
     }
 
     private Looper mServiceLooper;
@@ -35,7 +42,7 @@ public class TemperatureMonitorService extends Service {
     private NotificationHandler mNotificationHandler;
 
     // Handler that receives messages from the thread
-    private final class ServiceHandler extends Handler {
+    private final class ServiceHandler extends Handler implements Observer {
 
         public boolean m_error;
         private Temperature m_temperature = null;
@@ -43,6 +50,7 @@ public class TemperatureMonitorService extends Service {
         public ServiceHandler(Looper looper) {
             super(looper);
             mNotificationHandler = new NotificationHandler();
+            mService.addObserver(this);
         }
         @Override
         public void handleMessage(Message msg) {
@@ -91,12 +99,12 @@ public class TemperatureMonitorService extends Service {
                     break;
                 }
 
-                boolean alarmEnabled = mBinder.isAlarmEnabled();
+                boolean alarmEnabled = mService.isAlarmEnabled();
 
                 if (!mAlarmFired && alarmEnabled) {
-                    int alarm = mBinder.getAlarm();
-                    AlarmCondition alarmCondition = mBinder.getAlarmCondition();
-                    boolean triggerAlarm = alarmCondition.evaluate(alarm, m_temperature.getTemperature());
+                    int alarm = mService.getAlarm();
+                    AlarmCondition alarmCondition = mService.getAlarmCondition();
+                    boolean triggerAlarm = alarmCondition.evaluate(m_temperature.getTemperature(), alarm);
                     if (triggerAlarm) {
                         mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString(), Integer.toString(alarm));
                         mAlarmFired = true;
@@ -111,11 +119,13 @@ public class TemperatureMonitorService extends Service {
                     }
                     mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), "");
                 }
-                try {
-                    refreshInterval = mBinder.getRefreshInterval() * 1000;
-                    Thread.sleep(refreshInterval);
-                } catch (InterruptedException e) {
-                    break;
+                synchronized (ServiceHandler.this) {
+                    try {
+                        refreshInterval = mService.getRefreshInterval() * 1000;
+                        wait(refreshInterval);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
                 }
 
             }
@@ -124,6 +134,13 @@ public class TemperatureMonitorService extends Service {
             stopSelf(msg.arg1);
         }
 
+
+        @Override
+        public void update(Observable observable, Object data) {
+            synchronized (ServiceHandler.this) {
+                ServiceHandler.this.notify();
+            }
+        }
 
     }
 
@@ -161,7 +178,16 @@ public class TemperatureMonitorService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+
+        int condition = intent.getExtras().getInt(ServiceArguments.ALARM_CONDITION);
+        boolean alarmEnabled = intent.getExtras().getBoolean(ServiceArguments.ALARM_ENABLED);
+        int alarm = intent.getExtras().getInt(ServiceArguments.ALARM);
+        int refreshInterval = intent.getExtras().getInt(ServiceArguments.REFRESH_RATE);
         // We don't provide binding, so return null
+        mService.setRefreshInterval(refreshInterval);
+        mService.setAlarmEnabled(alarmEnabled);
+        mService.setAlarmCondition(AlarmCondition.fromInt(condition));
+        mService.setAlarm(alarm);
         return mBinder;
     }
 

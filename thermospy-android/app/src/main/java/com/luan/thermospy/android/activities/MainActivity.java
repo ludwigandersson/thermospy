@@ -136,6 +136,7 @@ public class MainActivity extends ActionBarActivity
     protected void onStart()
     {
         super.onStart();
+
     }
 
     @Override
@@ -143,12 +144,14 @@ public class MainActivity extends ActionBarActivity
     {
         super.onStop();
         Coordinator.getInstance().save();
-        if (isMyServiceRunning(TemperatureMonitorService.class)) {
-            if (mBound) {
-                unbindService(mConnection);
-                mBound = false;
-            }
+
+
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
         }
+
+
     }
 
     @Override
@@ -174,10 +177,7 @@ public class MainActivity extends ActionBarActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mNotificationHandler != null)
-        {
-            mNotificationHandler.cancel(this);
-        }
+
         Coordinator.getInstance().save();
     }
 
@@ -414,11 +414,27 @@ public class MainActivity extends ActionBarActivity
 
     public boolean startBackgroundService() {
 
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
         if (!isMyServiceRunning(TemperatureMonitorService.class))
         {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
+
             // Bind to LocalService
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            bundle.putString(TemperatureMonitorService.ServiceArguments.IP_ADDRESS, Coordinator.getInstance().getServerSettings().getIpAddress());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            intent.putExtras(bundle);
+
+            startService(intent);
+
+
+
+        }
+
+        if (isMyServiceRunning(TemperatureMonitorService.class) && !mBound) {
+            // Create bind to service
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             Bundle bundle = new Bundle();
             bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
@@ -427,6 +443,7 @@ public class MainActivity extends ActionBarActivity
             bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
             intent.putExtras(bundle);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
         }
 
         return true;

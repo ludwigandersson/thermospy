@@ -23,6 +23,10 @@ package com.luan.thermospy.android.core;
  * Holds information about the thermospy server
  */
 public class ServerSettings {
+    public boolean isValid() {
+        return this.ipAddress != null && !ipAddress.isEmpty() &&port > 0;
+    }
+
     static interface ServerSettingsStrings
     {
         String IP_ADDRESS = "ipaddress";

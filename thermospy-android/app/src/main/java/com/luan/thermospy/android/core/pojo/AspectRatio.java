@@ -1,8 +1,5 @@
 package com.luan.thermospy.android.core.pojo;
 
-/**
- * Created by ludde on 15-02-25.
- */
 public enum AspectRatio {
     ASPECT_RATIO_UNKNOWN(0,0,0),
     ASPECT_RATIO_1_1(1,1,1),

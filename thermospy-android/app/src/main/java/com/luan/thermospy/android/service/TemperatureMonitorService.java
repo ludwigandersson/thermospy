@@ -29,7 +29,7 @@ public class TemperatureMonitorService extends Service {
 
     public interface ServiceArguments {
         static final String REFRESH_RATE = "refreshrate";
-        static final String NOTIFICATION_ID = "notificationid";
+
         static final String IP_ADDRESS = "ipaddress";
         static final String PORT = "port";
         static final String ALARM_CONDITION = "alarmcondition";
@@ -193,7 +193,6 @@ public class TemperatureMonitorService extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "Temperature monitor stopped", Toast.LENGTH_SHORT).show();
         mServiceLooper.quit();
         mServiceLooper.getThread().interrupt();
 

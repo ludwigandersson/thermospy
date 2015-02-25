@@ -39,7 +39,6 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.ServerSettings;
@@ -231,7 +230,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     public void onResume() {
         super.onResume();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String temperatureScale = settings.getString("pref_key_temperature_degree", "");
+        String temperatureScale = settings.getString(getString(R.string.pref_key_temperature_degree), "");
         if (temperatureScale.equals("1"))
         {
             mTemperatureScaleStr = getString(R.string.temperature_scale_celsius);
@@ -326,17 +325,14 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     private void maybeDisableAlarm() {
         if (mAlarmSwitchChecked) {
             try {
-                // todo Ugly... I will need to do some rework on this. This code is duplicated.
+                // todo Ugly...
                 int alarm = Integer.parseInt(mAlarmText.getText().toString());
                 int tval = Integer.parseInt(mTemperatureText.getText().toString());
                 boolean playSound = mAlarmCondition.evaluate(tval, alarm);
                 if (playSound) {
-
                     mAlarmSwitchChecked = false;
                     mAlarmSwitch.setChecked(false);
                     mListener.onAlarmSwitchChanged(false);
-                    Toast toast = Toast.makeText(getActivity(), "The alarm was automatically disabled", Toast.LENGTH_SHORT);
-                    toast.show();
                 }
 
             } catch (NumberFormatException ex) {

@@ -214,7 +214,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
         mAdapter = new ArrayAdapter<LogSession>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, logSessionList);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
         mLogSessionList = logSessionList;
         mProgressDialog.dismiss();
 

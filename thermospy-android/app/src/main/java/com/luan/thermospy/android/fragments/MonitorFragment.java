@@ -208,7 +208,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     {
         super.onResume();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String temperatureScale = settings.getString("pref_key_temperature_degree", "");
+        String temperatureScale = settings.getString(getString(R.string.pref_key_temperature_degree), "");
         if (temperatureScale.equals("1"))
         {
             mTemperatureScaleStr = getString(R.string.temperature_scale_celsius);

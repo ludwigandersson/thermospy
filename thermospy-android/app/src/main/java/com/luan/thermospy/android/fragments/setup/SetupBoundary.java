@@ -23,10 +23,12 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +38,7 @@ import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.Action;
+import com.luan.thermospy.android.core.pojo.AspectRatio;
 import com.luan.thermospy.android.core.pojo.Boundary;
 import com.luan.thermospy.android.core.pojo.CameraControlAction;
 import com.luan.thermospy.android.core.rest.CameraControlReq;
@@ -120,8 +123,13 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
 
     private void runImgCrop()
     {
+       SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+       int val = Integer.parseInt(settings.getString(getString(R.string.pref_key_aspect_ratio), "1"));
+
+       AspectRatio ratio = AspectRatio.fromInt(val);
+
        Uri outputUri = Uri.fromFile(new File(getActivity().getCacheDir(), "cropped"));
-       new Crop(Uri.fromFile(mFileTemp)).output(outputUri).withAspect(2,1).start(getActivity(), this);
+       new Crop(Uri.fromFile(mFileTemp)).output(outputUri).withAspect(ratio.getX(),ratio.getY()).start(getActivity(), this);
 
     }
 
@@ -133,11 +141,12 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
             Boundary b = new Boundary(rect.left, rect.top, rect.width(), rect.height());
             requestBounds(b);
         }
-        else if (resultCode == Crop.REQUEST_REFRESH)
+        else if (resultCode == Crop.RESULT_REFRESH)
         {
             takePhoto();
         }
         else {
+
             mListener.onSetupAborted();
         }
     }
@@ -156,8 +165,9 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        View v = inflater.inflate(R.layout.fragment_set_image_bounds, container, false);
         // No view exists for this dude.
-        return null;
+        return v;
     }
 
 

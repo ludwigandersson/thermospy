@@ -36,11 +36,10 @@ import com.luan.thermospy.android.activities.MainActivity;
  * Responsible for displaying notifications, updating notifications and sounding the alarm.
  */
 public class NotificationHandler {
-    public static final String NOTIFICATION_ID = "notification_id";
     private final int mId = 1;
-    public void show(Context c, String temperature, String alarm, boolean playSound)
+    public void show(Context c, String temperature,  boolean playSound)
     {
-        NotificationCompat.Builder  mBuilder = createBuilder(c, temperature, alarm, playSound);
+        NotificationCompat.Builder  mBuilder = createBuilder(c, temperature, playSound);
 
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -55,37 +54,34 @@ public class NotificationHandler {
         mNotificationManager.cancel(mId);
     }
 
-    public void update(Context c, String temperature, String alarm)
+    public void update(Context c, String temperature)
     {
 
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder builder = createBuilder(c, temperature, alarm, false);
+        NotificationCompat.Builder builder = createBuilder(c, temperature, false);
 
         mNotificationManager.notify(
                 mId,
                 builder.build());
     }
 
-    public void playSound(Context c, String temperature, String alarm) {
+    public void playSound(Context c, String temperature) {
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder builder = createBuilder(c, temperature, alarm, true);
+        NotificationCompat.Builder builder = createBuilder(c, temperature, true);
 
         mNotificationManager.notify(
                 mId,
                 builder.build());
     }
 
-    private NotificationCompat.Builder createBuilder(Context c, String temperature, String alarm, boolean playSound)
+    private NotificationCompat.Builder createBuilder(Context c, String temperature, boolean playSound)
     {
         String text = "Current temperature is "+temperature;
-        if (!alarm.isEmpty())
-        {
-            text += " of "+alarm;
-        }
+
 
         NotificationCompat.Builder mBuilder  = new NotificationCompat.Builder(c)
                 .setPriority(Notification.PRIORITY_HIGH)

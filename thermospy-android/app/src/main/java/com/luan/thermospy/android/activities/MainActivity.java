@@ -38,7 +38,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -105,17 +104,11 @@ public class MainActivity extends ActionBarActivity
         }
     };
 
-    /**
-     * Displays the server status
-     */
-    TextView mTextView;
-
     RequestQueue requestQueue;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-    private boolean mAlarmActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +136,6 @@ public class MainActivity extends ActionBarActivity
     protected void onStart()
     {
         super.onStart();
-        checkAlarm();
-
     }
 
     @Override
@@ -164,14 +155,14 @@ public class MainActivity extends ActionBarActivity
     protected void onResume()
     {
         super.onResume();
-        if (mLastSelected > -1)
+        if (mLastSelected == 3)
         {
             mNavigationDrawerFragment.selectItem(0);
         }
 
         if (mBound) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
+            int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
             if (mService.getRefreshInterval() != interval)
             {
                 mService.setRefreshInterval(interval);
@@ -265,8 +256,7 @@ public class MainActivity extends ActionBarActivity
         {
             Intent intent = new Intent(this, LogSessionActivity.class);
             startActivity(intent);
-            transaction = fragmentManager.beginTransaction();
-
+            return;
         }
         else
         {
@@ -409,8 +399,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNewTemperature(String temperature) {
         Coordinator.getInstance().setTemperature(temperature);
-        //handleNotification();
-
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -424,12 +412,12 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    public boolean checkAlarm() {
+    public boolean startBackgroundService() {
 
-        if (isMyServiceRunning(TemperatureMonitorService.class))
+        if (!isMyServiceRunning(TemperatureMonitorService.class))
         {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
+            int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
             // Bind to LocalService
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             Bundle bundle = new Bundle();
@@ -442,39 +430,7 @@ public class MainActivity extends ActionBarActivity
         }
 
         return true;
-        /*
 
-        boolean result = false;
-        if (mAlarmActive) {
-            result = true;
-        }
-        else if (Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled()) {
-            final String temperature = Coordinator.getInstance().getTemperature();
-            final String alarm = Coordinator.getInstance().getAlarmSettings().getAlarm();
-            try {
-
-                int alarmVal = Integer.parseInt(alarm);
-                int temperatureVal = Integer.parseInt(temperature);
-                boolean playSound = Coordinator.getInstance().getAlarmSettings().getAlarmCondition().evaluate(temperatureVal, alarmVal);
-                if (playSound) {
-                    // Disable alarm
-                    Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
-                    mNotificationHandler.playSound(this, temperature, alarm);
-                    result = true;
-                    mAlarmActive = true;
-                }
-
-            } catch (NumberFormatException ex) {
-
-            }
-            if (mNotificationHandler == null) {
-                mNotificationHandler = new NotificationHandler();
-            }
-
-            mNotificationHandler.playSound(this, temperature, alarm);
-        }
-
-        return result;*/
     }
 
 
@@ -483,20 +439,8 @@ public class MainActivity extends ActionBarActivity
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
         //handleNotification();
         if (status.isRunning()) {
-            if (!isMyServiceRunning(TemperatureMonitorService.class)) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-                int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
-
-                Intent intent = new Intent(this, TemperatureMonitorService.class);
-                Bundle bundle = new Bundle();
-                bundle.putString(TemperatureMonitorService.ServiceArguments.IP_ADDRESS, Coordinator.getInstance().getServerSettings().getIpAddress());
-                bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
-                bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
-                bundle.putInt(TemperatureMonitorService.ServiceArguments.NOTIFICATION_ID, 1);
-                intent.putExtras(bundle);
-                startService(intent);
-
-
+            if (!mBound) {
+                startBackgroundService();
             }
         }
         else
@@ -510,7 +454,6 @@ public class MainActivity extends ActionBarActivity
                 stopService(intent);
             }
         }
-
 
     }
 
@@ -526,12 +469,14 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
             Coordinator.getInstance().getAlarmSettings().setAlarmCondition(alarmCondition);
-        if (!checkAlarm()) {
-            handleNotification();
-        }
+
         if (mBound)
         {
             mService.setAlarmCondition(alarmCondition);
+        }
+        else
+        {
+            startBackgroundService();
         }
     }
 
@@ -539,14 +484,13 @@ public class MainActivity extends ActionBarActivity
     public void onAlarmTextChanged(String alarmText) {
         Coordinator.getInstance().getAlarmSettings().setAlarm(alarmText);
 
-        // Update notification text if visible
-        if (!checkAlarm()) {
-            handleNotification();
-        }
-
         if (mBound)
         {
             mService.setAlarm(Integer.parseInt(alarmText));
+        }
+        else
+        {
+            startBackgroundService();
         }
     }
 
@@ -564,37 +508,16 @@ public class MainActivity extends ActionBarActivity
         toast.show();
         Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(isChecked);
 
-        if (!checkAlarm()) {
-            handleNotification();
-        }
-        if (!isChecked) mAlarmActive = false;
-
         if (mBound)
         {
             mService.setAlarmEnabled(isChecked);
         }
-    }
-
-    void handleNotification()
-    {
-        final String temperature = Coordinator.getInstance().getTemperature();
-        final AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
-        final boolean isRunning = Coordinator.getInstance().getServerSettings().isRunning();
-        final boolean isAlarmSwitchEnabled = Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled();
-
-        String alarm = isAlarmSwitchEnabled ? alarmSettings.getAlarm() : new String();
-
-        if (mNotificationHandler == null)
+        else
         {
-            mNotificationHandler = new NotificationHandler();
+            startBackgroundService();
         }
-        if (isRunning) {
-            mNotificationHandler.update(this, temperature, alarm);
-        } else {
-            mNotificationHandler.cancel(this);
-        }
-
     }
+
 
 
 }

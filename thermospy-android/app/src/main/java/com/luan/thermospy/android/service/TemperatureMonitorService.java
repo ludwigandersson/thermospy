@@ -106,18 +106,18 @@ public class TemperatureMonitorService extends Service {
                     AlarmCondition alarmCondition = mService.getAlarmCondition();
                     boolean triggerAlarm = alarmCondition.evaluate(m_temperature.getTemperature(), alarm);
                     if (triggerAlarm) {
-                        mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString(), Integer.toString(alarm));
+                        mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString());
                         mAlarmFired = true;
                     }
                     else
                     {
-                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), Integer.toString(alarm));
+                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString());
                     }
                 } else {
                     if (mAlarmFired && !alarmEnabled) {
                         mAlarmFired = false;
                     }
-                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), "");
+                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString());
                 }
                 synchronized (ServiceHandler.this) {
                     try {
@@ -162,7 +162,7 @@ public class TemperatureMonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Temperature monitor starting", Toast.LENGTH_SHORT).show();
 
         // For each start request, send a message to start a job and deliver the
         // start ID so we know which request we're stopping when we finish the job
@@ -193,7 +193,7 @@ public class TemperatureMonitorService extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Temperature monitor stopped", Toast.LENGTH_SHORT).show();
         mServiceLooper.quit();
         mServiceLooper.getThread().interrupt();
 

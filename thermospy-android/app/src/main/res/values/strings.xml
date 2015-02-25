@@ -73,5 +73,10 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="form_target_temperature">Target temperature</string>
     <string name="start_log_session">Start Log Session</string>
+    <string name="pref_aspect_ratio_summary">Specify the aspect ratio that will be used when cropping the images</string>
+    <string name="pref_title_aspect_ratio">Aspect ratio</string>
+    <string name="pref_key_aspect_ratio">pref_key_aspect_ratio</string>
+    <string name="pref_key_refresh_interval">pref_key_refresh_interval</string>
+    <string name="pref_key_temperature_degree">pref_key_temperature_degree</string>
     <color name="white">#FFFFFF</color>
 </resources>

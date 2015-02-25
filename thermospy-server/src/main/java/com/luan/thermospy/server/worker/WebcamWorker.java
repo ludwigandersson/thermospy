@@ -51,16 +51,8 @@ public class WebcamWorker extends Thread implements Runnable {
         synchronized (lockObj) {
             boolean result = true;
             try {
-                /*File snapshot = webCam.capture(controller.getDisplayBoundary());
-                Boundary b = controller.getDisplayBoundary();
-
-                String tempString = recognizer.recognize(snapshot, b);
-                        */
-               Random rand = new Random();
-
-                // nextInt is normally exclusive of the top value,
-                // so add 1 to make it inclusive
-                String tempString = ""+rand.nextInt(10) + 20;
+                File snapshot = webCam.capture(controller.getDisplayBoundary());
+                String tempString = recognizer.recognize(snapshot, controller.getDisplayBoundary());
                 try {
                     controller.setTemperature(Integer.parseInt(tempString));
                 } catch (NumberFormatException nbrEx) {

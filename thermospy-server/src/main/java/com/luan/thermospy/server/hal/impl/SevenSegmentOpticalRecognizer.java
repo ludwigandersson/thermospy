@@ -56,8 +56,13 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
         ProcessBuilder builder = new ProcessBuilder();
         ArrayList<String> commands = new ArrayList<>();
         commands.add("ssocr");
+        commands.add("make_mono");
         commands.add("-d");
         commands.add("-1");
+        if (getConfig().isDebugEnabled())
+        {
+            commands.add("-D");
+        }
         
         if (getConfig().isCropImage())
         {
@@ -72,58 +77,64 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
             commands.add("-t");
             commands.add(Integer.toString(getConfig().getThreshold()));
         }
+        else
+        {
+            // No threshold, use iterative 
+            commands.add("-T");
+        }
+            
         commands.add(img.getAbsolutePath());
         builder.command(commands);
         builder.redirectErrorStream(true);
         Process process = null;
         BufferedReader reader = null;
         String output = "";
-        int retries = getConfig().getRetryCount();
-        while (retries-- > 0)
+        
+        try {
+            process = builder.start();
+            InputStream std = process.getInputStream ();
+            reader = new BufferedReader(new InputStreamReader(std));
+
+            int result = process.waitFor();
+
+            if (result == 0)
+            {
+                output = reader.readLine();
+                if (output.startsWith("."))
+                {
+                    output = output.replace('.', '0');
+                    Log.getLog().debug("Found dot at first pos. Remove it!");
+                }
+                try
+                {
+                    int temperature = Integer.parseInt(output);
+                    Log.getLog().debug("Digits decoded: "+temperature);
+                }
+                catch (NumberFormatException nfe)
+                {
+                    Log.getLog().debug("Failed to parse output: "+output);
+
+                }
+                
+            }
+            
+        }
+        catch (Exception e)
+        {
+            Log.getLog().info("Exception: "+e.getMessage(), e);
+            throw new IOException(e.getMessage(), e);
+        }
+        finally
         {
             try {
-                process = builder.start();
-                InputStream std = process.getInputStream ();
-                reader = new BufferedReader(new InputStreamReader(std));
-
-                int result = process.waitFor();
-
-                if (result == 0)
-                {
-                    output = reader.readLine();
-                    if (output.startsWith("."))
-                    {
-                        output = output.replace('.', '0');
-                        Log.getLog().debug("Found dot at first pos. Remove it!");
-                    }
-                    try
-                    {
-                        int temperature = Integer.parseInt(output);
-                        Log.getLog().debug("Digits decoded: "+temperature);
-                        break;
-                    }
-                    catch (NumberFormatException nfe)
-                    {
-                        Log.getLog().debug("Failed to parse output: "+output);
-                    }
-                }
-            }
-            catch (Exception e)
+                if (reader != null) reader.close();
+            } catch (IOException exio)
             {
-                Log.getLog().info("Exception: "+e.getMessage(), e);
-                throw new IOException(e.getMessage(), e);
-            }
-            finally
-            {
-                try {
-                    if (reader != null) reader.close();
-                } catch (IOException exio)
-                {
 
-                }
-                if (process != null) process.destroy();
             }
+            if (process != null) process.destroy();
         }
+        
 
         return output;
 

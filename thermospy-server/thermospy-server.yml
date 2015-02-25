@@ -7,9 +7,10 @@ cameraDeviceConfig:
     filePath: "thermopic.png"
     enableMonochrome: false
 digitRecognizerConfig:
-    retryCount: 5
-    threshold: 30
+    retryCount: 1
+    threshold: 0
     cropImage: false
+    debugEnabled: true
 controller:
     refreshRate: 5
 

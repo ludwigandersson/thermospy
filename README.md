@@ -50,15 +50,14 @@ Make sure ssocr is in the path:<br />
  > $ ssocr<br />
 
 Get the source:<br />
->  $ mkdir ~/dev<br />
->  $ cd ~/dev<br />
+>  $ cd ~/<br />
 >  $ git clone https://github.com/ludwigandersson/thermospy.git<br />
 
 Build the server
->  $ cd ~/dev/thermospy/thermospy-server <br />
+>  $ cd ~/thermospy/thermospy-server <br />
 >  $ mvn package <br />
 
-Configure the database
+Configure the database<br />
 > 1. Make sure to set $JAVA_HOME
 > 2. Make sure to set $DERBY_HOME=$JAVA_HOME/db
 > 3. sudo nano $JAVA_HOME/jre/lib/security/java.policy
@@ -68,25 +67,22 @@ Configure the database
 > 6. create db:
 >   > connect 'jdbc:derby://localhost:1527/thermospydb;create=true';
 > 7. run sql script:
->     run '/path/to/thermospy/thermospy-server/thermospydb_schema.sql' 
+>     run '/home/pi/thermospy/thermospy-server/thermospydb_schema.sql' 
 
-Configure thermospy to start on boot.
- > $ sudo nano /etc/rc.local 
-Add the following:
-  > export DERBY_HOME=/usr/lib/jvm/jdk-8-oracle-arm-vfp-hflt/db
-  > xport PATH=/usr/local/bin:$PATH
-  > cd /home/pi
-  > printf "Start network server"
-  > $DERBY_HOME/bin/startNetworkServer &
-  > printf "Start Thermospy server"
-  > cd /home/pi/thermospy/thermospy-server/target
-  > java -jar thermospy-server-0.9.jar server ../thermospy-server.yml | tee thermospy.log &
-
+Configure thermospy to start on boot.<br />
+ > $ sudo nano /etc/rc.local and add the following:<br />
+ > export DERBY_HOME=<JAVA_HOME_PATH>/db<br />
+ > export PATH=/usr/local/bin:$PATH<br />
+ > cd /home/pi<br />
+ > printf "Start network server"<br />
+ > $DERBY_HOME/bin/startNetworkServer &<br />
+ > printf "Start Thermospy server"<br />
+ > cd /home/pi/thermospy/thermospy-server/target<br />
+ > java -jar thermospy-server-0.9.jar server ../thermospy-server.yml | tee thermospy.log &
 
 Start the server:
 >  $ cd ~/dev/thermospy/thermospy-server/target <br />
 >  $ java -jar thermospy-server-0.9.jar server ../thermospy-server.yml  <br />
-
 
 Android App
 ===========
@@ -108,7 +104,6 @@ Future improvements
   * Support multiple cameras
   * Support multiple measurements from one picture
   * Support for a simple thermometer sensor 
-  * Add db support to the server and log temperatures over time.
   * Use OpenCV or similar to fetch images from the webcam
   * Add support for auto-scan (i.e auto detect the Seven Segment display).
 

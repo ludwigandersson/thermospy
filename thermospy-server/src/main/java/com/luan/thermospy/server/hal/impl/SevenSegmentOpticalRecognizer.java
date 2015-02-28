@@ -20,6 +20,7 @@
  */
 package com.luan.thermospy.server.hal.impl;
 
+import com.google.common.io.Files;
 import com.luan.thermospy.server.core.Boundary;
 import com.luan.thermospy.server.core.DigitRecognizerConfig;
 import com.luan.thermospy.server.hal.DigitRecognizer;
@@ -59,9 +60,25 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
         commands.add("make_mono");
         commands.add("-d");
         commands.add("-1");
+        File dbgSessionDir = null;
         if (getConfig().isDebugEnabled())
-        {
-            commands.add("-D");
+        {   
+            File dbgDir = new File(img.getAbsolutePath()+"/"+"dbg");
+            if (!dbgDir.exists() && dbgDir.mkdir())
+            {
+                Log.getLog().info("Created dbg dir:" + dbgDir.getAbsolutePath() + ". All failed parsed images will be put here.");
+            }   
+            
+            long timeStamp = System.currentTimeMillis();
+            dbgSessionDir = new File(dbgDir.getAbsolutePath()+"/"+timeStamp);
+            
+            File debugOutputFile = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_output.png");
+            File copyOfSrcImg = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_input.png");
+            
+            Files.copy(img, copyOfSrcImg);
+            
+
+            commands.add("-D"+debugOutputFile.getAbsolutePath());
         }
         
         if (getConfig().isCropImage())
@@ -82,10 +99,9 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
             // No threshold, use iterative 
             commands.add("-T");
         }
-            
+        
         commands.add(img.getAbsolutePath());
         builder.command(commands);
-        builder.redirectErrorStream(true);
         Process process = null;
         BufferedReader reader = null;
         String output = "";
@@ -102,8 +118,13 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
                 output = reader.readLine();
                 if (output.startsWith("."))
                 {
-                    output = output.replace('.', '0');
+                    output = output.substring(1, output.length());
                     Log.getLog().debug("Found dot at first pos. Remove it!");
+                }
+                if (output.endsWith("."))
+                {
+                    output = output.substring(0, output.length()-1);
+                    Log.getLog().debug("Found dot at last pos. Remove it!");
                 }
                 try
                 {
@@ -113,9 +134,40 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
                 catch (NumberFormatException nfe)
                 {
                     Log.getLog().debug("Failed to parse output: "+output);
-
+                    
                 }
                 
+            }
+            
+            if (getConfig().isDebugEnabled() && dbgSessionDir != null)
+            {
+                File file = new File(dbgSessionDir.getAbsolutePath()+"ssocr_output.log");
+                FileOutputStream fos = null;
+                BufferedReader br = null;
+                try {
+                    InputStreamReader isr = new InputStreamReader(process.getErrorStream());
+                    br = new BufferedReader(isr);
+                    fos = new FileOutputStream(file);
+                    
+                    String line;
+                    while ((line = br.readLine()) != null)
+                        fos.write(line.getBytes());
+                    
+                    
+                }
+                catch (IOException ioe) {
+                    
+                } finally {
+                    if (fos != null)
+                    {
+                        fos.flush();
+                        fos.close();
+                    }
+                    if (br != null)
+                    {
+                        br.close();
+                    }
+                }
             }
             
         }

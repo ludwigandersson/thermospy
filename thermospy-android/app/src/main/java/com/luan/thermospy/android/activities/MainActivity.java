@@ -19,18 +19,25 @@
 
 package com.luan.thermospy.android.activities;
 
+import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -49,6 +56,10 @@ import com.luan.thermospy.android.fragments.NavigationDrawerFragment;
 import com.luan.thermospy.android.fragments.setup.SetupBoundary;
 import com.luan.thermospy.android.fragments.setup.SetupConfirm;
 import com.luan.thermospy.android.fragments.setup.SetupService;
+import com.luan.thermospy.android.fragments.temperaturelog.LogSessionDialogFragment;
+import com.luan.thermospy.android.service.LocalService;
+import com.luan.thermospy.android.service.ServiceBinder;
+import com.luan.thermospy.android.service.TemperatureMonitorService;
 
 /**
  * Main activity
@@ -59,7 +70,7 @@ public class MainActivity extends ActionBarActivity
         SetupBoundary.OnSetupBoundaryListener,
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
-        Alarm.OnAlarmFragmentListener {
+        Alarm.OnAlarmFragmentListener{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -72,17 +83,32 @@ public class MainActivity extends ActionBarActivity
 
     private String degree = "°";
 
-    /**
-     * Displays the server status
-     */
-    TextView mTextView;
+    LocalService mService;
+    boolean mBound = false;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ServiceBinder binder = (ServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     RequestQueue requestQueue;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-    private boolean mAlarmActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,26 +133,51 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onStart()
+    {
+        super.onStart();
+
+    }
+
+    @Override
     protected void onStop()
     {
         super.onStop();
         Coordinator.getInstance().save();
+
+
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+
+
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
+        if (mLastSelected == 3)
+        {
+            mNavigationDrawerFragment.selectItem(0);
+        }
+
+        if (mBound) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
+            if (mService.getRefreshInterval() != interval)
+            {
+                mService.setRefreshInterval(interval);
+            }
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mNotificationHandler != null)
-        {
-            mNotificationHandler.cancel(this);
-        }
+
         Coordinator.getInstance().save();
     }
 
@@ -201,6 +252,12 @@ public class MainActivity extends ActionBarActivity
             transaction = fragmentManager.beginTransaction()
                     .replace(R.id.container, SetupService.newInstance(ip, port));
         }
+        else if (position == 3)
+        {
+            Intent intent = new Intent(this, LogSessionActivity.class);
+            startActivity(intent);
+            return;
+        }
         else
         {
             transaction = fragmentManager.beginTransaction();
@@ -221,7 +278,12 @@ public class MainActivity extends ActionBarActivity
             case 2:
                 mTitle = getString(com.luan.thermospy.android.R.string.title_section3);
                 break;
-
+            case 3:
+                mTitle = getString(com.luan.thermospy.android.R.string.title_section4);
+                break;
+            default:
+                mTitle = "";
+                break;
         }
     }
 
@@ -322,72 +384,126 @@ public class MainActivity extends ActionBarActivity
         onServiceStatus(new ServiceStatus());
         mNavigationDrawerFragment.selectItem(2);
         mLastSelected = -1;
+
+        if (isMyServiceRunning(TemperatureMonitorService.class)) {
+            if (mBound) {
+                unbindService(mConnection);
+                mBound = false;
+            }
+
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            stopService(intent);
+        }
     }
 
     @Override
     public void onNewTemperature(String temperature) {
         Coordinator.getInstance().setTemperature(temperature);
-        handleNotification();
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
-    public boolean checkAlarm() {
+    public boolean startBackgroundService() {
 
-        boolean result = false;
-        if (mAlarmActive) {
-            result = true;
-        }
-        else if (Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled()) {
-            final String temperature = Coordinator.getInstance().getTemperature();
-            final String alarm = Coordinator.getInstance().getAlarmSettings().getAlarm();
-            try {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
+        if (!isMyServiceRunning(TemperatureMonitorService.class))
+        {
+            // Bind to LocalService
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            bundle.putString(TemperatureMonitorService.ServiceArguments.IP_ADDRESS, Coordinator.getInstance().getServerSettings().getIpAddress());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            intent.putExtras(bundle);
 
-                int alarmVal = Integer.parseInt(alarm);
-                int temperatureVal = Integer.parseInt(temperature);
-                boolean playSound = Coordinator.getInstance().getAlarmSettings().getAlarmCondition().evaluate(temperatureVal, alarmVal);
-                if (playSound) {
-                    // Disable alarm
-                    Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
-                    mNotificationHandler.playSound(this, temperature, alarm);
-                    result = true;
-                    mAlarmActive = true;
-                }
-
-            } catch (NumberFormatException ex) {
-
-            }
-            if (mNotificationHandler == null) {
-                mNotificationHandler = new NotificationHandler();
-            }
-
-            mNotificationHandler.playSound(this, temperature, alarm);
+            startService(intent);
         }
 
-        return result;
+        if (isMyServiceRunning(TemperatureMonitorService.class) && !mBound) {
+            // Create bind to service
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM_CONDITION, Coordinator.getInstance().getAlarmSettings().getAlarmCondition().getId());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
+            intent.putExtras(bundle);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        }
+
+        return true;
+
     }
+
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
-        handleNotification();
+        //handleNotification();
+        if (status.isRunning()) {
+            if (!mBound) {
+                startBackgroundService();
+            }
+        }
+        else
+        {
+            if (isMyServiceRunning(TemperatureMonitorService.class)) {
+                if (mBound) {
+                    unbindService(mConnection);
+                    mBound = false;
+                }
+                Intent intent = new Intent(this, TemperatureMonitorService.class);
+                stopService(intent);
+            }
+        }
+
+    }
+
+    @Override
+    public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener) {
+        FragmentManager fm = getFragmentManager();
+        LogSessionDialogFragment editNameDialog = LogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings());
+        editNameDialog.setDismissListener(dismissListener);
+        editNameDialog.show(fm, "fragment_edit_name");
+
     }
 
     @Override
     public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
             Coordinator.getInstance().getAlarmSettings().setAlarmCondition(alarmCondition);
-        if (!checkAlarm()) {
-            handleNotification();
-        }
 
+        if (mBound)
+        {
+            mService.setAlarmCondition(alarmCondition);
+        }
+        else
+        {
+            startBackgroundService();
+        }
     }
 
     @Override
     public void onAlarmTextChanged(String alarmText) {
         Coordinator.getInstance().getAlarmSettings().setAlarm(alarmText);
 
-        // Update notification text if visible
-        if (!checkAlarm()) {
-            handleNotification();
+        if (mBound)
+        {
+            mService.setAlarm(Integer.parseInt(alarmText));
+        }
+        else
+        {
+            startBackgroundService();
         }
     }
 
@@ -405,31 +521,16 @@ public class MainActivity extends ActionBarActivity
         toast.show();
         Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(isChecked);
 
-        if (!checkAlarm()) {
-            handleNotification();
-        }
-        if (!isChecked) mAlarmActive = false;
-    }
-
-    void handleNotification()
-    {
-        final String temperature = Coordinator.getInstance().getTemperature();
-        final AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
-        final boolean isRunning = Coordinator.getInstance().getServerSettings().isRunning();
-        final boolean isAlarmSwitchEnabled = Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled();
-
-        String alarm = isAlarmSwitchEnabled ? alarmSettings.getAlarm() : new String();
-
-        if (mNotificationHandler == null)
+        if (mBound)
         {
-            mNotificationHandler = new NotificationHandler();
+            mService.setAlarmEnabled(isChecked);
         }
-        if (isRunning) {
-            mNotificationHandler.update(this, temperature, alarm);
-        } else {
-            mNotificationHandler.cancel(this);
+        else
+        {
+            startBackgroundService();
         }
-
     }
+
+
 
 }

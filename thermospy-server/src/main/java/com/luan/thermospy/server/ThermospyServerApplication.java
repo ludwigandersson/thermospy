@@ -3,6 +3,13 @@ package com.luan.thermospy.server;
 import com.luan.thermospy.server.actions.SingleShotAction;
 import com.luan.thermospy.server.configuration.ThermospyServerConfiguration;
 import com.luan.thermospy.server.core.ThermospyController;
+
+import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.Temperatureentry;
+
+import com.luan.thermospy.server.db.dao.SessionDAO;
+import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
+import com.luan.thermospy.server.db.util.ThermospyHibernateUtil;
 import com.luan.thermospy.server.hal.impl.SevenSegmentOpticalRecognizer;
 import com.luan.thermospy.server.hal.impl.WebcamDevice;
 /**
@@ -32,6 +39,10 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.luan.thermospy.server.health.TemplateHealthCheck;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
+import org.eclipse.jetty.util.log.Log;
+import org.hibernate.Query;
 
 /**
  * Main app entrance. Setting up all relationships etc
@@ -45,6 +56,8 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
     public void run(ThermospyServerConfiguration configuration,
                     Environment environment) {
 
+        
+        
         ThermospyController controller = configuration.getController();
         SevenSegmentOpticalRecognizer recognizer = new SevenSegmentOpticalRecognizer();
         recognizer.setConfig(configuration.getDigitRecognizerConfig());
@@ -55,9 +68,10 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         SingleShotAction actionHandler = new SingleShotAction(worker);
 
         controller.setCameraAction(actionHandler);
-
+        controller.setSessionFactory(hibernate.getSessionFactory());
+        
         final GetTempResource tempResource = new GetTempResource(controller);
-        final CameraControlResource cameraResource = new CameraControlResource(controller);
+        final CameraControlResource cameraResource = new CameraControlResource(controller, configuration.getCameraDeviceConfig());
         final GetLastImage getLastImage = new GetLastImage(webcamDevice);
         final ImageBoundaryResource imgBoundaryResource = new ImageBoundaryResource(controller);
         final RefreshRateResource refreshRateResource = new RefreshRateResource(controller);
@@ -67,9 +81,16 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         final TemplateHealthCheck healthCheck =
                 new TemplateHealthCheck("TEST");
         
+        // Hibernate DAO types
+        final SessionDAO dao = new SessionDAO(hibernate.getSessionFactory());
+        final TemperatureEntryDAO tempDAO = new TemperatureEntryDAO(hibernate.getSessionFactory());
+
+        
+        controller.setTemperatureDao(tempDAO);
+        environment.jersey().register(new TemperatureEntryResource(tempDAO));
+        environment.jersey().register(new SessionResource(dao, tempDAO, controller));
+        
         environment.healthChecks().register("template", healthCheck);
-
-
         environment.jersey().register(tempResource);
         environment.jersey().register(cameraResource);
         environment.jersey().register(getLastImage);
@@ -87,7 +108,15 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
 
     @Override
     public void initialize(Bootstrap<ThermospyServerConfiguration> bootstrap) {
-        // nothing to do yet
+        
+        bootstrap.addBundle(hibernate);
     }
+    
+    private final HibernateBundle<ThermospyServerConfiguration> hibernate = new HibernateBundle<ThermospyServerConfiguration>(Session.class, Temperatureentry.class) {
+    @Override
+    public DataSourceFactory getDataSourceFactory(ThermospyServerConfiguration configuration) {
+        return configuration.getDataSourceFactory();
+    }
+};
 
 }

@@ -32,16 +32,20 @@ public class DigitRecognizerConfig {
     private int threshold;
     @JsonProperty
     private boolean cropImage;
+    @JsonProperty
+    private boolean debugEnabled;
+    
     
     public DigitRecognizerConfig()
     {
     }
     
-    public DigitRecognizerConfig(int retryCount, int threshold, boolean cropImage)
+    public DigitRecognizerConfig(int retryCount, int threshold, boolean cropImage, boolean debugEnabled)
     {
         this.retryCount = retryCount;
         this.threshold = threshold;
         this.cropImage = cropImage;
+        this.debugEnabled = debugEnabled;
     }
 
     /**
@@ -84,6 +88,15 @@ public class DigitRecognizerConfig {
      */
     public synchronized  void setCropImage(boolean cropImage) {
         this.cropImage = cropImage;
+    }
+
+    public synchronized boolean isDebugEnabled() {
+        return this.debugEnabled;
+    }
+    
+    public synchronized void setDebugEnabled(boolean debugEnabled)
+    {
+        this.debugEnabled = debugEnabled;
     }
     
     

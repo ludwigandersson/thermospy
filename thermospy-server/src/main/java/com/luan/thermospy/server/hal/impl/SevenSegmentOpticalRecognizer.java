@@ -20,6 +20,7 @@
  */
 package com.luan.thermospy.server.hal.impl;
 
+import com.google.common.io.Files;
 import com.luan.thermospy.server.core.Boundary;
 import com.luan.thermospy.server.core.DigitRecognizerConfig;
 import com.luan.thermospy.server.hal.DigitRecognizer;
@@ -56,8 +57,34 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
         ProcessBuilder builder = new ProcessBuilder();
         ArrayList<String> commands = new ArrayList<>();
         commands.add("ssocr");
+        commands.add("make_mono");
         commands.add("-d");
         commands.add("-1");
+        File dbgSessionDir = null;
+        
+        if (getConfig().isDebugEnabled() && img.getAbsoluteFile().getParent() != null)
+        {
+            File dbgDir = new File(img.getAbsoluteFile().getParent()+"/"+"dbg");
+            if (!dbgDir.exists() && dbgDir.mkdir())
+            {
+                Log.getLog().info("Created dbg dir:" + dbgDir.getAbsolutePath() + ". All images will be put here.");
+            }   
+            
+            long timeStamp = System.currentTimeMillis();
+            dbgSessionDir = new File(dbgDir.getAbsolutePath()+"/"+timeStamp);
+            
+            if (dbgSessionDir.mkdir())
+            {
+                File debugOutputFile = new File(dbgSessionDir.getAbsolutePath()+"/"+"ssocr_dbg_output.png");
+                File copyOfSrcImg = new File(dbgSessionDir.getAbsolutePath()+"/"+"ssocr_dbg_input.png");
+
+                Files.copy(img, copyOfSrcImg);
+                commands.add("-D"+debugOutputFile.getAbsolutePath());
+                commands.add("-P");
+            }
+
+            
+        }
         
         if (getConfig().isCropImage())
         {
@@ -72,61 +99,119 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
             commands.add("-t");
             commands.add(Integer.toString(getConfig().getThreshold()));
         }
+        else
+        {
+            // No threshold, use iterative 
+            commands.add("-T");
+        }
+        
         commands.add(img.getAbsolutePath());
         builder.command(commands);
-        builder.redirectErrorStream(true);
         Process process = null;
         BufferedReader reader = null;
         String output = "";
-        int retries = getConfig().getRetryCount();
-        while (retries-- > 0)
+        
+        try {
+            process = builder.start();
+            InputStream std = process.getInputStream ();
+            reader = new BufferedReader(new InputStreamReader(std));
+
+            int result = process.waitFor();
+
+            if (result == 0)
+            {
+                output = reader.readLine();
+                if (output.startsWith("."))
+                {
+                    output = output.substring(1, output.length());
+                    Log.getLog().debug("Found dot at first pos. Remove it!");
+                }
+                if (output.endsWith("."))
+                {
+                    output = output.substring(0, output.length()-1);
+                    Log.getLog().debug("Found dot at last pos. Remove it!");
+                }
+                try
+                {
+                    int temperature = Integer.parseInt(output);
+                    Log.getLog().debug("Digits decoded: "+temperature);
+                    deleteDir(dbgSessionDir);
+                }
+                catch (NumberFormatException nfe)
+                {
+                    Log.getLog().debug("Failed to parse output: "+output);
+                    
+                }
+                
+            }
+            
+            if (getConfig().isDebugEnabled() && dbgSessionDir != null)
+            {
+                File file = new File(dbgSessionDir.getAbsolutePath()+"/"+"ssocr_output.log");
+                FileOutputStream fos = null;
+                BufferedReader br = null;
+                try {
+                    file.createNewFile();
+                    InputStreamReader isr = new InputStreamReader(process.getErrorStream());
+                    br = new BufferedReader(isr);
+                    fos = new FileOutputStream(file);
+                    
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        line += "\n";
+                        fos.write(line.getBytes());
+                    }
+                }
+                catch (IOException ioe) {
+                    
+                } finally {
+                    if (fos != null)
+                    {
+                        fos.flush();
+                        fos.close();
+                    }
+                    if (br != null)
+                    {
+                        br.close();
+                    }
+                }
+            }
+            
+        }
+        catch (Exception e)
+        {
+            Log.getLog().info("Exception: "+e.getMessage(), e);
+            throw new IOException(e.getMessage(), e);
+        }
+        finally
         {
             try {
-                process = builder.start();
-                InputStream std = process.getInputStream ();
-                reader = new BufferedReader(new InputStreamReader(std));
-
-                int result = process.waitFor();
-
-                if (result == 0)
-                {
-                    output = reader.readLine();
-                    if (output.startsWith("."))
-                    {
-                        output = output.replace('.', '0');
-                        Log.getLog().debug("Found dot at first pos. Remove it!");
-                    }
-                    try
-                    {
-                        int temperature = Integer.parseInt(output);
-                        Log.getLog().debug("Digits decoded: "+temperature);
-                        break;
-                    }
-                    catch (NumberFormatException nfe)
-                    {
-                        Log.getLog().debug("Failed to parse output: "+output);
-                    }
-                }
-            }
-            catch (Exception e)
+                if (reader != null) reader.close();
+            } catch (IOException exio)
             {
-                Log.getLog().info("Exception: "+e.getMessage(), e);
-                throw new IOException(e.getMessage(), e);
-            }
-            finally
-            {
-                try {
-                    if (reader != null) reader.close();
-                } catch (IOException exio)
-                {
 
-                }
-                if (process != null) process.destroy();
             }
+            if (process != null) process.destroy();
         }
+        
 
         return output;
 
+    }
+    public static boolean deleteDir(File dir) {
+        if (dir != null) {
+            if (dir.isDirectory()) {
+                String[] children = dir.list();
+                for (int i = 0; i < children.length; i++) {
+                    boolean success = deleteDir(new File(dir, children[i]));
+                    if (!success) {
+                        return false;
+                    }
+                }
+            }
+            return dir.delete(); // The directory is empty now and can be deleted.
+       }
+       return false;
     }
 
 }

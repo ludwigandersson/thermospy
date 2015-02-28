@@ -23,35 +23,42 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
+import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.pojo.ServerStatus;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
+import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
+import com.luan.thermospy.android.core.rest.StopLogSessionReq;
 
 
 /**
  * The monitor fragment is responsible for displaying temperature as well as holding a sub-fragment.
  * The sub-fragment displays some server information etc.
  */
-public class MonitorFragment extends Fragment implements ServerControl.OnServerControlListener, GetServiceStatusReq.OnGetServiceStatus {
+public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,ServerControl.OnServerControlListener, GetServiceStatusReq.OnGetServiceStatus, StopLogSessionReq.OnStopLogSessionListener, DialogInterface.OnDismissListener {
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_ALARM_STR = "alarm";
     private static final String ARG_TEMPERATURE_STR = "temperature";
     private static final String LOG_TAG = MonitorFragment.class.getSimpleName();
     private static final String ARG_TEMPERATURE_SCALE_STR = "temperature_scale";
+    private static final String ARG_LOG_SESSION_ACTIVE = "logsession_active";
 
     private String mIpAddress;
     private int mPort;
@@ -59,9 +66,11 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
     private String mTemperatureStr = "";
     private RequestQueue mRequestQueue;
     private TextView mTemperature;
+    private boolean mLogSessionActive = false;
 
     private TextView mTemperatureScale;
 
+    private ToggleButton mStartStopLogSessionButton;
     private ServerControl mServerControl;
 
     private ProgressDialog mProgress = null;
@@ -69,7 +78,9 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
     private OnMonitorFragmentListener mListener;
 
     private GetServiceStatusReq mServiceStatusReq;
+    private StopLogSessionReq mStopLogSessionReq;
     private String mTemperatureScaleStr;
+    private GetActiveLogSessionReq mGetActiveLogSession;
 
     public static MonitorFragment newInstance(String ip, int port, String alarm, String temperature) {
         MonitorFragment fragment = new MonitorFragment();
@@ -79,6 +90,7 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
         args.putString(ARG_ALARM_STR, alarm);
         args.putString(ARG_TEMPERATURE_STR, temperature);
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -95,10 +107,9 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
             mAlarm = savedInstanceState.getString(ARG_ALARM_STR);
             mTemperatureStr = savedInstanceState.getString(ARG_TEMPERATURE_STR);
             mTemperatureScaleStr = savedInstanceState.getString(ARG_TEMPERATURE_SCALE_STR);
+            mLogSessionActive = savedInstanceState.getBoolean(ARG_LOG_SESSION_ACTIVE);
         }
-
     }
-
 
     private void loadServerControlPanel(boolean isRunning) {
         FragmentManager manager = getChildFragmentManager();
@@ -124,10 +135,39 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
         mTemperatureScale.setText(mTemperatureScaleStr);
 
 
+        mStartStopLogSessionButton = (ToggleButton)v.findViewById(R.id.btnStartStopLogSession);
+        mStartStopLogSessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        getServerStatus();
+
+                if (mStartStopLogSessionButton.isChecked()) {
+                    mListener.onShowCreateLogSessionDialog(MonitorFragment.this);
+
+                } else {
+                    requestStopLogSession();
+                }
+                mStartStopLogSessionButton.setChecked(mStartStopLogSessionButton.isChecked());
+
+
+
+            }
+        });
+        mStartStopLogSessionButton.setChecked(mLogSessionActive);
+        mStartStopLogSessionButton.setText(getString(R.string.start_recording));
+
 
         return v;
+    }
+
+    private void requestStopLogSession() {
+
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setCanceledOnTouchOutside(false);
+        mProgress.setTitle("Please wait");
+        mProgress.setMessage("Finalizing log session...");
+        mStopLogSessionReq.request(mIpAddress, mPort);
+        mProgress.show();
     }
 
     public void getServerStatus()
@@ -136,7 +176,7 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
         mProgress.setCanceledOnTouchOutside(false);
         mProgress.setTitle("Please wait");
         mProgress.setMessage("Fetching server status...");
-        mServiceStatusReq.request(mIpAddress, mPort);
+        mGetActiveLogSession.request(mIpAddress, mPort);
         mProgress.show();
     }
 
@@ -159,6 +199,8 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
         }
         mRequestQueue = Coordinator.getInstance().getRequestQueue();
         mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
+        mGetActiveLogSession = new GetActiveLogSessionReq(mRequestQueue, this);
+        mStopLogSessionReq = new StopLogSessionReq(mRequestQueue, this);
     }
 
     @Override
@@ -166,7 +208,7 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
     {
         super.onResume();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String temperatureScale = settings.getString("pref_key_temperature_degree", "");
+        String temperatureScale = settings.getString(getString(R.string.pref_key_temperature_degree), "");
         if (temperatureScale.equals("1"))
         {
             mTemperatureScaleStr = getString(R.string.temperature_scale_celsius);
@@ -176,6 +218,7 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
             mTemperatureScaleStr = getString(R.string.temperature_scale_fahrenheit);
         }
         mTemperatureScale.setText(mTemperatureScaleStr);
+        getServerStatus();
     }
 
     @Override
@@ -192,6 +235,8 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
 
         }
         mServiceStatusReq.cancel();
+        mStopLogSessionReq.cancel();
+        mGetActiveLogSession.cancel();
     }
 
     @Override
@@ -204,18 +249,24 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
         }
 
         mServiceStatusReq.cancel();
+        mStopLogSessionReq.cancel();
+        mGetActiveLogSession.cancel();
 
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+
         outState.putString(ARG_IP_ADDRESS, mIpAddress);
         outState.putInt(ARG_PORT, mPort);
         outState.putString(ARG_ALARM_STR, mAlarm);
         outState.putString(ARG_TEMPERATURE_STR, mTemperatureStr);
         outState.putString(ARG_TEMPERATURE_SCALE_STR, mTemperatureScaleStr);
+        outState.putBoolean(ARG_LOG_SESSION_ACTIVE, mLogSessionActive);
+        super.onSaveInstanceState(outState);
     }
+
+
 
     @Override
     public void onNewTemperature(String text) {
@@ -226,6 +277,8 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
 
     @Override
     public void onConnectionLost() {
+        mStartStopLogSessionButton.setChecked(false);
+        mStartStopLogSessionButton.setEnabled(true);
         Toast t = Toast.makeText(getActivity(), R.string.lost_connection, Toast.LENGTH_SHORT);
         t.show();
         mListener.onServerNotRunning();
@@ -233,10 +286,13 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
-        if (status.getError() != ServerStatus.OK)
+        if (status.getError() != ServerStatus.OK) {
             mListener.onServerNotRunning();
-        else
+        }
+        else {
             mListener.onServiceStatus(status);
+        }
+
     }
 
     @Override
@@ -248,14 +304,53 @@ public class MonitorFragment extends Fragment implements ServerControl.OnServerC
 
     @Override
     public void onServiceStatusError() {
-        mProgress.hide();
+        mProgress.dismiss();
         mListener.onServerNotRunning();
+    }
+
+    @Override
+    public void onStopLogSessionRecv(LogSession session) {
+        mStartStopLogSessionButton.setChecked(false);
+        mProgress.dismiss();
+    }
+
+    @Override
+    public void onStopLogSessionError() {
+
+        Log.d(LOG_TAG, "Failed to stop log session...");
+        mProgress.dismiss();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        mGetActiveLogSession.request(mIpAddress, mPort);
+        mStartStopLogSessionButton.setEnabled(false);
+    }
+
+
+
+    @Override
+    public void onActiveLogSessionRecv(LogSession logSession) {
+        mLogSessionActive = true;
+        mStartStopLogSessionButton.setChecked(true);
+        mServiceStatusReq.request(mIpAddress, mPort);
+        mStartStopLogSessionButton.setEnabled(true);
+    }
+
+    @Override
+    public void onActiveLogSessionError() {
+        mLogSessionActive = false;
+        mStartStopLogSessionButton.setChecked(false);
+        mServiceStatusReq.request(mIpAddress, mPort);
+        mStartStopLogSessionButton.setEnabled(true);
     }
 
     public interface OnMonitorFragmentListener {
         public void onServerNotRunning();
         public void onNewTemperature(String temperature);
         public void onServiceStatus(ServiceStatus status);
+
+        public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener);
     }
 
 }

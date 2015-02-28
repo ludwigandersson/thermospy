@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
 
-        android:key="pref_key_temperature_degree"
+        android:key="@string/pref_key_temperature_degree"
         android:summary="@string/pref_summary_degree_type"
         android:title="@string/pref_title_degree_type"
 
@@ -11,11 +11,21 @@
         android:entries="@array/degree_scales"
         android:entryValues="@array/degree_scale_values"/>
     <EditTextPreference
-        android:key="pref_key_refresh_interval"
+        android:key="@string/pref_key_refresh_interval"
         android:summary="@string/pref_summary_refresh_interval"
         android:title="@string/pref_title_refresh_interval"
         android:inputType="number"
         android:defaultValue="5"/>
+    <ListPreference
+
+        android:key="@string/pref_key_aspect_ratio"
+        android:summary="@string/pref_aspect_ratio_summary"
+        android:title="@string/pref_title_aspect_ratio"
+
+
+        android:defaultValue="1"
+        android:entries="@array/aspect_ratios"
+        android:entryValues="@array/aspect_ratio_values"/>
 
 </PreferenceScreen>
 

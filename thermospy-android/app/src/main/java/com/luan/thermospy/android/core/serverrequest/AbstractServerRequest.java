@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Thermospy-android.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.luan.thermospy.android.core.serverrequest;
@@ -23,6 +23,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
+
+import java.util.List;
 
 /**
  * Abstract class handling common functions for creating a requests. It builds the Url that the
@@ -33,6 +35,8 @@ import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
  * @param <R> The type of response that will be
  */
 public abstract class AbstractServerRequest<T, R> implements RequestControl {
+    private static final String LOG_TAG = AbstractServerRequest.class.getSimpleName();
+
     public interface ServerRequestListener<R>
     {
         void onOkResponse(R response);
@@ -42,6 +46,7 @@ public abstract class AbstractServerRequest<T, R> implements RequestControl {
     private final ServerRequestListener<R> mListener;
     private final UrlRequestType mRequestType;
     private final RequestQueue mRequestQueue;
+    private List<String> requestParams = null;
 
     protected ServerRequestListener<R> getListener()
     {
@@ -57,15 +62,28 @@ public abstract class AbstractServerRequest<T, R> implements RequestControl {
 
     protected abstract Request<T> createRequest(String url);
 
+    public void setRequestParams(List<String> params)
+    {
+        requestParams = params;
+    }
     public void request(String ip, int port)
     {
-        final UrlRequest request = new UrlRequest.UrlRequestBuilder().setIpAddress(ip).setPort(port).setUrlRequest(mRequestType).build();
-        final String url = request.toString();
+        try {
+            final UrlRequest request = new UrlRequest.UrlRequestBuilder().setIpAddress(ip).setPort(port).setUrlRequest(mRequestType).setRequestParams(requestParams).build();
+            final String url = request.toString();
 
-        Request<T> serverRequest = createRequest(url);
+            Request<T> serverRequest = createRequest(url);
 
-        serverRequest.setTag(this);
-        mRequestQueue.add(serverRequest);
+            serverRequest.setTag(this);
+            mRequestQueue.add(serverRequest);
+        } catch (Exception e)
+        {
+            if (mRequestQueue != null)
+            {
+                mRequestQueue.cancelAll(this);
+            }
+            mListener.onErrorResponse(new VolleyError("Failed to perform request!", e));
+        }
     }
     public void cancel()
     {

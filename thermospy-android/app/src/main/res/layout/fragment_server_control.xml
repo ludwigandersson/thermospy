@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <LinearLayout
@@ -40,7 +40,7 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:id="@+id/textView4"
                     android:layout_column="0"
-                    android:minWidth="100dp" />
+                    android:minWidth="50dp" />
 
                 <TextView
                     android:layout_width="wrap_content"

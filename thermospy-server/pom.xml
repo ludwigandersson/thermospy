@@ -12,6 +12,37 @@
         <artifactId>dropwizard-core</artifactId>
         <version>${dropwizard.version}</version>
     </dependency>
+    <!-- hibernate -->
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>4.3.8.Final</version>
+    </dependency>
+    <dependency>
+    <groupId>org.apache.derby</groupId>
+    <artifactId>derbyclient</artifactId>
+    <version>10.10.2.0</version>
+  </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <version>4.3.1.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <version>1.0.0.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.10.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-hibernate</artifactId>
+      <version>0.7.1</version>
+    </dependency>
 </dependencies>
 
 <properties>
@@ -82,4 +113,11 @@
         </plugin>
     </plugins>
 </build>
+  <repositories>
+    <repository>
+      <id>unknown-jars-temp-repo</id>
+      <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
+      <url>file:${project.basedir}/lib</url>
+    </repository>
+  </repositories>
 </project>

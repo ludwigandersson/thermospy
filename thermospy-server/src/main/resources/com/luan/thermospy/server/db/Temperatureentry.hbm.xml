@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 2015-feb-22 22:32:42 by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="com.luan.thermospy.server.db.Temperatureentry" table="TEMPERATUREENTRY" schema="THERMOSPY">
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="assigned" />
+        </id>
+        <timestamp name="timestamp" column="TIMESTAMP" />
+        <property name="temperature" type="java.lang.Double">
+            <column name="TEMPERATURE" precision="52" scale="0" />
+        </property>
+        <property name="fkSessionId" type="java.lang.Integer">
+            <column name="FK_SESSION_ID" />
+        </property>
+    </class>
+</hibernate-mapping>

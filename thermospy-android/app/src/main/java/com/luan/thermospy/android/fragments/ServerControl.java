@@ -184,7 +184,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
           super.onResume();
 
           SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-          int interval = Integer.parseInt(settings.getString("pref_key_refresh_interval", "5"));
+          int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
           mTemperaturePolling.setInterval(interval);
           mTemperaturePolling.start();
 
@@ -295,7 +295,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
           hideProgress();
       }
 
-      @Override
+      @Override 
       public void onServiceStatusRecv(ServiceStatus status) {
           mRunning = status.isRunning();
           mToggleServerStatus.setChecked(!mRunning);

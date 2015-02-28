@@ -103,7 +103,8 @@ public class CropImageActivity extends MonitoredActivity {
 
         findViewById(R.id.btn_refresh).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                setResult(Crop.REQUEST_REFRESH);
+
+                setResult(Crop.RESULT_REFRESH);
                 finish();
             }
         });
@@ -472,11 +473,13 @@ public class CropImageActivity extends MonitoredActivity {
         intent.putExtra(Crop.Extra.TOP, bounds.top);
         intent.putExtra(Crop.Extra.RIGHT, bounds.right);
         intent.putExtra(Crop.Extra.BOTTOM, bounds.bottom);
+        intent.putExtra("requestCode", Crop.REQUEST_CROP);
         setResult(RESULT_OK, intent);
     }
 
     private void setResultException(Throwable throwable) {
-        setResult(Crop.RESULT_ERROR, new Intent().putExtra(Crop.Extra.ERROR, throwable));
+        Intent intent = new Intent().putExtra(Crop.Extra.ERROR, throwable);
+        setResult(Crop.RESULT_ERROR, intent);
     }
 
 }

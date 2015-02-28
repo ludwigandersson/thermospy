@@ -7,8 +7,42 @@ cameraDeviceConfig:
     filePath: "thermopic.png"
     enableMonochrome: false
 digitRecognizerConfig:
-    retryCount: 5
-    threshold: 30
+    retryCount: 1
+    threshold: 0
     cropImage: false
+    debugEnabled: true
 controller:
     refreshRate: 5
+
+database:
+  # the name of your JDBC driver
+  driverClass: org.apache.derby.jdbc.ClientDriver
+
+  # the username
+  user: thermospy
+
+  # the password
+  password: thermospy
+
+  # the JDBC URL
+  url: jdbc:derby://localhost:1527/.derbydb/thermospydb
+
+  # any properties specific to your JDBC driver:
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.DerbyTenSevenDialect
+
+  # the maximum amount of time to wait on an empty pool before throwing an exception
+  maxWaitForConnection: 1s
+
+  # the SQL query to run when validating a connection's liveness
+  validationQuery: "SELECT * FROM SESSION"
+
+  # the minimum number of connections to keep open
+  minSize: 8
+
+  # the maximum number of connections to keep open
+  maxSize: 32
+
+  # whether or not idle connections should be validated
+  checkConnectionWhileIdle: false

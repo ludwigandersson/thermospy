@@ -1,0 +1,30 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:id="@+id/log_session_container"
+android:gravity="center_vertical|top">
+
+
+        <TextView android:id="@+id/section_label" android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/temperature_log" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="false"
+            android:layout_below="@+id/section_label"
+            android:layout_alignParentEnd="false"
+            android:gravity="center">
+
+            <ToggleButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnStartStopLogSession"
+                android:textOff="@string/start_recording"
+                android:textOn="@string/stop_recording" />
+        </LinearLayout>
+
+    </RelativeLayout>
+

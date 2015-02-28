@@ -61,9 +61,10 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
         commands.add("-d");
         commands.add("-1");
         File dbgSessionDir = null;
-        if (getConfig().isDebugEnabled())
-        {   
-            File dbgDir = new File(img.getAbsolutePath()+"/"+"dbg");
+        
+        if (getConfig().isDebugEnabled() && img.getAbsoluteFile().getParent() != null)
+        {
+            File dbgDir = new File(img.getAbsoluteFile().getParent()+"/"+"dbg");
             if (!dbgDir.exists() && dbgDir.mkdir())
             {
                 Log.getLog().info("Created dbg dir:" + dbgDir.getAbsolutePath() + ". All images will be put here.");
@@ -74,8 +75,8 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
             
             if (dbgSessionDir.mkdir())
             {
-                File debugOutputFile = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_output.png");
-                File copyOfSrcImg = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_input.png");
+                File debugOutputFile = new File(dbgSessionDir.getAbsolutePath()+"/"+"ssocr_dbg_output.png");
+                File copyOfSrcImg = new File(dbgSessionDir.getAbsolutePath()+"/"+"ssocr_dbg_input.png");
 
                 Files.copy(img, copyOfSrcImg);
                 commands.add("-D"+debugOutputFile.getAbsolutePath());
@@ -134,6 +135,7 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
                 {
                     int temperature = Integer.parseInt(output);
                     Log.getLog().debug("Digits decoded: "+temperature);
+                    deleteDir(dbgSessionDir);
                 }
                 catch (NumberFormatException nfe)
                 {
@@ -145,7 +147,7 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
             
             if (getConfig().isDebugEnabled() && dbgSessionDir != null)
             {
-                File file = new File(dbgSessionDir.getAbsolutePath()+"ssocr_output.log");
+                File file = new File(dbgSessionDir.getAbsolutePath()+"/"+"ssocr_output.log");
                 FileOutputStream fos = null;
                 BufferedReader br = null;
                 try {
@@ -155,10 +157,10 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
                     fos = new FileOutputStream(file);
                     
                     String line;
-                    while ((line = br.readLine()) != null)
+                    while ((line = br.readLine()) != null) {
+                        line += "\n";
                         fos.write(line.getBytes());
-                    
-                    
+                    }
                 }
                 catch (IOException ioe) {
                     
@@ -195,6 +197,21 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
 
         return output;
 
+    }
+    public static boolean deleteDir(File dir) {
+        if (dir != null) {
+            if (dir.isDirectory()) {
+                String[] children = dir.list();
+                for (int i = 0; i < children.length; i++) {
+                    boolean success = deleteDir(new File(dir, children[i]));
+                    if (!success) {
+                        return false;
+                    }
+                }
+            }
+            return dir.delete(); // The directory is empty now and can be deleted.
+       }
+       return false;
     }
 
 }

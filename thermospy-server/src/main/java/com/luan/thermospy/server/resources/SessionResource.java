@@ -162,7 +162,7 @@ public class SessionResource {
                     tx.rollback();
             }
             dbSession.close();
-                
+            dbSession = null;    
             // Update 
             if (list.size() > 0) {
                 dbSession = controller.getSessionFactory().openSession();

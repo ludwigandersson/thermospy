@@ -66,19 +66,23 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
             File dbgDir = new File(img.getAbsolutePath()+"/"+"dbg");
             if (!dbgDir.exists() && dbgDir.mkdir())
             {
-                Log.getLog().info("Created dbg dir:" + dbgDir.getAbsolutePath() + ". All failed parsed images will be put here.");
+                Log.getLog().info("Created dbg dir:" + dbgDir.getAbsolutePath() + ". All images will be put here.");
             }   
             
             long timeStamp = System.currentTimeMillis();
             dbgSessionDir = new File(dbgDir.getAbsolutePath()+"/"+timeStamp);
             
-            File debugOutputFile = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_output.png");
-            File copyOfSrcImg = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_input.png");
-            
-            Files.copy(img, copyOfSrcImg);
-            
+            if (dbgSessionDir.mkdir())
+            {
+                File debugOutputFile = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_output.png");
+                File copyOfSrcImg = new File(dbgSessionDir.getAbsolutePath()+"ssocr_dbg_input.png");
 
-            commands.add("-D"+debugOutputFile.getAbsolutePath());
+                Files.copy(img, copyOfSrcImg);
+                commands.add("-D"+debugOutputFile.getAbsolutePath());
+                commands.add("-P");
+            }
+
+            
         }
         
         if (getConfig().isCropImage())
@@ -145,6 +149,7 @@ public class SevenSegmentOpticalRecognizer extends DigitRecognizer {
                 FileOutputStream fos = null;
                 BufferedReader br = null;
                 try {
+                    file.createNewFile();
                     InputStreamReader isr = new InputStreamReader(process.getErrorStream());
                     br = new BufferedReader(isr);
                     fos = new FileOutputStream(file);

@@ -34,7 +34,7 @@ import org.json.JSONObject;
 
 
 /**
- * Created by ludde on 15-02-01.
+ * Get the current temperature
  */
 public class GetTemperatureReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 

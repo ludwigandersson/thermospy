@@ -30,7 +30,11 @@ import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
 import org.json.JSONArray;
 
 /**
+<<<<<<< HEAD
+ * Request a JSON array Object
+=======
  * Request a JSON Object
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class GetJsonArray extends AbstractServerRequest implements Response.Listener<JSONArray>, Response.ErrorListener {
     public GetJsonArray(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType requestType) {

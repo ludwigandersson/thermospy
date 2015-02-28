@@ -24,7 +24,12 @@ import com.luan.thermospy.android.fragments.AlarmCondition;
 import java.util.Observable;
 
 /**
+<<<<<<< HEAD
+ * The local service is an object that is shared between the TemperatureMonitorService and the
+ * MainActivity.
+=======
  * Created by ludde on 15-02-24.
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class LocalService extends Observable {
     private volatile int mRefreshInterval = 5;

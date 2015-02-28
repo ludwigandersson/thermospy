@@ -36,7 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by ludde on 15-02-01.
+ * Request that sets the refresh rate
  */
 public class SetRefreshRateReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 

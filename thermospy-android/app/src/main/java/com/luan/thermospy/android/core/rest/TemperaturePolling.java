@@ -27,6 +27,9 @@ import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.RefreshRate;
 import com.luan.thermospy.android.core.pojo.Temperature;
 
+/**
+ * Helper class that polls the temperature every mInterval seconds.
+ */
 public class TemperaturePolling implements GetTemperatureReq.OnGetTemperatureListener, SetRefreshRateReq.OnSetRefreshRateListener {
     volatile private int mInterval = 5;
     private final Context mContext;

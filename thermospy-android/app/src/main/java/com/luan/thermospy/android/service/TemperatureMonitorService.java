@@ -39,7 +39,12 @@ import java.util.Observable;
 import java.util.Observer;
 
 /**
+<<<<<<< HEAD
+ * The TemperatureMonitorService is responsible for monitoring the current temperature
+ * and notifing the user about the temperature changes/sounding the alarm etc.
+=======
  * Created by ludde on 15-02-24.
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class TemperatureMonitorService extends Service {
 

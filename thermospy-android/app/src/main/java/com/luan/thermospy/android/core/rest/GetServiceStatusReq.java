@@ -35,7 +35,7 @@ import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
 import org.json.JSONObject;
 
 /**
- * Created by ludde on 15-02-01.
+ * Request that gets the service status
  */
 public class GetServiceStatusReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 

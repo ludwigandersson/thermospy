@@ -19,9 +19,11 @@
 
 package com.luan.thermospy.android.core.serverrequest.type;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
@@ -33,14 +35,27 @@ import org.json.JSONObject;
  * Request a JSON Object
  */
 public class GetJsonObject extends AbstractServerRequest implements Response.Listener<JSONObject>, Response.ErrorListener {
+    private RetryPolicy mRetryPolicy;
+
+    public GetJsonObject(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType requestType, RetryPolicy retryPolicy) {
+        super(requestQueue, listener, requestType);
+        mRetryPolicy = retryPolicy;
+    }
     public GetJsonObject(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType requestType) {
         super(requestQueue, listener, requestType);
+        mRetryPolicy = new DefaultRetryPolicy(1000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
     }
 
 
     @Override
     public Request createRequest(String url) {
+<<<<<<< HEAD
+        Request r = new JsonObjectRequest(url, null, this, this);
+        r.setRetryPolicy(mRetryPolicy);
+        return  r;
+=======
         return new JsonObjectRequest(url, null, this, this);
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
     @Override
     public void onResponse(JSONObject response) {

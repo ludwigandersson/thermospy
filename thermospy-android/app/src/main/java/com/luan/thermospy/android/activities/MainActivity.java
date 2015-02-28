@@ -35,7 +35,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -45,7 +44,6 @@ import com.android.volley.toolbox.Volley;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.AlarmSettings;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.NotificationHandler;
 import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.Boundary;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
@@ -77,13 +75,28 @@ public class MainActivity extends ActionBarActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
+    /**
+     * Keeps track of the last selected "page"/fragment
+     */
     private int mLastSelected = -1;
 
+<<<<<<< HEAD
+    /**
+     * The local service is responsible for notification handling. The main activity communicates
+     * alarm settings, refresh rate etc.
+     *
+     */
+    LocalService mService;
+    /**
+     * Flag telling whether or not the local service is bound or not.
+     */
+=======
     private NotificationHandler mNotificationHandler = null;
 
     private String degree = "°";
 
     LocalService mService;
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     boolean mBound = false;
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -177,15 +190,13 @@ public class MainActivity extends ActionBarActivity
     protected void onDestroy() {
         super.onDestroy();
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
         Coordinator.getInstance().save();
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-        return super.onKeyDown(keyCode, event);
-    }
     @Override
     public void onBackPressed()
     {
@@ -399,6 +410,19 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNewTemperature(String temperature) {
         Coordinator.getInstance().setTemperature(temperature);
+<<<<<<< HEAD
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+=======
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -411,6 +435,62 @@ public class MainActivity extends ActionBarActivity
         return false;
     }
 
+<<<<<<< HEAD
+    public void startBackgroundService() {
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
+        if (!isMyServiceRunning(TemperatureMonitorService.class))
+        {
+            // Send intent to start the local service
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            bundle.putString(TemperatureMonitorService.ServiceArguments.IP_ADDRESS, Coordinator.getInstance().getServerSettings().getIpAddress());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            intent.putExtras(bundle);
+
+            startService(intent);
+        }
+
+        if (isMyServiceRunning(TemperatureMonitorService.class) && !mBound) {
+            // Create bind to service after the server has been started
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM_CONDITION, Coordinator.getInstance().getAlarmSettings().getAlarmCondition().getId());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
+            intent.putExtras(bundle);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+
+    }
+
+
+    @Override
+    public void onServiceStatus(ServiceStatus status) {
+        Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
+        if (status.isRunning()) {
+            // Service is up and running, check if we are bound if not start the service
+            if (!mBound) {
+                startBackgroundService();
+            }
+        }
+        else
+        {
+            if (isMyServiceRunning(TemperatureMonitorService.class)) {
+                // Service is stopped. Unbound and stop the service
+                if (mBound) {
+                    unbindService(mConnection);
+                    mBound = false;
+                }
+                Intent intent = new Intent(this, TemperatureMonitorService.class);
+                stopService(intent);
+            }
+        }
+
+=======
 
     public boolean startBackgroundService() {
 
@@ -444,10 +524,13 @@ public class MainActivity extends ActionBarActivity
 
         return true;
 
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 
 
     @Override
+<<<<<<< HEAD
+=======
     public void onServiceStatus(ServiceStatus status) {
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
         //handleNotification();
@@ -471,6 +554,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener) {
         FragmentManager fm = getFragmentManager();
         LogSessionDialogFragment editNameDialog = LogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings());

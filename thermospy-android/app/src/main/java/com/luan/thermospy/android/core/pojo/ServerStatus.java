@@ -18,6 +18,9 @@
  */
 package com.luan.thermospy.android.core.pojo;
 
+/**
+ * The server status enum
+ */
 public enum ServerStatus {
     UNKNOWN(-1),
     OK(0),
@@ -43,10 +46,8 @@ public enum ServerStatus {
                 return OK;
             case 100:
                 return INTERNAL_SERVER_ERROR;
-
             default:
                 return UNKNOWN;
-
         }
     }
 

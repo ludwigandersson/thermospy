@@ -19,7 +19,7 @@
 package com.luan.thermospy.android.core.pojo;
 
 /**
- * 
+ * The temperature object
  */
 public class Temperature {
 

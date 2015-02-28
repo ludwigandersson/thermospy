@@ -29,7 +29,7 @@ import com.luan.thermospy.android.core.serverrequest.type.GetImage;
 import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
 
 /**
- * Created by ludde on 15-02-01.
+ * Get the last taken picture.
  */
 public class GetImageReq implements AbstractServerRequest.ServerRequestListener<Bitmap>, RequestControl {
 

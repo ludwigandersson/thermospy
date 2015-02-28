@@ -32,7 +32,11 @@ import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
 import java.util.ArrayList;
 
 /**
+<<<<<<< HEAD
+ * Request for deleting a log session object
+=======
  * Created by ludde on 15-02-17.
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class DeleteLogSessionReq implements AbstractServerRequest.ServerRequestListener<String>, RequestControl {
 

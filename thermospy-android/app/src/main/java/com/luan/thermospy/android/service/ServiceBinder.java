@@ -22,7 +22,12 @@ package com.luan.thermospy.android.service;
 import android.os.Binder;
 
 /**
+<<<<<<< HEAD
+ * The Service binder object. Requested by the MainActivity so it can fetch the LocalService
+ * after a successfull bound.
+=======
  * Created by ludde on 15-02-24.
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class ServiceBinder extends Binder {
 

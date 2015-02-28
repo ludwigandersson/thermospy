@@ -30,6 +30,13 @@ import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.fragments.temperaturelog.LogSessionFragment;
 import com.luan.thermospy.android.fragments.temperaturelog.TemperatureGraph;
 
+<<<<<<< HEAD
+/**
+ * The LogSessionActivity is responsible for displaying a list of the available Log Sessions from
+ * the server.
+ */
+=======
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
 public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener, TemperatureGraph.OnTemperatureGraphFragmentListener {
 
     private static final String LOG_TAG = LogSessionActivity.class.getSimpleName();
@@ -96,11 +103,19 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
 
     @Override
     public void onLogSessionListError() {
+<<<<<<< HEAD
+        Log.d(LOG_TAG, "An error occurred within the log session fragment...");
+=======
         Log.d(LOG_TAG, "An error occured within the log session fragment...");
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 
     @Override
     public void onError() {
+<<<<<<< HEAD
+        Log.d(LOG_TAG, "An error occurred within the temperature graph fragment...");
+=======
         Log.d(LOG_TAG, "An error occured within the temperature graph fragment...");
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 }

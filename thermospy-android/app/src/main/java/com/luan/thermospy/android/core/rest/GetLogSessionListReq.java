@@ -42,7 +42,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
+<<<<<<< HEAD
+ * Request that fetches all log sessions created at the server.
+=======
  * Created by ludde on 15-02-17.
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class GetLogSessionListReq implements AbstractServerRequest.ServerRequestListener<JSONArray>, RequestControl {
 

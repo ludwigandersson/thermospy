@@ -162,7 +162,11 @@ public class SessionResource {
                     tx.rollback();
             }
             dbSession.close();
+<<<<<<< HEAD
             dbSession = null;    
+=======
+                
+>>>>>>> 490ad3b24612c7ca510805e33294de062c538504
             // Update 
             if (list.size() > 0) {
                 dbSession = controller.getSessionFactory().openSession();

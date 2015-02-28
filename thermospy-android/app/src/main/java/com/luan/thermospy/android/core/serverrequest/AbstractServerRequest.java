@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Thermospy-android.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.luan.thermospy.android.core.serverrequest;
@@ -24,7 +24,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.luan.thermospy.android.core.serverrequest.type.RequestControl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +35,8 @@ import java.util.List;
  * @param <R> The type of response that will be
  */
 public abstract class AbstractServerRequest<T, R> implements RequestControl {
+    private static final String LOG_TAG = AbstractServerRequest.class.getSimpleName();
+
     public interface ServerRequestListener<R>
     {
         void onOkResponse(R response);
@@ -67,13 +68,22 @@ public abstract class AbstractServerRequest<T, R> implements RequestControl {
     }
     public void request(String ip, int port)
     {
-        final UrlRequest request = new UrlRequest.UrlRequestBuilder().setIpAddress(ip).setPort(port).setUrlRequest(mRequestType).setRequestParams(requestParams).build();
-        final String url = request.toString();
+        try {
+            final UrlRequest request = new UrlRequest.UrlRequestBuilder().setIpAddress(ip).setPort(port).setUrlRequest(mRequestType).setRequestParams(requestParams).build();
+            final String url = request.toString();
 
-        Request<T> serverRequest = createRequest(url);
+            Request<T> serverRequest = createRequest(url);
 
-        serverRequest.setTag(this);
-        mRequestQueue.add(serverRequest);
+            serverRequest.setTag(this);
+            mRequestQueue.add(serverRequest);
+        } catch (Exception e)
+        {
+            if (mRequestQueue != null)
+            {
+                mRequestQueue.cancelAll(this);
+            }
+            mListener.onErrorResponse(new VolleyError("Failed to perform request!", e));
+        }
     }
     public void cancel()
     {

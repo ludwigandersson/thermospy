@@ -148,7 +148,7 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        requestQueue = Coordinator.getInstance().getRequestQueue();
+
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_setup_server, container, false);
 

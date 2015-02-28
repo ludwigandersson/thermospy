@@ -155,7 +155,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         });
         mStartStopLogSessionButton.setChecked(mLogSessionActive);
         mStartStopLogSessionButton.setText(getString(R.string.start_recording));
-        getServerStatus();
+
 
         return v;
     }
@@ -218,6 +218,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
             mTemperatureScaleStr = getString(R.string.temperature_scale_fahrenheit);
         }
         mTemperatureScale.setText(mTemperatureScaleStr);
+        getServerStatus();
     }
 
     @Override
@@ -276,6 +277,8 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
 
     @Override
     public void onConnectionLost() {
+        mStartStopLogSessionButton.setChecked(false);
+        mStartStopLogSessionButton.setEnabled(true);
         Toast t = Toast.makeText(getActivity(), R.string.lost_connection, Toast.LENGTH_SHORT);
         t.show();
         mListener.onServerNotRunning();
@@ -283,10 +286,13 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
-        if (status.getError() != ServerStatus.OK)
+        if (status.getError() != ServerStatus.OK) {
             mListener.onServerNotRunning();
-        else
+        }
+        else {
             mListener.onServiceStatus(status);
+        }
+
     }
 
     @Override
@@ -310,6 +316,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
 
     @Override
     public void onStopLogSessionError() {
+
         Log.d(LOG_TAG, "Failed to stop log session...");
         mProgress.dismiss();
     }

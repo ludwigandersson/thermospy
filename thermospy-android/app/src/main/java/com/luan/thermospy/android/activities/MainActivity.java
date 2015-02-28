@@ -418,7 +418,6 @@ public class MainActivity extends ActionBarActivity
         int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
         if (!isMyServiceRunning(TemperatureMonitorService.class))
         {
-
             // Bind to LocalService
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             Bundle bundle = new Bundle();
@@ -428,9 +427,6 @@ public class MainActivity extends ActionBarActivity
             intent.putExtras(bundle);
 
             startService(intent);
-
-
-
         }
 
         if (isMyServiceRunning(TemperatureMonitorService.class) && !mBound) {

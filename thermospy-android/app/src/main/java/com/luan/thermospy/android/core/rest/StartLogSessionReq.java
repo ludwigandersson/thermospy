@@ -1,5 +1,26 @@
+
+/*
+ * Copyright 2015 Ludwig Andersson
+ *
+ * This file is part of Thermospy-android.
+ *
+ * Thermospy-android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Thermospy-android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Thermospy-android.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.luan.thermospy.android.core.rest;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
@@ -24,9 +45,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by ludde on 15-02-17.
- */
 public class StartLogSessionReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 
     private static final String LOG_TAG = StartLogSessionReq.class.getSimpleName();
@@ -81,7 +99,7 @@ public class StartLogSessionReq implements AbstractServerRequest.ServerRequestLi
     {
         mLogSession = logSession;
         mListener = listener;
-        mPutJsonObjectReq = new PutJsonObject(queue, this, UrlRequestType.START_LOG_SESSION, getJsonObject());
+        mPutJsonObjectReq = new PutJsonObject(queue, this, UrlRequestType.START_LOG_SESSION, getJsonObject(), new DefaultRetryPolicy(15000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     }
 
     @Override

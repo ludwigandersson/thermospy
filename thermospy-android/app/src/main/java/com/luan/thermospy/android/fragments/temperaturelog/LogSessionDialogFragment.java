@@ -1,3 +1,21 @@
+/*
+ * Copyright 2015 Ludwig Andersson
+ *
+ * This file is part of Thermospy-android.
+ *
+ * Thermospy-android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Thermospy-android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Thermospy-android.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.luan.thermospy.android.fragments.temperaturelog;
 
 import android.app.Activity;
@@ -10,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
@@ -22,8 +41,6 @@ public class LogSessionDialogFragment extends DialogFragment implements StartLog
 
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
-    private static final String ARG_FOODTYPE_LIST = "foodtype";
-    private static final String ARG_CUTTYPE_LIST = "cuttype";
 
     String mIpAddress;
     int mPort;
@@ -98,12 +115,26 @@ public class LogSessionDialogFragment extends DialogFragment implements StartLog
 
     private void submit()
     {
-        LogSession session = new LogSession();
-        session.setName(mLogNameTxt.getText().toString());
-
-        mStartLogSessionReq.setLogSession(session);
-
-        mStartLogSessionReq.request(mIpAddress, mPort);
+        if (mLogNameTxt.getText().toString().isEmpty())
+        {
+            Toast t = Toast.makeText(getActivity(), getString(R.string.invalid_logname), Toast.LENGTH_SHORT);
+            t.show();
+        }
+        else {
+            LogSession session = new LogSession();
+            session.setName(mLogNameTxt.getText().toString());
+            if (!mTargetTemperature.getText().toString().isEmpty()) {
+                try {
+                    session.setTargetTemperature(Integer.parseInt(mTargetTemperature.getText().toString()));
+                } catch (NumberFormatException efe) {
+                    Toast t = Toast.makeText(getActivity(), getString(R.string.invalid_target_temperature), Toast.LENGTH_SHORT);
+                    t.show();
+                    return;
+                }
+            }
+            mStartLogSessionReq.setLogSession(session);
+            mStartLogSessionReq.request(mIpAddress, mPort);
+        }
     }
 
     private void cancel()

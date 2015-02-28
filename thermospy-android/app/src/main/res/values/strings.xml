@@ -31,7 +31,7 @@
     <string name="enable_alarm">Alarm enabled</string>
     <string name="disable_alarm">Alarm disabled</string>
     <string name="current_temperature">Current temperature</string>
-    <string name="lost_connection">Lost contact with mServerSettings!</string>
+    <string name="lost_connection">Lost contact with the server!</string>
     <string name="setup_aborted">Setup aborted!</string>
     <string name="setup_server_failed">Could not communicate with Server!</string>
     <string name="please_wait">Please wait</string>
@@ -78,5 +78,7 @@
     <string name="pref_key_aspect_ratio">pref_key_aspect_ratio</string>
     <string name="pref_key_refresh_interval">pref_key_refresh_interval</string>
     <string name="pref_key_temperature_degree">pref_key_temperature_degree</string>
+    <string name="invalid_target_temperature">Invalid target temperature!</string>
+    <string name="invalid_logname">Please specify a log name!</string>
     <color name="white">#FFFFFF</color>
 </resources>

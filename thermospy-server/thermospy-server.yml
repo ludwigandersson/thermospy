@@ -25,7 +25,7 @@ database:
   password: thermospy
 
   # the JDBC URL
-  url: jdbc:derby://localhost:1527/thermospydb
+  url: jdbc:derby://localhost:1527/.derbydb/thermospydb
 
   # any properties specific to your JDBC driver:
   properties:

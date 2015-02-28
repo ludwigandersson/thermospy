@@ -22,9 +22,7 @@ package com.luan.thermospy.server.health;
 
 
 import com.codahale.metrics.health.HealthCheck;
-/**
- * Created by ludde on 14-12-16.
- */
+
 public class TemplateHealthCheck extends HealthCheck {
     private final String template;
 

@@ -26,13 +26,12 @@ When the user starts the application he/she needs to setup the camera so the ser
 
 ![Alt text](../docs/docs/gfx/setup.png "Server setup") ![Alt text](../docs/docs/gfx/bounds.png "Specify bounds") ![Alt text](../docs/docs/gfx/confirm.png "Confirm temperature")
 
-Pre-requisites (if you want to run the binaries)
+Pre-requisites
 ===============
   
 ## Build the server
   > 1. Java jdk8
   > 2. Maven
-  
   
 ## Build the app
   > 1. Android Studio 1.0.2
@@ -41,7 +40,7 @@ Pre-requisites (if you want to run the binaries)
 Setup the server
 ================
  > $ sudo apt-get install fswebcam libimlib2 libx11-dev libimlib2-dev<br />
- > $ wget https://www.unix-ag.uni-kl.de/~auerswal/ssocr/ssocr-2.16.2.tar.bz2 ~/Downloads<br />
+ > $ wget https://www.unix-ag.uni-kl.de/~auerswal/ssocr/ssocr-2.16.3.tar.bz2 ~/Downloads<br />
  > $ tar xfv ~/Downloads/ssocr-2.16.2.tar.bz2 && cd ~/Downloads/ssocr-2.16.2/ && make && sudo make install<br />
   
 Make sure the webcam is working:<br />
@@ -59,9 +58,35 @@ Build the server
 >  $ cd ~/dev/thermospy/thermospy-server <br />
 >  $ mvn package <br />
 
+Configure the database
+> 1. Make sure to set $JAVA_HOME
+> 2. Make sure to set $DERBY_HOME=$JAVA_HOME/db
+> 3. sudo nano $JAVA_HOME/jre/lib/security/java.policy
+>   - add permission java.net.SocketPermission "localhost:1527", "listen"; within the grant statement.
+> 4. Start the db service. $DERBY_HOME/db/bin/startNetworkService
+> 5. run $DERBY_HOME/bin/ij
+> 6. create db:
+>   > connect 'jdbc:derby://localhost:1527/thermospydb;create=true';
+> 7. run sql script:
+>     run '/path/to/thermospy/thermospy-server/thermospydb_schema.sql' 
+
+Configure thermospy to start on boot.
+ > $ sudo nano /etc/rc.local 
+Add the following:
+  > export DERBY_HOME=/usr/lib/jvm/jdk-8-oracle-arm-vfp-hflt/db
+  > xport PATH=/usr/local/bin:$PATH
+  > cd /home/pi
+  > printf "Start network server"
+  > $DERBY_HOME/bin/startNetworkServer &
+  > printf "Start Thermospy server"
+  > cd /home/pi/thermospy/thermospy-server/target
+  > java -jar thermospy-server-0.9.jar server ../thermospy-server.yml | tee thermospy.log &
+
+
 Start the server:
 >  $ cd ~/dev/thermospy/thermospy-server/target <br />
 >  $ java -jar thermospy-server-0.9.jar server ../thermospy-server.yml  <br />
+
 
 Android App
 ===========

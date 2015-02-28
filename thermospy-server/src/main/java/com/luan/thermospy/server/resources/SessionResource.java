@@ -21,15 +21,19 @@
 package com.luan.thermospy.server.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import com.luan.thermospy.server.core.ServerStatus;
 import com.luan.thermospy.server.core.ThermospyController;
 
 import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.Temperatureentry;
 
 import com.luan.thermospy.server.db.dao.SessionDAO;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.IntParam;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -39,6 +43,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.hibernate.Query;
+import org.hibernate.Transaction;
 
 @Path("/thermospy-server/log-session")
 @Produces(MediaType.APPLICATION_JSON)
@@ -128,14 +134,62 @@ public class SessionResource {
         }
     }
 
+    /**
+     * Helper, closes any open log sessions.
+     * 1. Fetch all open log sessions.
+     * 2. Set isOpen = false and close them.
+     * 
+     */
     private void closeOpenLogSessions() {
-        List<Session> allOpen = sessionDao.findAllOpen();
-        allOpen.stream().map((s) -> {
-            s.setIsOpen(false);
-            return s;
-        }).forEach((s) -> {
-            sessionDao.create(s);
-        });
-        
+        org.hibernate.Session dbSession = null;
+        try {
+            dbSession = controller.getSessionFactory().openSession();
+            Transaction tx = null;
+            final List<Session> list = new LinkedList<>();
+            try {
+
+                tx = dbSession.beginTransaction();
+                Query q = dbSession.createQuery("FROM Session S WHERE isOpen = TRUE");
+
+                q.list().stream().forEach((o) -> {
+                    list.add((Session)o);
+                });
+
+                tx.commit();
+
+            } catch (Exception e) {
+                if (tx != null) 
+                    tx.rollback();
+            }
+            dbSession.close();
+                
+            // Update 
+            if (list.size() > 0) {
+                dbSession = controller.getSessionFactory().openSession();
+                try {
+                    tx = dbSession.beginTransaction();
+                    for (Session session : list) {
+                        String hql = "UPDATE Session set isOpen = false "  +
+                                "WHERE id = :session_id";
+                        Query query = dbSession.createQuery(hql);
+                        query.setParameter("session_id", session.getId());
+                        query.executeUpdate();
+                    }
+                    tx.commit();
+                } catch (Exception e) {
+                if (tx != null) 
+                    tx.rollback();
+                }
+            }
+        } 
+        catch (Exception e)
+        {
+        }
+        finally {
+            if (dbSession != null)
+            {
+                dbSession.close();
+            }
+      }
     }
 }

@@ -29,6 +29,7 @@ import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import io.dropwizard.db.DataSourceFactory;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import org.eclipse.jetty.util.log.Log;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -59,7 +60,6 @@ public class ThermospyController {
     @JsonIgnore
     private SessionFactory sessionFactory;
     
-  
     
     public int getTemperature() {
         synchronized(myLock){
@@ -185,7 +185,13 @@ public class ThermospyController {
 
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
+        
     }
+
+    public SessionFactory getSessionFactory() {
+        return this.sessionFactory;
+    }
+    
     
     
     

@@ -25,6 +25,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
@@ -39,7 +40,7 @@ public class NotificationHandler {
     private final int mId = 1;
     public void show(Context c, String temperature,  boolean playSound)
     {
-        NotificationCompat.Builder  mBuilder = createBuilder(c, temperature, playSound);
+        NotificationCompat.Builder  mBuilder = createBuilder(c, temperature, playSound, Notification.COLOR_DEFAULT);
 
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -54,13 +55,13 @@ public class NotificationHandler {
         mNotificationManager.cancel(mId);
     }
 
-    public void update(Context c, String temperature)
+    public void update(Context c, String temperature, int color)
     {
 
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder builder = createBuilder(c, temperature, false);
+        NotificationCompat.Builder builder = createBuilder(c, temperature, false, color);
 
         mNotificationManager.notify(
                 mId,
@@ -71,14 +72,14 @@ public class NotificationHandler {
         NotificationManager mNotificationManager =
                 (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationCompat.Builder builder = createBuilder(c, temperature, true);
+        NotificationCompat.Builder builder = createBuilder(c, temperature, true, Color.RED);
 
         mNotificationManager.notify(
                 mId,
                 builder.build());
     }
 
-    private NotificationCompat.Builder createBuilder(Context c, String temperature, boolean playSound)
+    private NotificationCompat.Builder createBuilder(Context c, String temperature, boolean playSound, int color)
     {
         String text = "Current temperature is "+temperature;
 
@@ -89,6 +90,7 @@ public class NotificationHandler {
                 .setContentTitle("Thermospy")
                 .setContentText(text)
                 .setOnlyAlertOnce(false)
+                .setColor(color)
                 .setSmallIcon(R.drawable.ic_stat_action_assignment_late);
 
         Uri alarmSound = null;

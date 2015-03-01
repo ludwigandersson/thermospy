@@ -96,14 +96,14 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            mAlarm = savedInstanceState.getString(ARG_ALARM_STRING);
-            mAlarmSwitchChecked = savedInstanceState.getBoolean(ARG_ALARM_ENABLED);
-            mIpAddress = savedInstanceState.getString(ARG_IP_ADDRESS);
-            mPort = savedInstanceState.getInt(ARG_PORT);
-            mRunning = savedInstanceState.getBoolean(ARG_SERVER_RUNNING);
-            mAlarmCondition = AlarmCondition.fromInt(savedInstanceState.getInt(ARG_ALARM_CONDITION));
-            mTemperatureScaleStr = savedInstanceState.getString(ARG_TEMPERATURE_SCALE);
+        if (getArguments() != null) {
+            mAlarm = getArguments().getString(ARG_ALARM_STRING);
+            mAlarmSwitchChecked = getArguments().getBoolean(ARG_ALARM_ENABLED);
+            mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
+            mPort = getArguments().getInt(ARG_PORT);
+            mRunning = getArguments().getBoolean(ARG_SERVER_RUNNING);
+            mAlarmCondition = AlarmCondition.fromInt(getArguments().getInt(ARG_ALARM_CONDITION));
+            mTemperatureScaleStr = getArguments().getString(ARG_TEMPERATURE_SCALE);
         }
     }
 

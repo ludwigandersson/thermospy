@@ -19,8 +19,10 @@
 
 package com.luan.thermospy.android.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -39,12 +41,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 /**
-<<<<<<< HEAD
  * The TemperatureMonitorService is responsible for monitoring the current temperature
  * and notifing the user about the temperature changes/sounding the alarm etc.
-=======
- * Created by ludde on 15-02-24.
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class TemperatureMonitorService extends Service {
 
@@ -130,18 +128,19 @@ public class TemperatureMonitorService extends Service {
                     AlarmCondition alarmCondition = mService.getAlarmCondition();
                     boolean triggerAlarm = alarmCondition.evaluate(m_temperature.getTemperature(), alarm);
                     if (triggerAlarm) {
+                        /* @todo Need to fix alarm handling. The main activity must listen to alarms etc.*/
                         mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString());
                         mAlarmFired = true;
                     }
                     else
                     {
-                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString());
+                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), getColor(alarmCondition, m_temperature.getTemperature(), alarm));
                     }
                 } else {
                     if (mAlarmFired && !alarmEnabled) {
                         mAlarmFired = false;
                     }
-                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString());
+                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), Notification.COLOR_DEFAULT);
                 }
                 synchronized (ServiceHandler.this) {
                     try {
@@ -156,6 +155,19 @@ public class TemperatureMonitorService extends Service {
             temperatureReq.cancel();
             mNotificationHandler.cancel(TemperatureMonitorService.this);
             stopSelf(msg.arg1);
+        }
+
+        private int getColor(AlarmCondition condition, int temperature, int alarm) {
+
+            double remaining;
+            if (condition == AlarmCondition.GREATER_THAN_OR_EQUAL) remaining = (double)temperature/alarm;
+            else remaining = (double)alarm/temperature;
+
+            if (remaining > 0.8) return Color.RED;
+            else if (remaining > 0.5) return 0xffa500;
+            else if (remaining > 0.2) return 0x32cd32;
+            else return Color.BLUE;
+
         }
 
 

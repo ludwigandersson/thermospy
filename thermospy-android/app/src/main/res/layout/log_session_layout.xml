@@ -23,7 +23,8 @@ android:gravity="center_vertical|top">
                 android:layout_height="wrap_content"
                 android:id="@+id/btnStartStopLogSession"
                 android:textOff="@string/start_recording"
-                android:textOn="@string/stop_recording" />
+                android:textOn="@string/stop_recording"
+                android:text="Reset bounds" />
         </LinearLayout>
 
     </RelativeLayout>

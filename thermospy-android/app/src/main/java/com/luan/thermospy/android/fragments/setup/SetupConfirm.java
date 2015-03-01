@@ -91,6 +91,7 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
         mTemperature = (TextView)v.findViewById(R.id.txtViewTemperature);
         Button btnAbort = (Button) v.findViewById(R.id.buttonRetry);
         Button btnOk = (Button) v.findViewById(R.id.buttonConfirm);
+        Button btnResetBounds = (Button)v.findViewById(R.id.buttonResetBounds);
         btnAbort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,6 +103,13 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
             @Override
             public void onClick(View v) {
                 requestStartService();
+            }
+        });
+
+        btnResetBounds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onResetBounds();
             }
         });
 
@@ -261,6 +269,7 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
     public interface OnThermoSpySetupConfirmedListener {
         public void setupConfirmed(String s);
         public void onSetupServerAborted();
+        public void onResetBounds();
     }
 
 }

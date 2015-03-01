@@ -329,6 +329,7 @@ public class MainActivity extends ActionBarActivity
         serverSettings.setRunning(running);
         serverSettings.setIpAddress(ipAddress);
         serverSettings.setPort(port);
+        serverSettings.setConnected(true);
 
         fragmentManager.beginTransaction()
                 .replace(R.id.container, SetupBoundary.newInstance(serverSettings.getIpAddress(), serverSettings.getPort()))
@@ -336,6 +337,14 @@ public class MainActivity extends ActionBarActivity
 
     }
 
+    @Override
+    public void onResetBounds() {
+        ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, SetupBoundary.newInstance(serverSettings.getIpAddress(), serverSettings.getPort()))
+                .commit();
+    }
 
 
     @Override
@@ -344,6 +353,7 @@ public class MainActivity extends ActionBarActivity
         Toast toast = Toast.makeText(getApplicationContext(), R.string.setup_server_failed, Toast.LENGTH_SHORT);
         toast.show();
         mNavigationDrawerFragment.selectItem(2);
+        Coordinator.getInstance().getServerSettings().setConnected(false);
     }
 
     @Override
@@ -352,7 +362,9 @@ public class MainActivity extends ActionBarActivity
         Toast toast = Toast.makeText(getApplicationContext(), R.string.setup_aborted, Toast.LENGTH_SHORT);
         toast.show();
         mNavigationDrawerFragment.selectItem(2);
+        Coordinator.getInstance().getServerSettings().setConnected(false);
     }
+
 
     @Override
     public void onBoundsSpecified(Boundary bounds) {
@@ -385,6 +397,7 @@ public class MainActivity extends ActionBarActivity
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             stopService(intent);
         }
+        Coordinator.getInstance().getServerSettings().setConnected(false);
     }
 
     @Override
@@ -436,6 +449,11 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
+
+        if (!Coordinator.getInstance().getServerSettings().isConnected()) {
+            Coordinator.getInstance().getServerSettings().setConnected(true);
+        }
+
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
         if (status.isRunning()) {
             // Service is up and running, check if we are bound if not start the service

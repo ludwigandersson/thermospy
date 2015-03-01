@@ -26,15 +26,9 @@ import java.util.Date;
  */
 public class LogSession {
     int id;
-<<<<<<< HEAD
     private Integer targetTemperature;
 
     public Boolean isOpen() {
-=======
-    private Integer targettemperature;
-
-    public Boolean getIsopen() {
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
         return isopen;
     }
 
@@ -43,19 +37,11 @@ public class LogSession {
     }
 
     public Integer getTargetTemperature() {
-<<<<<<< HEAD
         return targetTemperature;
     }
 
     public void setTargetTemperature(Integer targetTemperature) {
         this.targetTemperature = targetTemperature;
-=======
-        return targettemperature;
-    }
-
-    public void setTargetTemperature(Integer targetTemperature) {
-        this.targettemperature = targetTemperature;
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 
     private Boolean isopen;

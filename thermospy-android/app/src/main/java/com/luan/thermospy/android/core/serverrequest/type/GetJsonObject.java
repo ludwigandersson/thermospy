@@ -49,13 +49,9 @@ public class GetJsonObject extends AbstractServerRequest implements Response.Lis
 
     @Override
     public Request createRequest(String url) {
-<<<<<<< HEAD
         Request r = new JsonObjectRequest(url, null, this, this);
         r.setRetryPolicy(mRetryPolicy);
         return  r;
-=======
-        return new JsonObjectRequest(url, null, this, this);
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
     @Override
     public void onResponse(JSONObject response) {

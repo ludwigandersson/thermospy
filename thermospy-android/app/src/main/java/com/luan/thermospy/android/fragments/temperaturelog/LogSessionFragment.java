@@ -33,10 +33,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-<<<<<<< HEAD
-=======
-import android.widget.ListAdapter;
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -88,11 +84,8 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-<<<<<<< HEAD
     private ArrayAdapter mAdapter;
-=======
-    private ListAdapter mAdapter;
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
+
     private RequestQueue mRequestQueue;
     private DeleteLogSessionReq mDeleteLogSessionReq;
 
@@ -287,11 +280,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         if (mToBeDeleted != null && mToBeDeleted.getId() == id)
         {
             mLogSessionList.remove(mToBeDeleted);
-<<<<<<< HEAD
             mAdapter.notifyDataSetChanged();
-=======
-            mListView.invalidateViews();
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
         }
     }
 

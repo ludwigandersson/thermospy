@@ -80,7 +80,6 @@ public class MainActivity extends ActionBarActivity
      */
     private int mLastSelected = -1;
 
-<<<<<<< HEAD
     /**
      * The local service is responsible for notification handling. The main activity communicates
      * alarm settings, refresh rate etc.
@@ -90,13 +89,7 @@ public class MainActivity extends ActionBarActivity
     /**
      * Flag telling whether or not the local service is bound or not.
      */
-=======
-    private NotificationHandler mNotificationHandler = null;
 
-    private String degree = "°";
-
-    LocalService mService;
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     boolean mBound = false;
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -189,11 +182,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
         Coordinator.getInstance().save();
     }
 
@@ -410,19 +398,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNewTemperature(String temperature) {
         Coordinator.getInstance().setTemperature(temperature);
-<<<<<<< HEAD
-    }
-
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-=======
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -435,7 +410,6 @@ public class MainActivity extends ActionBarActivity
         return false;
     }
 
-<<<<<<< HEAD
     public void startBackgroundService() {
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -476,9 +450,7 @@ public class MainActivity extends ActionBarActivity
             if (!mBound) {
                 startBackgroundService();
             }
-        }
-        else
-        {
+        } else {
             if (isMyServiceRunning(TemperatureMonitorService.class)) {
                 // Service is stopped. Unbound and stop the service
                 if (mBound) {
@@ -489,72 +461,9 @@ public class MainActivity extends ActionBarActivity
                 stopService(intent);
             }
         }
-
-=======
-
-    public boolean startBackgroundService() {
-
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
-        if (!isMyServiceRunning(TemperatureMonitorService.class))
-        {
-            // Bind to LocalService
-            Intent intent = new Intent(this, TemperatureMonitorService.class);
-            Bundle bundle = new Bundle();
-            bundle.putString(TemperatureMonitorService.ServiceArguments.IP_ADDRESS, Coordinator.getInstance().getServerSettings().getIpAddress());
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
-            intent.putExtras(bundle);
-
-            startService(intent);
-        }
-
-        if (isMyServiceRunning(TemperatureMonitorService.class) && !mBound) {
-            // Create bind to service
-            Intent intent = new Intent(this, TemperatureMonitorService.class);
-            Bundle bundle = new Bundle();
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM_CONDITION, Coordinator.getInstance().getAlarmSettings().getAlarmCondition().getId());
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
-            bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
-            intent.putExtras(bundle);
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-
-        }
-
-        return true;
-
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     }
 
 
-    @Override
-<<<<<<< HEAD
-=======
-    public void onServiceStatus(ServiceStatus status) {
-        Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
-        //handleNotification();
-        if (status.isRunning()) {
-            if (!mBound) {
-                startBackgroundService();
-            }
-        }
-        else
-        {
-            if (isMyServiceRunning(TemperatureMonitorService.class)) {
-                if (mBound) {
-                    unbindService(mConnection);
-                    mBound = false;
-                }
-                Intent intent = new Intent(this, TemperatureMonitorService.class);
-                stopService(intent);
-            }
-        }
-
-    }
-
-    @Override
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
     public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener) {
         FragmentManager fm = getFragmentManager();
         LogSessionDialogFragment editNameDialog = LogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings());
@@ -563,7 +472,6 @@ public class MainActivity extends ActionBarActivity
 
     }
 
-    @Override
     public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
             Coordinator.getInstance().getAlarmSettings().setAlarmCondition(alarmCondition);
 
@@ -577,7 +485,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    @Override
     public void onAlarmTextChanged(String alarmText) {
         Coordinator.getInstance().getAlarmSettings().setAlarm(alarmText);
 

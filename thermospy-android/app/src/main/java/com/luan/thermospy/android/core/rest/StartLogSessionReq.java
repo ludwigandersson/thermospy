@@ -45,12 +45,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-<<<<<<< HEAD
+
 /**
  * Request that starts a new log session
  */
-=======
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
 public class StartLogSessionReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 
     private static final String LOG_TAG = StartLogSessionReq.class.getSimpleName();

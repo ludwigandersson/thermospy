@@ -27,13 +27,10 @@ import com.android.volley.toolbox.StringRequest;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
 import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
 
-<<<<<<< HEAD
+
 /**
  * Make a generic string request.
  */
-=======
-
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
 public class GenericStringRequest extends AbstractServerRequest implements Response.Listener<String>, Response.ErrorListener {
     private final int method;
 

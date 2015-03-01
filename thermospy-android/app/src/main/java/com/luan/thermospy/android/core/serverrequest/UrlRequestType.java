@@ -40,6 +40,7 @@ public enum UrlRequestType {
     CUT_TYPE(15, "cuts"),
     CUT_TYPE_LIST(16, "cuts/list"),
     TEMPERATURE_ENTRY_LIST(17, "get-temperature-entries/list"),
+    RESET_AND_GET_IMAGE(18, "get-last-image/reset-and-fetch"),
 
 
     UNKNOWN(-1, "");

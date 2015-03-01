@@ -37,12 +37,10 @@ import android.view.ViewGroup;
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.pojo.Action;
 import com.luan.thermospy.android.core.pojo.AspectRatio;
 import com.luan.thermospy.android.core.pojo.Boundary;
-import com.luan.thermospy.android.core.pojo.CameraControlAction;
-import com.luan.thermospy.android.core.rest.CameraControlReq;
 import com.luan.thermospy.android.core.rest.GetImageReq;
+import com.luan.thermospy.android.core.rest.ResetCameraAndGetImageReq;
 import com.luan.thermospy.android.core.rest.SetImgBoundsReq;
 import com.soundcloud.android.crop.Crop;
 
@@ -61,7 +59,7 @@ import java.io.IOException;
  * If the user specifies a boundary and press Done the view will notify its listener.
  * If the user cancels the user returns to the first view of the setup.
  */
-public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListener, SetImgBoundsReq.OnSetImgBoundsListener, CameraControlReq.OnCameraControlListener {
+public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListener, SetImgBoundsReq.OnSetImgBoundsListener, ResetCameraAndGetImageReq.OnGetImgListener {
     private File mFileTemp = null;
     private OnSetupBoundaryListener mListener;
     private final static String LOG_TAG = SetupBoundary.class.getCanonicalName();
@@ -76,10 +74,9 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
     private RequestQueue mRequestQueue;
     ProgressDialog mProgress = null;
 
-
-    SetImgBoundsReq mSetImgBoundsReq;
     GetImageReq mGetImageReq;
-    CameraControlReq mCameraControlReq;
+    ResetCameraAndGetImageReq mResetCameraAndGetImageReq;
+    SetImgBoundsReq mSetImgBoundsReq;
 
     public static SetupBoundary newInstance(String ip, int port) {
         Bundle args = new Bundle();
@@ -104,7 +101,7 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
 
         mProgress.setTitle("Please wait");
         mProgress.setMessage("Fetching image from camera...");
-        mCameraControlReq.request(mIpAddress, mPort);
+        mResetCameraAndGetImageReq.request(mIpAddress, mPort);
         mProgress.show();
     }
 
@@ -143,7 +140,7 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
         }
         else if (resultCode == Crop.RESULT_REFRESH)
         {
-            takePhoto();
+            requestImage();
         }
         else {
 
@@ -194,8 +191,8 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
             mRequestQueue = Coordinator.getInstance().getRequestQueue();
             mSetImgBoundsReq = new SetImgBoundsReq(mRequestQueue, this, new Boundary(0,0,0,0));
             mGetImageReq = new GetImageReq(mRequestQueue, this);
-            mCameraControlReq = new CameraControlReq(mRequestQueue, this, new Action(CameraControlAction.RUNONCE));
-            requestImage();
+            mResetCameraAndGetImageReq = new ResetCameraAndGetImageReq(mRequestQueue, this);
+            takePhoto();
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnAlarmFragmentListener");
@@ -208,7 +205,7 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
         mListener = null;
         mSetImgBoundsReq = null;
         mGetImageReq = null;
-        mCameraControlReq = null;
+        mResetCameraAndGetImageReq = null;
     }
 
     @Override
@@ -219,7 +216,7 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
         }
         mSetImgBoundsReq.cancel();
         mGetImageReq.cancel();
-        mCameraControlReq.cancel();
+        mResetCameraAndGetImageReq.cancel();
     }
 
     @Override
@@ -232,7 +229,7 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
 
         mSetImgBoundsReq.cancel();
         mGetImageReq.cancel();
-        mCameraControlReq.cancel();
+        mResetCameraAndGetImageReq.cancel();
     }
 
     @Override
@@ -253,11 +250,11 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-            byte[] bitmapdata = bos.toByteArray();
+            byte[] bitmapData = bos.toByteArray();
 
             //write the bytes in file
             FileOutputStream fos = new FileOutputStream(mFileTemp);
-            fos.write(bitmapdata);
+            fos.write(bitmapData);
 
             runImgCrop();
             mProgress.dismiss();
@@ -283,26 +280,6 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
 
     @Override
     public void onSetImgBoundsError() {
-        mProgress.hide();
-        mListener.onSetupAborted();
-    }
-
-    @Override
-    public void onCameraControlResp(Action action) {
-        if (mCameraControlReq.getAction().getActionId() == action.getActionId())
-        {
-            requestImage();
-        }
-        else
-        {
-            Log.w(LOG_TAG, "Unknown camera control response received: "+action.getActionId());
-            mProgress.hide();
-            mListener.onSetupAborted();
-        }
-    }
-
-    @Override
-    public void onCameraControlError() {
         mProgress.hide();
         mListener.onSetupAborted();
     }

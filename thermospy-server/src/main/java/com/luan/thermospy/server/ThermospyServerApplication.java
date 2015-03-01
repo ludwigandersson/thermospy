@@ -72,7 +72,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         
         final GetTempResource tempResource = new GetTempResource(controller);
         final CameraControlResource cameraResource = new CameraControlResource(controller, configuration.getCameraDeviceConfig());
-        final GetLastImage getLastImage = new GetLastImage(webcamDevice);
+        final GetLastImage getLastImage = new GetLastImage(controller, webcamDevice);
         final ImageBoundaryResource imgBoundaryResource = new ImageBoundaryResource(controller);
         final RefreshRateResource refreshRateResource = new RefreshRateResource(controller);
         final CameraDeviceConfigResource cameraDeviceConfigResource = new CameraDeviceConfigResource(webcamDevice);

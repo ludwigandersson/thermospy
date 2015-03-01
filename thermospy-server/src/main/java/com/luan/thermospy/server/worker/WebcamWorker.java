@@ -62,6 +62,7 @@ public class WebcamWorker extends Thread implements Runnable {
             } catch (Exception e)
             {
                 controller.setServerStatus(ServerStatus.INTERNAL_SERVER_ERROR);
+                controller.setTemperature(Integer.MIN_VALUE);
                 result = false;
             }
             return result;

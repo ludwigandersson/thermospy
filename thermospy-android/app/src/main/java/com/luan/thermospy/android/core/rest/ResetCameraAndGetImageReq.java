@@ -21,7 +21,9 @@ package com.luan.thermospy.android.core.rest;
 
 import android.graphics.Bitmap;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
 import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
@@ -54,7 +56,11 @@ public class ResetCameraAndGetImageReq implements AbstractServerRequest.ServerRe
 
     public ResetCameraAndGetImageReq(RequestQueue queue, OnGetImgListener listener)
     {
-        mImageReq = new GetImage(queue, this, UrlRequestType.RESET_AND_GET_IMAGE);
+        RetryPolicy retryPolicy = new DefaultRetryPolicy(
+                15000,
+                1,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        mImageReq = new GetImage(queue, this, UrlRequestType.RESET_AND_GET_IMAGE, retryPolicy);
         mListener = listener;
     }
 

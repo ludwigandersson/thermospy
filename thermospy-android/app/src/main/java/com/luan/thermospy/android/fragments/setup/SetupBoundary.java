@@ -22,6 +22,7 @@ package com.luan.thermospy.android.fragments.setup;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -59,10 +60,15 @@ import java.io.IOException;
  * If the user specifies a boundary and press Done the view will notify its listener.
  * If the user cancels the user returns to the first view of the setup.
  */
-public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListener, SetImgBoundsReq.OnSetImgBoundsListener, ResetCameraAndGetImageReq.OnGetImgListener {
+public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListener, SetImgBoundsReq.OnSetImgBoundsListener, ResetCameraAndGetImageReq.OnGetImgListener, DialogInterface.OnCancelListener {
     private File mFileTemp = null;
     private OnSetupBoundaryListener mListener;
     private final static String LOG_TAG = SetupBoundary.class.getCanonicalName();
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        mListener.onSetupServerAborted();
+    }
 
     static interface Arguments {
         String IP_ADDRESS = "ipaddress";
@@ -96,6 +102,7 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
     {
         if (mProgress == null) {
             mProgress = new ProgressDialog(getActivity());
+            mProgress.setOnCancelListener(this);
         }
         mProgress.setCanceledOnTouchOutside(false);
 
@@ -140,11 +147,11 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
         }
         else if (resultCode == Crop.RESULT_REFRESH)
         {
-            requestImage();
+            takePhoto();
         }
         else {
 
-            mListener.onSetupAborted();
+            mListener.onSetupServerAborted();
         }
     }
 
@@ -168,18 +175,6 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
     }
 
 
-    private void requestImage() {
-        if (mProgress == null) {
-            mProgress = new ProgressDialog(getActivity());
-        }
-        mProgress.setCanceledOnTouchOutside(false);
-
-        mProgress.setTitle(getString(R.string.please_wait));
-        mProgress.setMessage(getString(R.string.progress_fetching_image));
-        mGetImageReq.request(mIpAddress, mPort);
-        mProgress.show();
-
-    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -262,14 +257,14 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
         } catch (IOException e) {
             Log.e(LOG_TAG, "Failed to run crop activity!", e);
             mProgress.dismiss();
-            mListener.onSetupAborted();
+            mListener.onSetupServerAborted();
         }
 
     }
 
     @Override
     public void onGetImgError() {
-        mListener.onSetupAborted();
+        mListener.onSetupServerAborted();
     }
 
     @Override
@@ -281,12 +276,12 @@ public class SetupBoundary extends Fragment implements GetImageReq.OnGetImgListe
     @Override
     public void onSetImgBoundsError() {
         mProgress.hide();
-        mListener.onSetupAborted();
+        mListener.onSetupServerAborted();
     }
 
     public interface OnSetupBoundaryListener {
         public void onBoundsSpecified(Boundary bounds);
-        public void onSetupAborted();
+        public void onSetupServerAborted();
     }
 
 }

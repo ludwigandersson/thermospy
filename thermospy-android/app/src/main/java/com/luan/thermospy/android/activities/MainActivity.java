@@ -188,8 +188,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onBackPressed()
     {
-        if (mLastSelected > 0)
-        {
+        if (mLastSelected > 0) {
             mNavigationDrawerFragment.selectItem(0);
         }
         else
@@ -348,6 +347,14 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    public void onSetupServerAborted() {
+        onServiceStatus(new ServiceStatus());
+        Toast toast = Toast.makeText(getApplicationContext(), R.string.setup_aborted, Toast.LENGTH_SHORT);
+        toast.show();
+        mNavigationDrawerFragment.selectItem(2);
+    }
+
+    @Override
     public void onBoundsSpecified(Boundary bounds) {
         FragmentManager fragmentManager = getFragmentManager();
 
@@ -361,21 +368,6 @@ public class MainActivity extends ActionBarActivity
         onServiceStatus(new ServiceStatus());
         // Start
         mNavigationDrawerFragment.selectItem(0);
-    }
-
-
-    @Override
-    public void onSetupAborted() {
-        onServiceStatus(new ServiceStatus());
-        Toast toast = Toast.makeText(getApplicationContext(), R.string.setup_aborted, Toast.LENGTH_SHORT);
-        toast.show();
-        mNavigationDrawerFragment.selectItem(2);
-    }
-
-    @Override
-    public void abortSetup() {
-        onServiceStatus(new ServiceStatus());
-        mNavigationDrawerFragment.selectItem(2);
     }
 
     @Override

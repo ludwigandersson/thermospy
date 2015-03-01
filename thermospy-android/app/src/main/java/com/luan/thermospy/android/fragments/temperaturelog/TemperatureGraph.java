@@ -71,6 +71,7 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_SESSION_ID = "sessionid";
+    private static String ARG_DATEFORMAT = "dateformat";
 
     private int mSessionId;
     private int mPort;
@@ -85,6 +86,7 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
 
     private ShareActionProvider mShareActionProvider;
     private List<TemperatureEntry> mTemperatureList;
+    private String mDateFormat;
 
     /**
      * Use this factory method to create a new instance of
@@ -93,15 +95,17 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
      * @param ipAddress Ip address of thermospy-server
      * @param port Port to use
      * @param sessionId The session id
+     * @param dateFormat
      * @return A new instance of fragment TemperatureGraph.
      */
     // TODO: Rename and change types and number of parameters
-    public static TemperatureGraph newInstance(String ipAddress, int port, int sessionId) {
+    public static TemperatureGraph newInstance(String ipAddress, int port, int sessionId, String dateFormat) {
         TemperatureGraph fragment = new TemperatureGraph();
         Bundle args = new Bundle();
         args.putString(ARG_IP_ADDRESS, ipAddress);
         args.putInt(ARG_PORT, port);
         args.putInt(ARG_SESSION_ID, sessionId);
+        args.putString(ARG_DATEFORMAT, dateFormat);
         fragment.setArguments(args);
         return fragment;
     }
@@ -117,6 +121,7 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
             mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
             mPort = getArguments().getInt(ARG_PORT);
             mSessionId = getArguments().getInt(ARG_SESSION_ID);
+            mDateFormat = getArguments().getString(ARG_DATEFORMAT);
         }
 
         setHasOptionsMenu(true);
@@ -149,7 +154,7 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
             {
                 writer = new BufferedWriter( new FileWriter( outputFile.getAbsolutePath()));
 
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat df = new SimpleDateFormat(mDateFormat);
 
                 for (TemperatureEntry entry : mTemperatureList)
                 {

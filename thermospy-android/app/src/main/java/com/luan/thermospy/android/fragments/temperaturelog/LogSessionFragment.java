@@ -33,7 +33,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
@@ -60,6 +59,8 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     private static final String ARG_PARAM_IP_ADDRESS = "ipaddress";
     private static final String ARG_PARAM_PORT = "port";
     private static final String LOG_TAG = LogSessionFragment.class.getSimpleName();
+    private static final String ARG_DATEFORMAT = "dateformat";
+    private static final String ARG_TIMEFORMAT = "timeformat";
 
     // TODO: Rename and change types of parameters
     private String mIpAddress;
@@ -88,13 +89,15 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
     private RequestQueue mRequestQueue;
     private DeleteLogSessionReq mDeleteLogSessionReq;
+    private String mDateFormat;
 
     // TODO: Rename and change types of parameters
-    public static LogSessionFragment newInstance(String ipAddress, int port) {
+    public static LogSessionFragment newInstance(String ipAddress, int port, String dateformat) {
         LogSessionFragment fragment = new LogSessionFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM_IP_ADDRESS, ipAddress);
         args.putInt(ARG_PARAM_PORT, port);
+        args.putString(ARG_DATEFORMAT,dateformat);
         fragment.setArguments(args);
         return fragment;
     }
@@ -113,6 +116,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         if (getArguments() != null) {
             mIpAddress = getArguments().getString(ARG_PARAM_IP_ADDRESS);
             mPort = getArguments().getInt(ARG_PARAM_PORT);
+            mDateFormat = getArguments().getString(ARG_DATEFORMAT);
         }
     }
 
@@ -211,19 +215,6 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
 
             mListener.onShowTemperatureList(session);
 
-        }
-    }
-
-    /**
-     * The default content for this Fragment has a TextView that is shown when
-     * the list is empty. If you would like to change the text, call this method
-     * to supply the text it should use.
-     */
-    public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
-
-        if (emptyView instanceof TextView) {
-            ((TextView) emptyView).setText(emptyText);
         }
     }
 

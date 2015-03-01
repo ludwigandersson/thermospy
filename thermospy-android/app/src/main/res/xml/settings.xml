@@ -18,14 +18,36 @@
         android:defaultValue="5"/>
     <ListPreference
 
-        android:key="@string/pref_key_aspect_ratio"
-        android:summary="@string/pref_aspect_ratio_summary"
-        android:title="@string/pref_title_aspect_ratio"
+    android:key="@string/pref_key_aspect_ratio"
+    android:summary="@string/pref_aspect_ratio_summary"
+    android:title="@string/pref_title_aspect_ratio"
+
+
+    android:defaultValue="1"
+        android:entries="@array/aspect_ratios"
+        android:entryValues="@array/aspect_ratio_values"/>
+
+    <ListPreference
+
+        android:key="@string/pref_key_timeformat"
+        android:summary="@string/pref_timeformat_summary"
+        android:title="@string/pref_title_timeformat"
 
 
         android:defaultValue="1"
-        android:entries="@array/aspect_ratios"
-        android:entryValues="@array/aspect_ratio_values"/>
+        android:entries="@array/timeformat"
+        android:entryValues="@array/timeformat_values"/>
+
+    <ListPreference
+
+        android:key="@string/pref_key_dateformat"
+        android:summary="@string/pref_dateformat_summary"
+        android:title="@string/pref_title_dateformat"
+
+
+        android:defaultValue="1"
+        android:entries="@array/dateformat"
+        android:entryValues="@array/dateformat"/>
 
 </PreferenceScreen>
 

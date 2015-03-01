@@ -78,7 +78,13 @@
     <string name="pref_key_aspect_ratio">pref_key_aspect_ratio</string>
     <string name="pref_key_refresh_interval">pref_key_refresh_interval</string>
     <string name="pref_key_temperature_degree">pref_key_temperature_degree</string>
+    <string name="pref_key_timeformat">pref_key_timeformat</string>
+    <string name="pref_key_dateformat">pref_key_dateformat</string>
     <string name="invalid_target_temperature">Invalid target temperature!</string>
     <string name="invalid_logname">Please specify a log name!</string>
+    <string name="pref_timeformat_summary"></string>
+    <string name="pref_title_timeformat">Specify time format</string>
+    <string name="pref_dateformat_summary" />
+    <string name="pref_title_dateformat">Specify date format</string>
     <color name="white">#FFFFFF</color>
 </resources>

@@ -252,7 +252,17 @@ public class MainActivity extends ActionBarActivity
         }
         else if (position == 3)
         {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            String dateformat = settings.getString(getString(R.string.pref_key_dateformat), "yyyy-MM-dd");
+            String timeformat = settings.getString(getString(R.string.pref_key_timeformat), "HH");
+            String dateTimeFormat = dateformat+" "+timeformat+":mm:ss";
+            if (timeformat.equals("hh"))
+            {
+                // Show am/pm marker
+                dateTimeFormat += " a";
+            }
             Intent intent = new Intent(this, LogSessionActivity.class);
+            intent.putExtra(LogSessionActivity.DATEFORMAT, dateTimeFormat);
             startActivity(intent);
             return;
         }

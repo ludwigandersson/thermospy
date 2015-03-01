@@ -24,5 +24,23 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+    <string-array name="dateformat">
+        <item>yyyy-MM-dd</item>
+        <item>MM-dd-yyyy</item>
+        <item>dd-MM-yyyy</item>
+    </string-array>
+    <string-array name="dateformat_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="timeformat">
+        <item>24 h</item>
+        <item>12 h</item>
+    </string-array>
+    <string-array name="timeformat_values">
+        <item>HH</item>
+        <item>hh</item>
+    </string-array>
 
 </resources>

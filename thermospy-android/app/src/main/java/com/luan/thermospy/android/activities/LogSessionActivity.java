@@ -38,19 +38,28 @@ import com.luan.thermospy.android.fragments.temperaturelog.TemperatureGraph;
 public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener, TemperatureGraph.OnTemperatureGraphFragmentListener {
 
     private static final String LOG_TAG = LogSessionActivity.class.getSimpleName();
+    public static final String DATEFORMAT = "key_dateformat";
+    private String mDateFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_session);
         setTitle(getString(R.string.temperature_log));
-        if (savedInstanceState == null) {
-            int port = Coordinator.getInstance().getServerSettings().getPort();
-            String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.container, LogSessionFragment.newInstance(ipAddress, port))
-                    .commit();
+
+        if (savedInstanceState != null) {
+            mDateFormat = savedInstanceState.getString(DATEFORMAT);
         }
+        else
+        {
+            mDateFormat = getIntent().getExtras().getString(DATEFORMAT);
+        }
+        int port = Coordinator.getInstance().getServerSettings().getPort();
+        String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
+        getFragmentManager().beginTransaction()
+        .replace(R.id.container, LogSessionFragment.newInstance(ipAddress, port, mDateFormat))
+                .commit();
+
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -75,8 +84,9 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
         setTitle(session.getName());
         int port = Coordinator.getInstance().getServerSettings().getPort();
         String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
+
         getFragmentManager().beginTransaction()
-                .add(R.id.container, TemperatureGraph.newInstance(ipAddress, port, session.getId()))
+                .add(R.id.container, TemperatureGraph.newInstance(ipAddress, port, session.getId(), mDateFormat))
                 .addToBackStack(null)
                 .commit();
         getFragmentManager().executePendingTransactions();

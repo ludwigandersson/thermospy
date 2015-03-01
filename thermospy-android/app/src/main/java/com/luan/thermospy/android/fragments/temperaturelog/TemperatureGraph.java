@@ -54,6 +54,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,9 +149,18 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
             {
                 writer = new BufferedWriter( new FileWriter( outputFile.getAbsolutePath()));
 
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
                 for (TemperatureEntry entry : mTemperatureList)
                 {
-                    writer.write(entry.toCsv()+"\n");
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(entry.getId()).append(",")
+                            .append(df.format(entry.getTimestamp().getTime()))
+                            .append(",")
+                            .append(entry.getTemperature())
+                            .append("\n");
+
+                    writer.write(builder.toString());
                 }
                 writer.flush();
 
@@ -315,7 +325,7 @@ public class TemperatureGraph extends Fragment implements GetTemperatureEntryLis
         }
 
         // create a dataset and give it a type
-        LineDataSet set1 = new LineDataSet(yVals, "DataSet 1");
+        LineDataSet set1 = new LineDataSet(yVals, getString(R.string.temperature));
         set1.setColor(ColorTemplate.getHoloBlue());
         set1.setCircleColor(ColorTemplate.getHoloBlue());
         set1.setLineWidth(2f);

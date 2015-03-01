@@ -22,11 +22,7 @@ package com.luan.thermospy.android.core.pojo;
 import java.util.Date;
 
 /**
-<<<<<<< HEAD
  * The temperature object, as a db object received from the server.
-=======
- * Created by ludde on 15-02-17.
->>>>>>> 490ad3b24612c7ca510805e33294de062c538504
  */
 public class TemperatureEntry {
     int id;
@@ -66,13 +62,4 @@ public class TemperatureEntry {
         this.fkSessionId = fkSessionId;
     }
 
-    public String toCsv() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(id).append(",")
-               .append(timestamp).append(",")
-               .append(temperature);
-
-        return builder.toString();
-
-    }
 }

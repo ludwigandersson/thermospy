@@ -166,7 +166,7 @@ public class LogSessionResource {
             try {
 
                 tx = dbSession.beginTransaction();
-                Query q = dbSession.createQuery("FROM Session S WHERE isOpen = TRUE");
+                Query q = dbSession.createQuery("FROM LogSession S WHERE isOpen = TRUE");
 
                 q.list().stream().forEach((o) -> {
                     list.add((LogSession)o);
@@ -186,7 +186,7 @@ public class LogSessionResource {
                 try {
                     tx = dbSession.beginTransaction();
                     for (LogSession session : list) {
-                        String hql = "UPDATE Session set isOpen = false "  +
+                        String hql = "UPDATE LogSession set isOpen = false "  +
                                 "WHERE id = :session_id";
                         Query query = dbSession.createQuery(hql);
                         query.setParameter("session_id", session.getId());

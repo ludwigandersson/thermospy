@@ -46,12 +46,12 @@ public class SessionDAO  extends AbstractDAO<LogSession> {
     
     public boolean delete(int sessionId)
     {
-       Query q = currentSession().createQuery("delete Session where id = "+sessionId);
+       Query q = currentSession().createQuery("delete LogSession where id = "+sessionId);
        return q.executeUpdate() >= 1;
     }
 
     public List<LogSession> findAllOpen() {
-       Query q = currentSession().createQuery("SELECT * FROM SESSION WHERE isOpen = TRUE");
+       Query q = currentSession().createQuery("SELECT * FROM LogSession WHERE isOpen = TRUE");
        return q.list();
     }
 }

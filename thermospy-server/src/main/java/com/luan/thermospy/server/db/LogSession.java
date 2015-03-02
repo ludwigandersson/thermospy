@@ -33,14 +33,18 @@ public class LogSession  implements java.io.Serializable {
      @GeneratedValue(generator="id_generator", strategy=GenerationType.SEQUENCE)
      @Column(name = "id", unique = true, nullable = false)
      private int id;
+     @Column(name="name")
      private String name;
      @Column(name="START_TIMESTAMP")
      private Date startTimestamp;
      @Column(name="END_TIMESTAMP")
      private Date endTimestamp;
      
+     @Column(name="column")
      private String comment;
+     @Column(name="TARGETTEMPERATURE")
      private Integer targetTemperature;
+     @Column(name="isopen")
      private Boolean isopen;
 
     public LogSession() {

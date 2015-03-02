@@ -40,7 +40,7 @@ public class LogSession  implements java.io.Serializable {
      @Column(name="END_TIMESTAMP")
      private Date endTimestamp;
      
-     @Column(name="column")
+     @Column(name="comment")
      private String comment;
      @Column(name="TARGETTEMPERATURE")
      private Integer targetTemperature;

@@ -241,4 +241,12 @@ public class EditLogSessionDialogFragment extends DialogFragment implements Upda
         public void onError();
     }
 
+
+    @Override
+    public void onCancel(DialogInterface dialog)
+    {
+        super.onCancel(dialog);
+        mUpdateLogSessionReq.cancel();
+    }
+
 }

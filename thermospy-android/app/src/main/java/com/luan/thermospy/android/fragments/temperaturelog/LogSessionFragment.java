@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -54,7 +55,8 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnLogSessionFragmentListener}
  * interface.
  */
-public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener, EditLogSessionDialogFragment.OnEditLogSessionListener {
+public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener,
+        GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener, EditLogSessionDialogFragment.OnEditLogSessionListener, DialogInterface.OnCancelListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -321,6 +323,14 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     public void onError() {
         Toast t = Toast.makeText(getActivity(), getString(R.string.failed_to_update_logsession), Toast.LENGTH_SHORT);
         t.show();
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog)
+    {
+        mDeleteLogSessionReq.cancel();
+        mGetLogSessionListReq.cancel();
+        mListener.onLogSessionListError();
     }
 
     /**

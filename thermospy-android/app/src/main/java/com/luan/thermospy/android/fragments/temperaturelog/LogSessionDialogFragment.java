@@ -37,7 +37,7 @@ import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.rest.StartLogSessionReq;
 
-public class LogSessionDialogFragment extends DialogFragment implements StartLogSessionReq.OnStartLogSessionListener {
+public class LogSessionDialogFragment extends DialogFragment implements StartLogSessionReq.OnStartLogSessionListener, DialogInterface.OnCancelListener {
 
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
@@ -146,6 +146,7 @@ public class LogSessionDialogFragment extends DialogFragment implements StartLog
     {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setOnCancelListener(this);
         }
         mProgressDialog.setCanceledOnTouchOutside(false);
         mProgressDialog.setTitle("Please wait");
@@ -231,7 +232,17 @@ public class LogSessionDialogFragment extends DialogFragment implements StartLog
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
         mDissmissListener.onDismiss(dialog);
+        mStartLogSessionReq.cancel();
 
     }
+
+    @Override
+    public void onCancel(DialogInterface dialog)
+    {
+        super.onCancel(dialog);
+        mStartLogSessionReq.cancel();
+    }
+
+
 
 }

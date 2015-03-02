@@ -20,6 +20,7 @@
 package com.luan.thermospy.android.activities;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -53,7 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LineGraphActivity extends ActionBarActivity implements GetTemperatureEntryListReq.OnGetTemperatureEntryListener {
+public class LineGraphActivity extends ActionBarActivity implements GetTemperatureEntryListReq.OnGetTemperatureEntryListener, DialogInterface.OnCancelListener {
 
     public static final String ARG_IP_ADDRESS = "ipaddress";
     public static final String ARG_PORT = "port";
@@ -232,6 +233,7 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
         if (mProgressDialog == null)
         {
             mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setOnCancelListener(this);
         }
 
         mProgressDialog.setCanceledOnTouchOutside(false);
@@ -296,11 +298,24 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
 
     private void setData(List<TemperatureEntry> logSessionList) {
 
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+
         ArrayList<Entry> yVals = new ArrayList<Entry>();
         ArrayList<String> xVals = new ArrayList<String>();
+        long time=logSessionList.get(0).getTimestamp().getTime();
+        int seconds= 0;
         for (int i = 0; i < logSessionList.size(); i++) {
-            xVals.add((i) + "");
+            TemperatureEntry temperatureEntry = logSessionList.get(i);
+            seconds += (temperatureEntry.getTimestamp().getTime()-time)/1000;
+            xVals.add(seconds + "");
+
             yVals.add(new Entry(logSessionList.get(i).getTemperature(), i));
+
+            if (temperatureEntry.getTemperature() < min) min = temperatureEntry.getTemperature();
+            if (temperatureEntry.getTemperature() > max) max = temperatureEntry.getTemperature();
+
+            time = temperatureEntry.getTimestamp().getTime();
         }
 
         // create a dataset and give it a type
@@ -338,7 +353,8 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.addLimitLine(ll1);
         leftAxis.setStartAtZero(true);
-
+        leftAxis.setAxisMaxValue(max + 10);
+        leftAxis.setAxisMinValue(min-10);
         mChart.getAxisRight().setEnabled(false);
 
         // set data
@@ -404,5 +420,13 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
         } else {
             super.onBackPressed();
         }
+    }
+
+
+    @Override
+    public void onCancel(DialogInterface dialog)
+    {
+        mGetTemperatureEntryListReq.cancel();
+        finish();
     }
 }

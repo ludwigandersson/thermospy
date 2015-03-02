@@ -23,7 +23,7 @@ package com.luan.thermospy.server.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.luan.thermospy.server.actions.CameraAction;
-import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.LogSession;
 import com.luan.thermospy.server.db.Temperatureentry;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
 import io.dropwizard.db.DataSourceFactory;
@@ -54,7 +54,7 @@ public class ThermospyController {
     @JsonIgnore
     private ServerStatus serverStatus = ServerStatus.OK;
     @JsonIgnore
-    private Session logSession = null;
+    private LogSession logSession = null;
     @JsonIgnore
     TemperatureEntryDAO temperatureEntryDao = null;
     @JsonIgnore
@@ -167,13 +167,13 @@ public class ThermospyController {
         }
     }
 
-    public Session getLogSession() {
+    public LogSession getLogSession() {
         synchronized (myLock) {
             return this.logSession;
         }
     }
 
-    public void setLogSession(Session session) {
+    public void setLogSession(LogSession session) {
         synchronized(myLock) {
             this.logSession = session;
         }

@@ -4,7 +4,7 @@ import com.luan.thermospy.server.actions.SingleShotAction;
 import com.luan.thermospy.server.configuration.ThermospyServerConfiguration;
 import com.luan.thermospy.server.core.ThermospyController;
 
-import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.LogSession;
 import com.luan.thermospy.server.db.Temperatureentry;
 
 import com.luan.thermospy.server.db.dao.SessionDAO;
@@ -112,7 +112,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         bootstrap.addBundle(hibernate);
     }
     
-    private final HibernateBundle<ThermospyServerConfiguration> hibernate = new HibernateBundle<ThermospyServerConfiguration>(Session.class, Temperatureentry.class) {
+    private final HibernateBundle<ThermospyServerConfiguration> hibernate = new HibernateBundle<ThermospyServerConfiguration>(LogSession.class, Temperatureentry.class) {
     @Override
     public DataSourceFactory getDataSourceFactory(ThermospyServerConfiguration configuration) {
         return configuration.getDataSourceFactory();

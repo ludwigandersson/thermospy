@@ -20,27 +20,27 @@
  */
 package com.luan.thermospy.server.db.dao;
 
-import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.LogSession;
 import io.dropwizard.hibernate.AbstractDAO;
 import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
-public class SessionDAO  extends AbstractDAO<Session> {
+public class SessionDAO  extends AbstractDAO<LogSession> {
 
     public SessionDAO(SessionFactory sessionFactory) {
         super(sessionFactory);
     }
     
-    public Session findById(int id) {
+    public LogSession findById(int id) {
         return get(id);
     }
 
-    public Session create(Session session) {
+    public LogSession create(LogSession session) {
         return persist(session);
     }
 
-    public List<Session> findAll() {
+    public List<LogSession> findAll() {
         return list(namedQuery("Session.findAll"));
     }
     
@@ -50,7 +50,7 @@ public class SessionDAO  extends AbstractDAO<Session> {
        return q.executeUpdate() >= 1;
     }
 
-    public List<Session> findAllOpen() {
+    public List<LogSession> findAllOpen() {
        Query q = currentSession().createQuery("SELECT * FROM SESSION WHERE isOpen = TRUE");
        return q.list();
     }

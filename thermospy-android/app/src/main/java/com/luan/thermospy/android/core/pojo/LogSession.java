@@ -74,6 +74,7 @@ public class LogSession {
             }
         });
 
+
         Gson gson = builder.create();
         LogSession logSession =null;
         try {
@@ -85,8 +86,7 @@ public class LogSession {
         return logSession;
     }
 
-    int id;
-    private Integer targetTemperature;
+
 
     public Boolean isOpen() {
         return isopen;
@@ -104,6 +104,8 @@ public class LogSession {
         this.targetTemperature = targetTemperature;
     }
 
+    int id;
+    private Integer targetTemperature;
     private Boolean isopen;
     private String name;
     private Date startTimestamp;

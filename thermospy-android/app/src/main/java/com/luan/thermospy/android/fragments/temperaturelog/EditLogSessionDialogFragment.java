@@ -123,7 +123,7 @@ public class EditLogSessionDialogFragment extends DialogFragment implements Upda
             mLogNameTxt.setText(mSession.getName());
         }
         if (mSession.getTargetTemperature() != null) {
-            mTargetTemperature.setText(mSession.getTargetTemperature());
+            mTargetTemperature.setText(Integer.toString(mSession.getTargetTemperature()));
         }
 
         return v;
@@ -137,18 +137,18 @@ public class EditLogSessionDialogFragment extends DialogFragment implements Upda
             t.show();
         }
         else {
-            LogSession session = new LogSession();
-            session.setName(mLogNameTxt.getText().toString());
+
+            mSession.setName(mLogNameTxt.getText().toString());
             if (!mTargetTemperature.getText().toString().isEmpty()) {
                 try {
-                    session.setTargetTemperature(Integer.parseInt(mTargetTemperature.getText().toString()));
+                    mSession.setTargetTemperature(Integer.parseInt(mTargetTemperature.getText().toString()));
                 } catch (NumberFormatException efe) {
                     Toast t = Toast.makeText(getActivity(), getString(R.string.invalid_target_temperature), Toast.LENGTH_SHORT);
                     t.show();
                     return;
                 }
             }
-            mUpdateLogSessionReq.setLogSession(session);
+            mUpdateLogSessionReq.setLogSession(mSession);
             mUpdateLogSessionReq.request(mIpAddress, mPort);
             mToast = Toast.makeText(getActivity(), getString(R.string.wait_log_session_update), Toast.LENGTH_SHORT);
             mToast.show();

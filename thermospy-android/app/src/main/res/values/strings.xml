@@ -84,9 +84,15 @@
     <string name="invalid_logname">Please specify a log name!</string>
     <string name="pref_timeformat_summary"></string>
     <string name="pref_title_timeformat">Specify time format</string>
-    <string name="pref_dateformat_summary" />
+    <string name="pref_dateformat_summary"></string>
     <string name="pref_title_dateformat">Specify date format</string>
     <string name="wait_log_session_update">Updating log session...</string>
     <string name="failed_to_update_logsession">Sorry but the log session could not be updated.</string>
+
     <color name="white">#FFFFFF</color>
+
+    <string name="title_activity_line_graph">LineGraphActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
 </resources>

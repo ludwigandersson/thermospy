@@ -19,6 +19,7 @@
 
 package com.luan.thermospy.android.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -28,14 +29,15 @@ import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.fragments.temperaturelog.LogSessionFragment;
-import com.luan.thermospy.android.fragments.temperaturelog.TemperatureGraph;
+
+import org.json.JSONException;
 
 
 /**
  * The LogSessionActivity is responsible for displaying a list of the available Log Sessions from
  * the server.
  */
-public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener, TemperatureGraph.OnTemperatureGraphFragmentListener {
+public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener {
 
     private static final String LOG_TAG = LogSessionActivity.class.getSimpleName();
     public static final String DATEFORMAT = "key_dateformat";
@@ -52,7 +54,7 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
         }
         else
         {
-            mDateFormat = getIntent().getExtras().getString(DATEFORMAT);
+            mDateFormat = getIntent().getStringExtra(DATEFORMAT);
         }
         int port = Coordinator.getInstance().getServerSettings().getPort();
         String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
@@ -85,11 +87,16 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
         int port = Coordinator.getInstance().getServerSettings().getPort();
         String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
 
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, TemperatureGraph.newInstance(ipAddress, port, session.getId(), mDateFormat))
-                .addToBackStack(null)
-                .commit();
-        getFragmentManager().executePendingTransactions();
+        Intent intent = new Intent(this, LineGraphActivity.class);
+        intent.putExtra(LineGraphActivity.ARG_DATEFORMAT, mDateFormat);
+        intent.putExtra(LineGraphActivity.ARG_IP_ADDRESS, ipAddress);
+        intent.putExtra(LineGraphActivity.ARG_PORT, port);
+        try {
+            intent.putExtra(LineGraphActivity.ARG_SESSION_ID, LogSession.toJson(session).toString());
+        } catch (JSONException e) {
+
+        }
+        startActivity(intent);
     }
 
     @Override
@@ -114,8 +121,6 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
         Log.d(LOG_TAG, "An error occurred within the log session fragment...");
     }
 
-    @Override
-    public void onError() {
-        Log.d(LOG_TAG, "An error occurred within the temperature graph fragment...");
-    }
+
+
 }

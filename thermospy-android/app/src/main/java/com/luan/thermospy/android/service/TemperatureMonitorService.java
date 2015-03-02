@@ -164,8 +164,8 @@ public class TemperatureMonitorService extends Service {
             else remaining = (double)alarm/temperature;
 
             if (remaining > 0.8) return Color.RED;
-            else if (remaining > 0.5) return 0xffa500;
-            else if (remaining > 0.2) return 0x32cd32;
+            else if (remaining > 0.6) return 0xffa500;
+            else if (remaining > 0.3) return 0x32cd32;
             else return Color.BLUE;
 
         }

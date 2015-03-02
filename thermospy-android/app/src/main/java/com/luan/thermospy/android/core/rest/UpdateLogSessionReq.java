@@ -45,6 +45,7 @@ public class UpdateLogSessionReq implements AbstractServerRequest.ServerRequestL
 
     @Override
     public void request(String ip, int port) {
+
         mPutJsonObjectReq.request(ip, port);
     }
 

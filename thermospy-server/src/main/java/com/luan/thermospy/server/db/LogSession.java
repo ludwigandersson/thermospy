@@ -40,7 +40,7 @@ public class LogSession  implements java.io.Serializable {
      private Date endTimestamp;
      
      private String comment;
-     private Integer targettemperature;
+     private Integer targetTemperature;
      private Boolean isopen;
 
     public LogSession() {
@@ -50,13 +50,13 @@ public class LogSession  implements java.io.Serializable {
     public LogSession(int id) {
         this.id = id;
     }
-    public LogSession(int id, String name, Date startTimestamp, Date endTimestamp, String comment, Integer targettemperature, Boolean isopen) {
+    public LogSession(int id, String name, Date startTimestamp, Date endTimestamp, String comment, Integer targetTemperature, Boolean isopen) {
        this.id = id;
        this.name = name;
        this.startTimestamp = startTimestamp;
        this.endTimestamp = endTimestamp;
        this.comment = comment;
-       this.targettemperature = targettemperature;
+       this.targetTemperature = targetTemperature;
        this.isopen = isopen;
     }
    
@@ -96,11 +96,11 @@ public class LogSession  implements java.io.Serializable {
         this.comment = comment;
     }
     public Integer getTargettemperature() {
-        return this.targettemperature;
+        return this.targetTemperature;
     }
     
-    public void setTargetTemperature(Integer targettemperature) {
-        this.targettemperature = targettemperature;
+    public void setTargetTemperature(Integer targetTemperature) {
+        this.targetTemperature = targetTemperature;
     }
     public Boolean getIsopen() {
         return this.isopen;

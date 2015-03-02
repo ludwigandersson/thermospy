@@ -19,7 +19,7 @@
     <property name="comment" type="string">
       <column length="32700" name="COMMENT"/>
     </property>
-    <property name="targettemperature" type="java.lang.Integer">
+    <property name="targetTemperature" type="java.lang.Integer">
       <column name="TARGETTEMPERATURE" precision="5" scale="0"/>
     </property>
     <property name="isopen" type="java.lang.Boolean">

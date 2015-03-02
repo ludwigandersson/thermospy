@@ -5,7 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -43,6 +43,7 @@ public class LogSession  implements java.io.Serializable {
      @Column(name="comment")
      private String comment;
      @Column(name="TARGETTEMPERATURE")
+     @JsonProperty("targetTemperature")
      private Integer targetTemperature;
      @Column(name="isopen")
      private Boolean isopen;

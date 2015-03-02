@@ -105,7 +105,7 @@ public class LogSessionResource {
     @POST
     @Timed
     @UnitOfWork
-    @Path("/update/{id}")
+    @Path("/update")
     public Response update(LogSession s)
     {
         LogSession session = sessionDao.create(s);

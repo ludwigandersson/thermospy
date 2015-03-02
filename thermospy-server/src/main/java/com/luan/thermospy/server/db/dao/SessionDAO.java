@@ -41,7 +41,7 @@ public class SessionDAO  extends AbstractDAO<LogSession> {
     }
 
     public List<LogSession> findAll() {
-        return list(namedQuery("Session.findAll"));
+        return list(namedQuery("LogSession.findAll"));
     }
     
     public boolean delete(int sessionId)

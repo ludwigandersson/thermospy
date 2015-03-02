@@ -48,11 +48,11 @@ import org.hibernate.Transaction;
 
 @Path("/thermospy-server/log-session")
 @Produces(MediaType.APPLICATION_JSON)
-public class SessionResource {
+public class LogSessionResource {
     private final SessionDAO sessionDao;
     private final ThermospyController controller;
     private final TemperatureEntryDAO temperatureEntryDao;
-    public SessionResource(SessionDAO dao, TemperatureEntryDAO temperatureEntryDao, ThermospyController controller) {
+    public LogSessionResource(SessionDAO dao, TemperatureEntryDAO temperatureEntryDao, ThermospyController controller) {
         sessionDao = dao;
         this.controller = controller;
         this.temperatureEntryDao = temperatureEntryDao;

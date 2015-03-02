@@ -18,8 +18,8 @@ import org.hibernate.annotations.GenericGenerator;
  */
 @NamedQueries({
 	@NamedQuery(
-	name = "Session.findAll",
-	query = "from Session s"
+	name = "LogSession.findAll",
+	query = "from LogSession s"
 	)
 })
 

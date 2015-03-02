@@ -11,6 +11,6 @@
     <property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>
     <property name="hibernate.current_session_context_class">thread</property>
     <mapping resource="com/luan/thermospy/server/db/Temperatureentry.hbm.xml"/>
-    <mapping resource="com/luan/thermospy/server/db/Session.hbm.xml"/>
+    <mapping class="" file="" jar="" package="" resource="com/luan/thermospy/server/db/LogSession.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

@@ -110,7 +110,8 @@ public class LogSessionResource {
     {
         LogSession session = sessionDao.create(s);
         if (session != null) {
-            if (controller.getLogSession().getId() == session.getId())
+            if (controller.getLogSession() != null && 
+                    controller.getLogSession().getId() == session.getId())
             {
                controller.setLogSession(session);
             }

@@ -21,6 +21,7 @@ package com.luan.thermospy.android.fragments.temperaturelog;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
@@ -52,7 +54,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnLogSessionFragmentListener}
  * interface.
  */
-public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener {
+public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener, EditLogSessionDialogFragment.OnEditLogSessionListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -157,13 +159,28 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         int menuItemIndex = item.getItemId();
 
         LogSession logSession = mLogSessionList.get(info.position);
-        if (menuItemIndex == 0) {
-            mListener.onShowTemperatureList(logSession);
-        } else if (menuItemIndex == 1)
+        switch (menuItemIndex)
         {
-            mToBeDeleted = logSession;
-            mDeleteLogSessionReq.setLogSessionTypeId(logSession.getId());
-            mDeleteLogSessionReq.request(mIpAddress, mPort);
+            case 0: {
+                mListener.onShowTemperatureList(logSession);
+            }
+                break;
+
+            case 1: {
+                FragmentManager fm = getFragmentManager();
+                EditLogSessionDialogFragment editLogSessionDialog = EditLogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings(), logSession);
+                editLogSessionDialog.setTargetFragment(this, 1);
+                editLogSessionDialog.show(fm, "fragment_edit_logsession");
+            }
+            break;
+            case 2: {
+                mToBeDeleted = logSession;
+                mDeleteLogSessionReq.setLogSessionTypeId(logSession.getId());
+                mDeleteLogSessionReq.request(mIpAddress, mPort);
+            }
+                break;
+            default:
+                return false;
         }
         return true;
     }
@@ -279,6 +296,31 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     public void onLogSessionTypeError() {
         mToBeDeleted = null;
         Log.d(LOG_TAG, "Failed to delete log session.");
+    }
+
+    @Override
+    public void onDone(LogSession session) {
+        LogSession inList = null;
+        for (LogSession l : mLogSessionList)
+        {
+            if (session.getId() == l.getId())
+            {
+                inList = l;
+                break;
+            }
+        }
+        if (inList != null)
+        {
+            mLogSessionList.remove(inList);
+            mLogSessionList.add(0, session);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onError() {
+        Toast t = Toast.makeText(getActivity(), getString(R.string.failed_to_update_logsession), Toast.LENGTH_SHORT);
+        t.show();
     }
 
     /**

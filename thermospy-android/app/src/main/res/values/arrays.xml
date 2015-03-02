@@ -10,6 +10,7 @@
     </string-array>
     <string-array name="menu">
         <item>Open</item>
+        <item>Edit</item>
         <item>Delete</item>
     </string-array>
     <string-array name="aspect_ratios">

@@ -300,22 +300,25 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
 
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
+        int ttt = Integer.MIN_VALUE;
 
-        ArrayList<Entry> yVals = new ArrayList<Entry>();
-        ArrayList<String> xVals = new ArrayList<String>();
-        long time=logSessionList.get(0).getTimestamp().getTime();
-        int seconds= 0;
+        ArrayList<Entry> yVals = new ArrayList<>();
+        ArrayList<String> xVals = new ArrayList<>();
+        SimpleDateFormat df = new SimpleDateFormat(mDateFormat.split(" ")[1]);
         for (int i = 0; i < logSessionList.size(); i++) {
             TemperatureEntry temperatureEntry = logSessionList.get(i);
-            seconds += (temperatureEntry.getTimestamp().getTime()-time)/1000;
-            xVals.add(seconds + "");
-
-            yVals.add(new Entry(logSessionList.get(i).getTemperature(), i));
+            xVals.add(df.format(temperatureEntry.getTimestamp()));
+            Entry chartEntry = new Entry(logSessionList.get(i).getTemperature(), i, temperatureEntry);
+            yVals.add(chartEntry);
+            if (mLogSession.getTargetTemperature() != null &&
+                    temperatureEntry.getTemperature() >= mLogSession.getTargetTemperature() &&
+                    ttt == Integer.MIN_VALUE)
+            {
+                ttt = i;
+            }
 
             if (temperatureEntry.getTemperature() < min) min = temperatureEntry.getTemperature();
             if (temperatureEntry.getTemperature() > max) max = temperatureEntry.getTemperature();
-
-            time = temperatureEntry.getTimestamp().getTime();
         }
 
         // create a dataset and give it a type
@@ -342,12 +345,18 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
         // create a data object with the datasets
         LineData data = new LineData(xVals, dataSets);
 
+        String timeToTarget = "Target temperature";
+        if (ttt != Integer.MIN_VALUE) {
+            long duration = (logSessionList.get(ttt).getTimestamp().getTime()-logSessionList.get(0).getTimestamp().getTime())/1000;
+            timeToTarget = "Time to target temperature: "+String.format("%d:%02d:%02d", duration/3600, (duration%3600)/60, (duration%60));
+        }
 
-        LimitLine ll1 = new LimitLine(mLogSession.getTargetTemperature(), "Target temperature");
+        LimitLine ll1 = new LimitLine(mLogSession.getTargetTemperature(), timeToTarget);
         ll1.setLineWidth(4f);
         ll1.enableDashedLine(10f, 10f, 0f);
         ll1.setLabelPosition(LimitLine.LimitLabelPosition.POS_RIGHT);
         ll1.setTextSize(10f);
+
 
 
         YAxis leftAxis = mChart.getAxisLeft();

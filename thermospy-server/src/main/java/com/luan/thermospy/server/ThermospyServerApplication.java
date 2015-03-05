@@ -78,6 +78,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         final CameraDeviceConfigResource cameraDeviceConfigResource = new CameraDeviceConfigResource(webcamDevice);
         final DigitRecognizerConfigResource drcResource = new DigitRecognizerConfigResource(recognizer);
         final ServiceStatusResource serviceStatusResource = new ServiceStatusResource(controller);
+        final GetTemperatureHistoryResource temperatureHistory = new GetTemperatureHistoryResource(controller);
         final TemplateHealthCheck healthCheck =
                 new TemplateHealthCheck("TEST");
         
@@ -99,6 +100,7 @@ public class ThermospyServerApplication extends Application<ThermospyServerConfi
         environment.jersey().register(cameraDeviceConfigResource);
         environment.jersey().register(drcResource);
         environment.jersey().register(serviceStatusResource);
+        environment.jersey().register(temperatureHistory);
     }
 
     @Override

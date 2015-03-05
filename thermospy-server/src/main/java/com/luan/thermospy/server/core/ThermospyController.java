@@ -26,14 +26,13 @@ import com.luan.thermospy.server.actions.CameraAction;
 import com.luan.thermospy.server.db.LogSession;
 import com.luan.thermospy.server.db.Temperatureentry;
 import com.luan.thermospy.server.db.dao.TemperatureEntryDAO;
-import io.dropwizard.db.DataSourceFactory;
-import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.jetty.util.log.Log;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.AnnotationConfiguration;
 
 /**
  * The man in the middle who connects all the dots.
@@ -60,6 +59,13 @@ public class ThermospyController {
     @JsonIgnore
     private SessionFactory sessionFactory;
     
+    @JsonIgnore
+    private final CopyOnWriteArrayList<Temperature> temperatureHistory;
+
+    public ThermospyController() {
+        this.temperatureHistory = new CopyOnWriteArrayList<>();
+    }
+    
     
     public int getTemperature() {
         synchronized(myLock){
@@ -75,6 +81,10 @@ public class ThermospyController {
                 String toTemperature = temperature == Integer.MIN_VALUE ? "--" : Integer.toString(temperature);
                 Log.getLog().info("Temperature changed from " + fromTemperature + " to " + toTemperature );
                 this.temperature = temperature;
+                
+                temperatureHistory.add(new Temperature(temperature));
+                // Only keep the 100 latest .
+                while (temperatureHistory.size() > 100) temperatureHistory.remove(0);
             }
             
             if (this.logSession != null && this.temperature != Integer.MIN_VALUE)
@@ -82,7 +92,6 @@ public class ThermospyController {
                 org.hibernate.Session s = sessionFactory.openSession();
                 Transaction tx = null;
                 try {
-                    
                     tx = s.beginTransaction();
                     
                     Temperatureentry entry = new Temperatureentry();
@@ -190,6 +199,11 @@ public class ThermospyController {
 
     public SessionFactory getSessionFactory() {
         return this.sessionFactory;
+    }
+    
+    public List<Temperature> getTemperatureHistory()
+    {
+        return Arrays.asList(temperatureHistory.toArray(new Temperature[temperatureHistory.size()]));
     }
     
     

@@ -21,6 +21,7 @@
 package com.luan.thermospy.server.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
 
 /**
  * 
@@ -29,11 +30,13 @@ public class Temperature {
 
     private int temperature = 0;
     private int id = 0;
+    private long timestamp;
     public Temperature(){}
 
     public Temperature(int temperature)
     {
         this.temperature = temperature;
+        this.timestamp = new Date().getTime();
     }
     @JsonProperty
     public int getId()
@@ -55,5 +58,14 @@ public class Temperature {
     public void setId(int id)
     {
         this.id = id;
+    }
+    
+    public void setTimestamp(long timestamp)
+    {
+        this.timestamp = timestamp;
+    }
+    @JsonProperty
+    public long getTimestamp() {
+        return this.timestamp;
     }
 }

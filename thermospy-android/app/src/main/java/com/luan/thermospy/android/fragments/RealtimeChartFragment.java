@@ -100,7 +100,11 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        if (savedInstanceState != null)
+        {
+            mIpAddress = savedInstanceState.getString(ARG_IP_ADDRESS);
+            mPort = savedInstanceState.getInt(ARG_PORT);
+        }
     }
 
     @Override
@@ -184,7 +188,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
 
             TemperatureEntry temperatureEntry = new TemperatureEntry();
             temperatureEntry.setTemperature(temperature.getTemperature());
-            temperatureEntry.setTimestamp(new Date());
+            temperatureEntry.setTimestamp(new Date(temperature.getTimestamp()));
 
             // add a new x-value first
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -208,6 +212,9 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
 //            mChart.invalidate();
 
             if (set.getEntryCount() > 0) {
+                
+
+
                 mAverageMaxY += temperature.getTemperature() + 20;
                 mAverageMinY += temperature.getTemperature() - 20;
                 YAxis yaxis = mChart.getAxisLeft();
@@ -268,6 +275,14 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         if (mChart.getData().getDataSetCount() == 0) {
             mGetTemperatureHistoryReq.request(mIpAddress, mPort);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(ARG_IP_ADDRESS, mIpAddress);
+        outState.putInt(ARG_PORT, mPort);
+
     }
 
     @Override

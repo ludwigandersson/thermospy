@@ -9,9 +9,10 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:layout_alignParentTop="false"
-        android:layout_alignParentEnd="true">
+        android:layout_alignParentEnd="true"
+        android:id="@+id/linearLayout">
 
 
         <include
@@ -19,18 +20,42 @@
             android:layout_height="wrap_content"
             layout="@layout/temperature_layout" />
 
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            layout="@layout/log_session_layout" />
-
-        <FrameLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/server_control_container"
-            android:layout_marginTop="10dp">
+            android:layout_height="fill_parent">
 
-        </FrameLayout>
+            <fragment
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:name="com.luan.thermospy.android.fragments.RealtimeChartFragment"
+                android:id="@+id/fragment"
+                android:layout_below="@+id/linearLayout"
+                android:layout_centerHorizontal="true"
+                android:tag="realtime_graph"
+                android:layout_weight="0.8" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.2">
+
+                <include
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    layout="@layout/log_session_layout"
+                    android:id="@+id/log_session_control"
+                    android:layout_weight="0.5" />
+
+                <include
+                    layout="@layout/fragment_server_control"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/server_control"
+                    android:layout_weight="0.5" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

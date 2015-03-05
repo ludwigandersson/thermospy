@@ -19,19 +19,25 @@
 
 package com.luan.thermospy.android.service;
 
+import com.luan.thermospy.android.core.ITemperatureObserver;
+import com.luan.thermospy.android.core.ITemperatureSubject;
+import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 
+import java.util.ArrayList;
 import java.util.Observable;
 
 /**
  * The local service is an object that is shared between the TemperatureMonitorService and the
  * MainActivity.
  */
-public class LocalService extends Observable {
+public class LocalService extends Observable implements ITemperatureSubject {
     private volatile int mRefreshInterval = 5;
     private volatile int mAlarm = 0;
     private AlarmCondition alarmCondition = AlarmCondition.GREATER_THAN_OR_EQUAL;
     private boolean alarmEnabled = false;
+    private ArrayList<ITemperatureObserver> mObservers = new ArrayList<>();
+
 
     synchronized public int getRefreshInterval() {
         return mRefreshInterval;
@@ -85,5 +91,23 @@ public class LocalService extends Observable {
             notifyObservers();
         }
 
+    }
+
+    @Override
+    synchronized public void registerObserver(ITemperatureObserver listener) {
+        mObservers.add(listener);
+    }
+
+    @Override
+    synchronized public void unregisterObserver(ITemperatureObserver listener) {
+        mObservers.remove(listener);
+    }
+
+    @Override
+    synchronized public void notifyObservers(Temperature temperatureEntry) {
+        for (ITemperatureObserver observer : mObservers)
+        {
+            observer.onTemperatureRecv(temperatureEntry);
+        }
     }
 }

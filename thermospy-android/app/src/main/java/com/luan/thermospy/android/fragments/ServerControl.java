@@ -28,7 +28,6 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.android.volley.RequestQueue;
@@ -63,11 +62,6 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
 
     private GetServiceStatusReq mServiceStatusReq;
     private CameraControlReq mCameraControlReq;
-
-    private TextView mTxtViewIpAddress;
-
-      private TextView mTxtViewServerStatus;
-      private TextView mTxtViewAlarm;
 
       private ToggleButton mToggleServerStatus;
       private OnServerControlListener mListener;
@@ -131,20 +125,8 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
         // Inflate the layout for this fragment
         View v  =  inflater.inflate(R.layout.fragment_server_control, container, false);
 
-
-        mTxtViewIpAddress = (TextView) v.findViewById(R.id.txtServerIpValue);
-        mTxtViewServerStatus = (TextView) v.findViewById(R.id.txtViewServerStatusValue);
-        mTxtViewAlarm = (TextView) v.findViewById(R.id.txtViewAlarmValue);
-
-        mTxtViewIpAddress.setText(mIpAddress);
-        if (mRunning) {
-            mTxtViewServerStatus.setText("running");
-        } else {
-            mTxtViewServerStatus.setText("not running");
-        }
-
         setAlarmText(mAlarm);
-        mToggleServerStatus = (ToggleButton) v.findViewById(R.id.toggleButton);
+        mToggleServerStatus = (ToggleButton) v.findViewById(R.id.toggleButton2);
         mToggleServerStatus.setChecked(!mRunning);
         mToggleServerStatus.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,9 +241,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
           {
               mAlarm = getString(R.string.not_enabled);
           }
-          if (mTxtViewAlarm != null) {
-              mTxtViewAlarm.setText(mAlarm);
-          }
+
       }
 
       @Override
@@ -301,11 +281,11 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
           mToggleServerStatus.setChecked(!mRunning);
           if (mRunning) {
               mTemperaturePolling.start();
-              mTxtViewServerStatus.setText(getString(R.string.running));
+             // mTxtViewServerStatus.setText(getString(R.string.running));
               mListener.onNewTemperature(mTemperaturePolling.toString());
           } else {
               mTemperaturePolling.cancel();
-              mTxtViewServerStatus.setText(getString(R.string.not_running));
+              //mTxtViewServerStatus.setText(getString(R.string.not_running));
               mListener.onNewTemperature("--");
           }
           mListener.onServiceStatus(status);
@@ -315,7 +295,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
       @Override
       public void onServiceStatusError() {
           mToggleServerStatus.setChecked(true);
-          mTxtViewServerStatus.setText(getString(R.string.not_running));
+          //mTxtViewServerStatus.setText(getString(R.string.not_running));
           mListener.onNewTemperature("--");
           hideProgress();
           mListener.onConnectionLost();

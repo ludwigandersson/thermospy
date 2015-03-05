@@ -121,6 +121,8 @@ public class TemperatureMonitorService extends Service {
                     break;
                 }
 
+                mService.notifyObservers(m_temperature);
+
                 boolean alarmEnabled = mService.isAlarmEnabled();
 
                 if (!mAlarmFired && alarmEnabled) {

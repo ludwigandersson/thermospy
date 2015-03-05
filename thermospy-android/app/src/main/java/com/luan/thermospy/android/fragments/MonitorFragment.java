@@ -71,7 +71,8 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     private TextView mTemperatureScale;
 
     private ToggleButton mStartStopLogSessionButton;
-    private ServerControl mServerControl;
+    //private ServerControl mServerControl;
+
 
     private ProgressDialog mProgress = null;
 
@@ -114,9 +115,9 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     private void loadServerControlPanel(boolean isRunning) {
         FragmentManager manager = getChildFragmentManager();
 
-        mServerControl = ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm);
-
-        manager.beginTransaction().replace(R.id.server_control_container, mServerControl).commit();
+        //mServerControl = ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm);
+        Fragment realTimeGraph = RealtimeChartFragment.newInstance();
+        manager.beginTransaction().replace(R.id.server_control, ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm)).commit();
     }
 
     @Override
@@ -128,9 +129,9 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
 
         Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/digital-7.ttf");
         mTemperature.setTypeface(typeface);
-        mTemperature.setTextSize(125);
+        mTemperature.setTextSize(65);
         mTemperature.setText(mTemperatureStr);
-        mTemperatureScale.setTextSize(75);
+        mTemperatureScale.setTextSize(45);
 
         mTemperatureScale.setText(mTemperatureScaleStr);
 

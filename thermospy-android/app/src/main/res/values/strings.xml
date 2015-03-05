@@ -94,5 +94,6 @@
     <string name="title_activity_line_graph">LineGraphActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="control_server">Server control</string>
 
 </resources>

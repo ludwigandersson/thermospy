@@ -44,9 +44,12 @@ import com.android.volley.toolbox.Volley;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.AlarmSettings;
 import com.luan.thermospy.android.core.Coordinator;
+import com.luan.thermospy.android.core.ITemperatureObserver;
+import com.luan.thermospy.android.core.ITemperatureSubject;
 import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.Boundary;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
+import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.Alarm;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 import com.luan.thermospy.android.fragments.MonitorFragment;
@@ -59,6 +62,8 @@ import com.luan.thermospy.android.service.LocalService;
 import com.luan.thermospy.android.service.ServiceBinder;
 import com.luan.thermospy.android.service.TemperatureMonitorService;
 
+import java.util.ArrayList;
+
 /**
  * Main activity
  */
@@ -68,7 +73,9 @@ public class MainActivity extends ActionBarActivity
         SetupBoundary.OnSetupBoundaryListener,
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
-        Alarm.OnAlarmFragmentListener{
+        Alarm.OnAlarmFragmentListener,
+        ITemperatureSubject,
+        ITemperatureObserver{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -101,12 +108,14 @@ public class MainActivity extends ActionBarActivity
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             ServiceBinder binder = (ServiceBinder) service;
             mService = binder.getService();
+            mService.registerObserver(MainActivity.this);
             mBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
+            mService.unregisterObserver(MainActivity.this);
         }
     };
 
@@ -115,6 +124,7 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private ArrayList<ITemperatureObserver> mTemperatureObservers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -543,5 +553,38 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    @Override
+    public void registerObserver(ITemperatureObserver listener) {
+        mTemperatureObservers.add(listener);
+    }
 
+    @Override
+    public void unregisterObserver(ITemperatureObserver listener) {
+        mTemperatureObservers.remove(listener);
+    }
+
+    @Override
+    public void notifyObservers(Temperature entry) {
+        for (ITemperatureObserver observer : mTemperatureObservers)
+        {
+            observer.onTemperatureRecv(entry);
+        }
+    }
+
+    @Override
+    public void onTemperatureRecv(final Temperature temperature) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                    //stuff that updates ui
+                notifyObservers(temperature);
+            }
+        });
+
+    }
+
+    @Override
+    public void onTemperatureError() {
+
+    }
 }

@@ -7,46 +7,51 @@
     tools:context=".MainActivity$PlaceholderFragment">
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
             android:layout_alignParentTop="false"
             android:layout_alignParentEnd="true"
-            android:layout_weight="0.5">
+            android:layout_weight="0.4">
 
 
             <include
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                layout="@layout/temperature_layout" />
+                layout="@layout/temperature_layout"
+                android:layout_weight="0.6" />
 
             <include
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                layout="@layout/log_session_layout" />
+                layout="@layout/log_session_layout"
+                android:layout_weight="0.8" />
+
+            <include
+                layout="@layout/fragment_server_control"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.5">
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.6">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/server_control_container"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_gravity="left">
-
-            </FrameLayout>
+            <fragment
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:name="com.luan.thermospy.android.fragments.RealtimeChartFragment"
+                android:id="@+id/realtime_graph"
+                android:tag="realtime_graph" />
         </LinearLayout>
     </LinearLayout>
 

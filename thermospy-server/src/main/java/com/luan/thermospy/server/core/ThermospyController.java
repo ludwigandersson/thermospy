@@ -82,10 +82,11 @@ public class ThermospyController {
                 Log.getLog().info("Temperature changed from " + fromTemperature + " to " + toTemperature );
                 this.temperature = temperature;
                 
-                temperatureHistory.add(new Temperature(temperature));
+                
+            }
+            temperatureHistory.add(new Temperature(temperature));
                 // Only keep the 100 latest .
                 while (temperatureHistory.size() > 100) temperatureHistory.remove(0);
-            }
             
             if (this.logSession != null && this.temperature != Integer.MIN_VALUE)
             {

@@ -25,6 +25,7 @@ public class Temperature {
 
     private int temperature = 0;
     private int id = 0;
+    private long timestamp;
     public Temperature(){}
 
     public Temperature(int temperature)
@@ -46,6 +47,15 @@ public class Temperature {
     {
         this.temperature = temperature;
     }
+
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+    public void setTimestamp(long timestamp)
+    {
+        this.timestamp = timestamp;
+    }
+
     
     public void setId(int id)
     {

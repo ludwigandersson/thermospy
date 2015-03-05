@@ -82,20 +82,13 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_line_graph);
 
-        if (savedInstanceState != null)
-        {
-            mLogSession = LogSession.fromJson(savedInstanceState.getString(ARG_SESSION_ID));
-            mPort = savedInstanceState.getInt(ARG_PORT);
-            mIpAddress = savedInstanceState.getString(ARG_IP_ADDRESS);
-            mDateFormat = savedInstanceState.getString(ARG_DATEFORMAT);
-        }
-        else
-        {
-            mLogSession = LogSession.fromJson(getIntent().getStringExtra(ARG_SESSION_ID));
-            mPort = getIntent().getIntExtra(ARG_PORT,0);
-            mIpAddress = getIntent().getStringExtra(ARG_IP_ADDRESS);
-            mDateFormat = getIntent().getStringExtra(ARG_DATEFORMAT);
-        }
+
+
+        mLogSession = LogSession.fromJson(getIntent().getStringExtra(ARG_SESSION_ID));
+        mPort = getIntent().getIntExtra(ARG_PORT,0);
+        mIpAddress = getIntent().getStringExtra(ARG_IP_ADDRESS);
+        mDateFormat = getIntent().getStringExtra(ARG_DATEFORMAT);
+
 
         mRequestQueue = Volley.newRequestQueue(this);
         mGetTemperatureEntryListReq = new GetTemperatureEntryListReq(mRequestQueue, this);
@@ -344,26 +337,28 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
 
         // create a data object with the datasets
         LineData data = new LineData(xVals, dataSets);
+        YAxis leftAxis = mChart.getAxisLeft();
+        if (mLogSession.getTargetTemperature() != null) {
+            String timeToTarget = "Target temperature";
+            if (ttt != Integer.MIN_VALUE) {
+                long duration = (logSessionList.get(ttt).getTimestamp().getTime() - logSessionList.get(0).getTimestamp().getTime()) / 1000;
+                timeToTarget = "Time to target temperature: " + String.format("%d:%02d:%02d", duration / 3600, (duration % 3600) / 60, (duration % 60));
+            }
 
-        String timeToTarget = "Target temperature";
-        if (ttt != Integer.MIN_VALUE) {
-            long duration = (logSessionList.get(ttt).getTimestamp().getTime()-logSessionList.get(0).getTimestamp().getTime())/1000;
-            timeToTarget = "Time to target temperature: "+String.format("%d:%02d:%02d", duration/3600, (duration%3600)/60, (duration%60));
+            LimitLine ll1 = new LimitLine(mLogSession.getTargetTemperature(), timeToTarget);
+            ll1.setLineWidth(4f);
+            ll1.enableDashedLine(10f, 10f, 0f);
+            ll1.setLabelPosition(LimitLine.LimitLabelPosition.POS_RIGHT);
+            ll1.setTextSize(10f);
+        leftAxis.addLimitLine(ll1);
+
         }
 
-        LimitLine ll1 = new LimitLine(mLogSession.getTargetTemperature(), timeToTarget);
-        ll1.setLineWidth(4f);
-        ll1.enableDashedLine(10f, 10f, 0f);
-        ll1.setLabelPosition(LimitLine.LimitLabelPosition.POS_RIGHT);
-        ll1.setTextSize(10f);
 
-
-
-        YAxis leftAxis = mChart.getAxisLeft();
-        leftAxis.addLimitLine(ll1);
         leftAxis.setStartAtZero(true);
         leftAxis.setAxisMaxValue(max + 10);
         leftAxis.setAxisMinValue(min-10);
+
         mChart.getAxisRight().setEnabled(false);
 
         // set data

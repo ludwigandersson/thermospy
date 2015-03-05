@@ -20,7 +20,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.luan.thermospy.android.fragments.RealtimeChartFragment">
+    tools:context="com.luan.thermospy.android.fragments.RealtimeChartFragment"
+    android:id="@+id/fragment_realtime_chart">
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"

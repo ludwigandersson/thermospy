@@ -27,7 +27,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
@@ -43,9 +46,11 @@ import com.luan.thermospy.android.core.ITemperatureObserver;
 import com.luan.thermospy.android.core.ITemperatureSubject;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.pojo.TemperatureEntry;
+import com.luan.thermospy.android.core.rest.GetTemperatureHistoryReq;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,23 +60,35 @@ import java.util.Date;
  * Use the {@link RealtimeChartFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RealtimeChartFragment extends Fragment implements OnChartValueSelectedListener, ITemperatureObserver {
+public class RealtimeChartFragment extends Fragment implements OnChartValueSelectedListener, ITemperatureObserver, GetTemperatureHistoryReq.OnGetTemperatureHistoryListener {
+
+    private final static String ARG_IP_ADDRESS = "ipaddress";
+    private final static String ARG_PORT = "port";
 
     private ITemperatureSubject mTemperatureSubject;
     private LineChart mChart;
     private String LOG_TAG = RealtimeChartFragment.class.getSimpleName();
     private long mAverageMaxY = 0;
     private long mAverageMinY = 0;
+    private String mIpAddress;
+    private int mPort;
+    private RequestQueue mRequestQueue;
+    private GetTemperatureHistoryReq mGetTemperatureHistoryReq;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
      * @return A new instance of fragment RealtimeChartFragment.
+     * @param ipAddress
+     * @param port
      */
 
-    public static RealtimeChartFragment newInstance() {
+    public static RealtimeChartFragment newInstance(String ipAddress, int port) {
         RealtimeChartFragment fragment = new RealtimeChartFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_IP_ADDRESS, ipAddress);
+        args.putInt(ARG_PORT, port);
         fragment.setArguments(args);
         return fragment;
     }
@@ -221,8 +238,14 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
+            if (getArguments() != null) {
+                mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
+                mPort = getArguments().getInt(ARG_PORT);
+            }
             mTemperatureSubject = (ITemperatureSubject) activity;
             mTemperatureSubject.registerObserver(this);
+            mRequestQueue = Volley.newRequestQueue(getActivity());
+            mGetTemperatureHistoryReq = new GetTemperatureHistoryReq(mRequestQueue, this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -238,6 +261,13 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     public void onResume()
     {
         super.onResume();
+        fetchHistory();
+    }
+
+    private void fetchHistory() {
+        if (mChart.getData().getDataSetCount() == 0) {
+            mGetTemperatureHistoryReq.request(mIpAddress, mPort);
+        }
     }
 
     @Override
@@ -248,6 +278,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     public void onStop(){
         super.onStop();
         mTemperatureSubject.unregisterObserver(this);
+        mGetTemperatureHistoryReq.cancel();
     }
 
     @Override
@@ -270,4 +301,15 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         Log.i(LOG_TAG, "Received temperature error");
     }
 
+    @Override
+    public void onGetTemperatureHistoryRecv(List<Temperature> temperatureList) {
+        for (Temperature t : temperatureList) {
+            addEntry(t);
+        }
+    }
+
+    @Override
+    public void onGetTemperatureHistoryError() {
+        Toast.makeText(getActivity(), "Failed to get history...", Toast.LENGTH_SHORT);
+    }
 }

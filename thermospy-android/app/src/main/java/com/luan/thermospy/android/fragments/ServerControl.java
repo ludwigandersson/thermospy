@@ -19,26 +19,27 @@
 
 package com.luan.thermospy.android.fragments;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.ProgressDialog;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ToggleButton;
+  import android.app.Activity;
+  import android.app.Fragment;
+  import android.app.ProgressDialog;
+  import android.content.SharedPreferences;
+  import android.os.Bundle;
+  import android.preference.PreferenceManager;
+  import android.util.Log;
+  import android.view.LayoutInflater;
+  import android.view.View;
+  import android.view.ViewGroup;
+  import android.widget.ToggleButton;
 
-import com.android.volley.RequestQueue;
-import com.luan.thermospy.android.R;
-import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.pojo.Action;
-import com.luan.thermospy.android.core.pojo.CameraControlAction;
-import com.luan.thermospy.android.core.pojo.ServiceStatus;
-import com.luan.thermospy.android.core.rest.CameraControlReq;
-import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
-import com.luan.thermospy.android.core.rest.TemperaturePolling;
+  import com.android.volley.RequestQueue;
+  import com.luan.thermospy.android.R;
+  import com.luan.thermospy.android.core.Coordinator;
+  import com.luan.thermospy.android.core.pojo.Action;
+  import com.luan.thermospy.android.core.pojo.CameraControlAction;
+  import com.luan.thermospy.android.core.pojo.ServiceStatus;
+  import com.luan.thermospy.android.core.rest.CameraControlReq;
+  import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
+  import com.luan.thermospy.android.core.rest.TemperaturePolling;
 
   /**
    * The server control class is responsible for polling temperature from the server service
@@ -67,9 +68,10 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
       private OnServerControlListener mListener;
 
       private ProgressDialog mProgress = null;
+      private final static String LOG_TAG = ServerControl.class.getSimpleName();
 
 
-    public static ServerControl newInstance(String ip, int port, boolean serverStatus, String alarm) {
+      public static ServerControl newInstance(String ip, int port, boolean serverStatus, String alarm) {
         ServerControl fragment = new ServerControl();
         Bundle args = new Bundle();
         args.putString(ARG_IP_ADDRESS, ip);
@@ -122,12 +124,13 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         // Inflate the layout for this fragment
         View v  =  inflater.inflate(R.layout.fragment_server_control, container, false);
 
-        setAlarmText(mAlarm);
-        mToggleServerStatus = (ToggleButton) v.findViewById(R.id.toggleButton2);
-        mToggleServerStatus.setChecked(!mRunning);
+        mToggleServerStatus = (ToggleButton) v.findViewById(R.id.toggleButton);
+        mToggleServerStatus.setChecked(mRunning);
+
         mToggleServerStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,7 +145,11 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
                     controlServer(0);
                 }
             }
+
+
         });
+
+
 
         return v;
     }
@@ -183,6 +190,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
       public void onStop()
       {
           super.onStop();
+          if (mToggleServerStatus.hasOnClickListeners()) Log.d(LOG_TAG, "There are bastards and gobblins here!");
           if (mProgress != null && mProgress.isShowing())
           {
               mProgress.dismiss();
@@ -251,7 +259,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
 
       @Override
       public void onError() {
-          mToggleServerStatus.setChecked(true);
+          mToggleServerStatus.setChecked(false);
           onServiceStatusError();
       }
 
@@ -271,14 +279,14 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
 
       @Override
       public void onCameraControlError() {
-          mToggleServerStatus.setChecked(true);
+          mToggleServerStatus.setChecked(false);
           hideProgress();
       }
 
       @Override 
       public void onServiceStatusRecv(ServiceStatus status) {
           mRunning = status.isRunning();
-          mToggleServerStatus.setChecked(!mRunning);
+          mToggleServerStatus.setChecked(mRunning);
           if (mRunning) {
               mTemperaturePolling.start();
              // mTxtViewServerStatus.setText(getString(R.string.running));
@@ -294,7 +302,7 @@ public class ServerControl extends Fragment implements TemperaturePolling.OnTemp
 
       @Override
       public void onServiceStatusError() {
-          mToggleServerStatus.setChecked(true);
+          mToggleServerStatus.setChecked(false);
           //mTxtViewServerStatus.setText(getString(R.string.not_running));
           mListener.onNewTemperature("--");
           hideProgress();

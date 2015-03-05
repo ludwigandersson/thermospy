@@ -42,7 +42,7 @@ public enum UrlRequestType {
     TEMPERATURE_ENTRY_LIST(17, "get-temperature-entries/list"),
     RESET_AND_GET_IMAGE(18, "get-last-image/reset-and-fetch"),
     UPDATE_LOG_SESSION(19, "log-session/update"),
-
+    TEMPERATURE_HISTORY(20, "get-temperature-history" ),
 
     UNKNOWN(-1, "");
 

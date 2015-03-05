@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright 2015 Ludwig Andersson
   ~
@@ -18,12 +19,11 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="wrap_content" tools:context="com.luan.thermospy.android.fragments.ServerControl"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.luan.thermospy.android.fragments.ServerControl"
     android:id="@+id/server_control_id">
-
-    <!-- TODO: Update blank fragment layout -->
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -34,28 +34,15 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="0dp" />
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="false"
-        android:layout_below="@+id/section_label"
-        android:layout_alignParentEnd="false"
-        android:gravity="center"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp">
-
-    </LinearLayout>
-
     <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/toggleButton2"
-        android:textOff="@string/stop"
-        android:textOn="@string/start"
-        android:text="Reset bounds"
+        android:text="New ToggleButton"
+        android:id="@+id/toggleButton"
+        android:layout_gravity="center_horizontal|top"
+        android:textOn="@string/stop"
+        android:textOff="@string/start"
+        android:layout_marginLeft="296dp"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
 

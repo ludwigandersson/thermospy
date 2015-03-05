@@ -29,11 +29,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:name="com.luan.thermospy.android.fragments.RealtimeChartFragment"
-                android:id="@+id/fragment"
+                android:id="@+id/fragment_realtime"
                 android:layout_below="@+id/linearLayout"
                 android:layout_centerHorizontal="true"
                 android:tag="realtime_graph"
-                android:layout_weight="0.8" />
+                android:layout_weight="0.8"
+                class="com.luan.thermospy.android.fragments.RealtimeChartFragment"
+                tools:layout="@layout/fragment_realtime_chart" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -48,12 +50,12 @@
                     android:id="@+id/log_session_control"
                     android:layout_weight="0.5" />
 
-                <include
-                    layout="@layout/fragment_server_control"
+                <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/server_control"
-                    android:layout_weight="0.5" />
+                    android:layout_height="fill_parent"
+                    android:id="@+id/server_control_container"
+                    android:layout_weight="0.5"></FrameLayout>
+
             </LinearLayout>
         </LinearLayout>
 

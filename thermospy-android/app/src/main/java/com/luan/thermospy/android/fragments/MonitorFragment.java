@@ -116,8 +116,9 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         FragmentManager manager = getChildFragmentManager();
 
         //mServerControl = ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm);
-        Fragment realTimeGraph = RealtimeChartFragment.newInstance();
-        manager.beginTransaction().replace(R.id.server_control, ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm)).commit();
+        manager.beginTransaction().replace(R.id.server_control_container, ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm)).commit();
+        manager.beginTransaction().replace(R.id.fragment_realtime, RealtimeChartFragment.newInstance(mIpAddress, mPort)).commit();
+
     }
 
     @Override

@@ -243,7 +243,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
                 mPort = getArguments().getInt(ARG_PORT);
             }
             mTemperatureSubject = (ITemperatureSubject) activity;
-            mTemperatureSubject.registerObserver(this);
+
             mRequestQueue = Volley.newRequestQueue(getActivity());
             mGetTemperatureHistoryReq = new GetTemperatureHistoryReq(mRequestQueue, this);
         } catch (ClassCastException e) {
@@ -306,6 +306,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         for (Temperature t : temperatureList) {
             addEntry(t);
         }
+        mTemperatureSubject.registerObserver(this);
     }
 
     @Override

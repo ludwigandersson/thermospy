@@ -39,9 +39,12 @@ import android.widget.ToggleButton;
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.pojo.ServerStatus;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
+import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
 import com.luan.thermospy.android.core.rest.StopLogSessionReq;
@@ -51,7 +54,7 @@ import com.luan.thermospy.android.core.rest.StopLogSessionReq;
  * The monitor fragment is responsible for displaying temperature as well as holding a sub-fragment.
  * The sub-fragment displays some server information etc.
  */
-public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,ServerControl.OnServerControlListener, GetServiceStatusReq.OnGetServiceStatus, StopLogSessionReq.OnStopLogSessionListener, DialogInterface.OnDismissListener {
+public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,ServerControl.OnServerControlListener, GetServiceStatusReq.OnGetServiceStatus, StopLogSessionReq.OnStopLogSessionListener, DialogInterface.OnDismissListener, LocalServiceObserver {
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_ALARM_STR = "alarm";
@@ -82,6 +85,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     private StopLogSessionReq mStopLogSessionReq;
     private String mTemperatureScaleStr;
     private GetActiveLogSessionReq mGetActiveLogSession;
+    private LocalServiceSubject mTemperatureSubject;
 
     public static MonitorFragment newInstance(String ip, int port, String alarm, String temperature) {
         MonitorFragment fragment = new MonitorFragment();
@@ -115,8 +119,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     private void loadServerControlPanel(boolean isRunning) {
         FragmentManager manager = getChildFragmentManager();
 
-        //mServerControl = ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm);
-        manager.beginTransaction().replace(R.id.server_control_container, ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm)).commit();
+        manager.beginTransaction().replace(R.id.server_control_container, ServerControl.newInstance(mIpAddress, mPort, isRunning)).commit();
         manager.beginTransaction().replace(R.id.fragment_realtime, RealtimeChartFragment.newInstance(mIpAddress, mPort)).commit();
 
     }
@@ -187,6 +190,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         super.onAttach(activity);
         try {
             mListener = (OnMonitorFragmentListener) activity;
+            mTemperatureSubject = (LocalServiceSubject)activity;
             if (getArguments() != null) {
                 mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
                 mPort = getArguments().getInt(ARG_PORT);
@@ -220,6 +224,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
             mTemperatureScaleStr = getString(R.string.temperature_scale_fahrenheit);
         }
         mTemperatureScale.setText(mTemperatureScaleStr);
+        mTemperatureSubject.registerObserver(this);
         getServerStatus();
     }
 
@@ -245,6 +250,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     public void onStop()
     {
         super.onStop();
+        mTemperatureSubject.unregisterObserver(this);
         if (mProgress != null && mProgress.isShowing()) {
             mProgress.dismiss();
 
@@ -268,14 +274,6 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         super.onSaveInstanceState(outState);
     }
 
-
-
-    @Override
-    public void onNewTemperature(String text) {
-        mTemperatureStr = text;
-        mTemperature.setText(text);
-        mListener.onNewTemperature(text);
-    }
 
     @Override
     public void onConnectionLost() {
@@ -347,11 +345,24 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         mStartStopLogSessionButton.setEnabled(true);
     }
 
+    @Override
+    public void onTemperatureRecv(Temperature temperature) {
+        mTemperature.setText(temperature.toString());
+    }
+
+    @Override
+    public void onTemperatureError() {
+        mTemperature.setText("--");
+    }
+
+    @Override
+    public void onAlarmTriggered() {
+        // Dont care... yet
+    }
+
     public interface OnMonitorFragmentListener {
         public void onServerNotRunning();
-        public void onNewTemperature(String temperature);
         public void onServiceStatus(ServiceStatus status);
-
         public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener);
     }
 

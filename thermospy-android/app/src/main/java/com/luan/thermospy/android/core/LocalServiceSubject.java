@@ -22,9 +22,11 @@ package com.luan.thermospy.android.core;
 import com.luan.thermospy.android.core.pojo.Temperature;
 
 /**
- * Interface between fragment->activitity<-temperature monitoring service
+ * Created by ludde on 15-03-04.
  */
-public interface ITemperatureObserver {
-    public void onTemperatureRecv(Temperature temperature);
-    public void onTemperatureError();
+public interface LocalServiceSubject {
+    public void registerObserver(LocalServiceObserver listener);
+    public void unregisterObserver(LocalServiceObserver listener);
+    public void temperatureChanged(Temperature temperatureEntry);
+    public void alarmTriggered();
 }

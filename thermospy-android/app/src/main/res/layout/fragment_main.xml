@@ -34,7 +34,6 @@
                 android:layout_centerHorizontal="true"
                 android:tag="realtime_graph"
                 android:layout_weight="0.8"
-                class="com.luan.thermospy.android.fragments.RealtimeChartFragment"
                 tools:layout="@layout/fragment_realtime_chart" />
 
             <LinearLayout

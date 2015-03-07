@@ -44,8 +44,8 @@ import com.android.volley.toolbox.Volley;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.AlarmSettings;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.ITemperatureObserver;
-import com.luan.thermospy.android.core.ITemperatureSubject;
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.Boundary;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
@@ -74,8 +74,8 @@ public class MainActivity extends ActionBarActivity
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
         Alarm.OnAlarmFragmentListener,
-        ITemperatureSubject,
-        ITemperatureObserver{
+        LocalServiceSubject,
+        LocalServiceObserver {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -124,7 +124,7 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-    private ArrayList<ITemperatureObserver> mTemperatureObservers = new ArrayList<>();
+    private ArrayList<LocalServiceObserver> mTemperatureObservers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,7 +216,8 @@ public class MainActivity extends ActionBarActivity
         FragmentManager fragmentManager = getFragmentManager();
         final ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
         final AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
-        final String temperature = Coordinator.getInstance().getTemperature();
+        final Temperature lastTemperature = Coordinator.getInstance().getTemperature();
+        final String temperature = lastTemperature == null ? "--" : lastTemperature.toString();
 
         final String ip = serverSettings.getIpAddress();
         final int port = serverSettings.getPort();
@@ -420,11 +421,6 @@ public class MainActivity extends ActionBarActivity
         Coordinator.getInstance().getServerSettings().setConnected(false);
     }
 
-    @Override
-    public void onNewTemperature(String temperature) {
-        Coordinator.getInstance().setTemperature(temperature);
-    }
-
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -554,21 +550,30 @@ public class MainActivity extends ActionBarActivity
 
 
     @Override
-    public void registerObserver(ITemperatureObserver listener) {
+    public void registerObserver(LocalServiceObserver listener) {
         mTemperatureObservers.add(listener);
+        if (Coordinator.getInstance().getTemperature() != null) {
+            listener.onTemperatureRecv(Coordinator.getInstance().getTemperature());
+        }
     }
 
     @Override
-    public void unregisterObserver(ITemperatureObserver listener) {
+    public void unregisterObserver(LocalServiceObserver listener) {
         mTemperatureObservers.remove(listener);
     }
 
     @Override
-    public void notifyObservers(Temperature entry) {
-        for (ITemperatureObserver observer : mTemperatureObservers)
+    public void temperatureChanged(Temperature entry) {
+        Coordinator.getInstance().setTemperature(entry);
+        for (LocalServiceObserver observer : mTemperatureObservers)
         {
             observer.onTemperatureRecv(entry);
         }
+    }
+
+    @Override
+    public void alarmTriggered() {
+
     }
 
     @Override
@@ -577,7 +582,7 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void run() {
                     //stuff that updates ui
-                notifyObservers(temperature);
+                temperatureChanged(temperature);
             }
         });
 
@@ -586,5 +591,29 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onTemperatureError() {
 
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Coordinator.getInstance().setTemperature(null);
+                for (LocalServiceObserver observer : mTemperatureObservers)
+                {
+                    observer.onTemperatureError();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onAlarmTriggered() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Coordinator.getInstance().getAlarmSettings().setAlarmSwitchEnabled(false);
+                for (LocalServiceObserver observer : mTemperatureObservers)
+                {
+                    observer.onAlarmTriggered();
+                }
+            }
+        });
     }
 }

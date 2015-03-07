@@ -121,7 +121,7 @@ public class TemperatureMonitorService extends Service {
                     break;
                 }
 
-                mService.notifyObservers(m_temperature);
+                mService.temperatureChanged(m_temperature);
 
                 boolean alarmEnabled = mService.isAlarmEnabled();
 
@@ -130,9 +130,9 @@ public class TemperatureMonitorService extends Service {
                     AlarmCondition alarmCondition = mService.getAlarmCondition();
                     boolean triggerAlarm = alarmCondition.evaluate(m_temperature.getTemperature(), alarm);
                     if (triggerAlarm) {
-                        /* @todo Need to fix alarm handling. The main activity must listen to alarms etc.*/
                         mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString());
                         mAlarmFired = true;
+                        mService.alarmTriggered();
                     }
                     else
                     {

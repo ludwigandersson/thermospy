@@ -19,8 +19,8 @@
 
 package com.luan.thermospy.android.service;
 
-import com.luan.thermospy.android.core.ITemperatureObserver;
-import com.luan.thermospy.android.core.ITemperatureSubject;
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 
@@ -31,13 +31,13 @@ import java.util.Observable;
  * The local service is an object that is shared between the TemperatureMonitorService and the
  * MainActivity.
  */
-public class LocalService extends Observable implements ITemperatureSubject {
+public class LocalService extends Observable implements LocalServiceSubject {
     private volatile int mRefreshInterval = 5;
     private volatile int mAlarm = 0;
     private AlarmCondition alarmCondition = AlarmCondition.GREATER_THAN_OR_EQUAL;
     private boolean alarmEnabled = false;
-    private ArrayList<ITemperatureObserver> mObservers = new ArrayList<>();
-
+    private ArrayList<LocalServiceObserver> mObservers = new ArrayList<>();
+    private Temperature mTemperatureEntry = null;
 
     synchronized public int getRefreshInterval() {
         return mRefreshInterval;
@@ -94,20 +94,32 @@ public class LocalService extends Observable implements ITemperatureSubject {
     }
 
     @Override
-    synchronized public void registerObserver(ITemperatureObserver listener) {
+    synchronized public void registerObserver(LocalServiceObserver listener) {
+        if (mTemperatureEntry != null) {
+            listener.onTemperatureRecv(mTemperatureEntry);
+        }
         mObservers.add(listener);
     }
 
     @Override
-    synchronized public void unregisterObserver(ITemperatureObserver listener) {
+    synchronized public void unregisterObserver(LocalServiceObserver listener) {
         mObservers.remove(listener);
     }
 
     @Override
-    synchronized public void notifyObservers(Temperature temperatureEntry) {
-        for (ITemperatureObserver observer : mObservers)
+    synchronized public void temperatureChanged(Temperature temperatureEntry) {
+        mTemperatureEntry = temperatureEntry;
+        for (LocalServiceObserver observer : mObservers)
         {
             observer.onTemperatureRecv(temperatureEntry);
+        }
+    }
+
+    @Override
+    public void alarmTriggered() {
+        for (LocalServiceObserver observer : mObservers)
+        {
+            observer.onAlarmTriggered();
         }
     }
 }

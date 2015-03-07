@@ -22,6 +22,8 @@ package com.luan.thermospy.android.core;
 import android.content.Context;
 
 import com.android.volley.RequestQueue;
+import com.google.gson.Gson;
+import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 
 /**
@@ -30,7 +32,7 @@ import com.luan.thermospy.android.fragments.AlarmCondition;
 public class Coordinator {
     private static final Coordinator ourInstance = new Coordinator();
     private AlarmSettings mAlarmSettings;
-    private String temperature;
+    private Temperature temperature;
 
     public static Coordinator getInstance() {
         return ourInstance;
@@ -63,11 +65,15 @@ public class Coordinator {
             database.open();
             mServerSettings = ServerSettings.fromDb(database);
             mAlarmSettings = AlarmSettings.fromDb(database);
-            temperature = database.getString("temperature");
         } catch (Exception e) {
             mServerSettings = new ServerSettings(0, "", false);
             mAlarmSettings = new AlarmSettings("0", false, AlarmCondition.GREATER_THAN_OR_EQUAL);
-            temperature = "--";
+        }
+        try {
+            Gson gson = new Gson();
+            temperature = gson.fromJson(database.getString("temperature"), Temperature.class);
+        } catch (Exception e) {
+            temperature = null;
         }
     }
 
@@ -76,9 +82,14 @@ public class Coordinator {
         mServerSettings.serialize(database);
         mAlarmSettings.serialize(database);
         try {
-            database.putString("temperature", temperature);
+            Gson gson = new Gson();
+            database.putString("temperature", gson.toJson(temperature));
         } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                database.putString("temperature", "");
+            } catch (Exception e1) {
+                // dont care
+            }
         }
     }
 
@@ -89,11 +100,11 @@ public class Coordinator {
     public AlarmSettings getAlarmSettings() { return mAlarmSettings; }
 
 
-    public String getTemperature() {
+    public Temperature getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(String temperature) {
+    public void setTemperature(Temperature temperature) {
         this.temperature = temperature;
     }
 }

@@ -42,8 +42,8 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.Highlight;
 import com.luan.thermospy.android.R;
-import com.luan.thermospy.android.core.ITemperatureObserver;
-import com.luan.thermospy.android.core.ITemperatureSubject;
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.pojo.TemperatureEntry;
 import com.luan.thermospy.android.core.rest.GetTemperatureHistoryReq;
@@ -55,17 +55,17 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ITemperatureObserver} interface
+ * {@link com.luan.thermospy.android.core.LocalServiceObserver} interface
  * to handle interaction events.
  * Use the {@link RealtimeChartFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RealtimeChartFragment extends Fragment implements OnChartValueSelectedListener, ITemperatureObserver, GetTemperatureHistoryReq.OnGetTemperatureHistoryListener {
+public class RealtimeChartFragment extends Fragment implements OnChartValueSelectedListener, LocalServiceObserver, GetTemperatureHistoryReq.OnGetTemperatureHistoryListener {
 
     private final static String ARG_IP_ADDRESS = "ipaddress";
     private final static String ARG_PORT = "port";
 
-    private ITemperatureSubject mTemperatureSubject;
+    private LocalServiceSubject mTemperatureSubject;
     private LineChart mChart;
     private String LOG_TAG = RealtimeChartFragment.class.getSimpleName();
     private long mAverageMaxY = 0;
@@ -212,7 +212,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
 //            mChart.invalidate();
 
             if (set.getEntryCount() > 0) {
-                
+
 
 
                 mAverageMaxY += temperature.getTemperature() + 20;
@@ -249,7 +249,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
                 mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
                 mPort = getArguments().getInt(ARG_PORT);
             }
-            mTemperatureSubject = (ITemperatureSubject) activity;
+            mTemperatureSubject = (LocalServiceSubject) activity;
 
             mRequestQueue = Volley.newRequestQueue(getActivity());
             mGetTemperatureHistoryReq = new GetTemperatureHistoryReq(mRequestQueue, this);
@@ -314,6 +314,11 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     @Override
     public void onTemperatureError() {
         Log.i(LOG_TAG, "Received temperature error");
+    }
+
+    @Override
+    public void onAlarmTriggered() {
+        // Dont care yet
     }
 
     @Override

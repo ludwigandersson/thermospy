@@ -41,14 +41,17 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
+import com.luan.thermospy.android.core.pojo.Temperature;
 
 
 /**
  * The alarm class is responsible for handling Alarm settings.
  */
-public class Alarm extends Fragment implements ServerControl.OnServerControlListener {
+public class Alarm extends Fragment implements ServerControl.OnServerControlListener, LocalServiceObserver {
 
     private static final String ARG_ALARM_STRING = "alarm";
     private static final String ARG_ALARM_ENABLED = "alarmenabled";
@@ -73,6 +76,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     private ServerControl mServerControl;
     private String mTemperatureScaleStr;
     private TextView mTemperatureScale;
+    private LocalServiceSubject mTemperatureService;
 
 
     public static Alarm newInstance(String alarm, Boolean switchEnabled, ServerSettings serverSettings, AlarmCondition alarmCondition) {
@@ -121,7 +125,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 mAlarmSwitchChecked = isChecked;
                 setAlarmText();
                 mListener.onAlarmSwitchChanged(isChecked);
-                maybeDisableAlarm();
 
             }
         });
@@ -158,7 +161,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 {
                     mAlarmCondition = selected;
                     mListener.onAlarmConditionChanged(mAlarmCondition);
-                    maybeDisableAlarm();
                 }
 
             }
@@ -189,13 +191,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
             mListener.onAlarmConditionChanged(mAlarmCondition);
         }
         mAlarmText.setText(mAlarm);
-        if (mServerControl != null) {
-            if (mAlarmSwitchChecked) {
-                mServerControl.setAlarmText(mAlarm);
-            } else {
-                mServerControl.setAlarmText(getString(R.string.not_enabled));
-            }
-        }
+
 
     }
 
@@ -204,6 +200,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
         super.onAttach(activity);
         try {
             mListener = (OnAlarmFragmentListener) activity;
+            mTemperatureService = (LocalServiceSubject)activity;
             if (getArguments() != null)
             {
                 mAlarm = getArguments().getString(ARG_ALARM_STRING);
@@ -212,9 +209,9 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 mPort = getArguments().getInt(ARG_PORT);
                 mRunning = getArguments().getBoolean(ARG_SERVER_RUNNING);
                 if (mAlarmSwitchChecked)
-                    mServerControl = ServerControl.newInstance(mIpAddress, mPort, mRunning, mAlarm);
+                    mServerControl = ServerControl.newInstance(mIpAddress, mPort, mRunning);
                 else
-                    mServerControl = ServerControl.newInstance(mIpAddress, mPort, mRunning, getString(R.string.not_enabled));
+                    mServerControl = ServerControl.newInstance(mIpAddress, mPort, mRunning);
 
                 mAlarmCondition = AlarmCondition.fromInt(getArguments().getInt(ARG_ALARM_CONDITION));
             }
@@ -224,6 +221,12 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
             throw new ClassCastException(activity.toString()
                     + " must implement OnAlarmFragmentListener");
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mTemperatureService.unregisterObserver(this);
     }
 
     @Override
@@ -240,6 +243,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
             mTemperatureScaleStr = getString(R.string.temperature_scale_fahrenheit);
         }
         mTemperatureScale.setText(mTemperatureScaleStr);
+        mTemperatureService.registerObserver(this);
     }
 
     @Override
@@ -303,7 +307,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                                         Integer.toString(tens.getValue() * 10 + ones.getValue()) :
                                         Integer.toString(hundreds.getValue() * 100 + tens.getValue() * 10 + ones.getValue());
                                 setAlarmText();
-                                maybeDisableAlarm();
                             }
                         })
                 .setNegativeButton(R.string.dialog_cancel,
@@ -316,32 +319,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     }
 
     @Override
-    public void onNewTemperature(String text) {
-        mTemperatureText.setText(text);
-        mListener.onNewTemperature(text);
-        maybeDisableAlarm();
-    }
-
-    private void maybeDisableAlarm() {
-        if (mAlarmSwitchChecked) {
-            try {
-                // todo Ugly...
-                int alarm = Integer.parseInt(mAlarmText.getText().toString());
-                int tval = Integer.parseInt(mTemperatureText.getText().toString());
-                boolean playSound = mAlarmCondition.evaluate(tval, alarm);
-                if (playSound) {
-                    mAlarmSwitchChecked = false;
-                    mAlarmSwitch.setChecked(false);
-                    mListener.onAlarmSwitchChanged(false);
-                }
-
-            } catch (NumberFormatException ex) {
-
-            }
-        }
-    }
-
-    @Override
     public void onConnectionLost() {
         mListener.onServiceStatus(new ServiceStatus());
     }
@@ -351,12 +328,26 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
         mListener.onServiceStatus(status);
     }
 
+    @Override
+    public void onTemperatureRecv(Temperature temperature) {
+        mTemperatureText.setText(temperature.toString());
+    }
+
+    @Override
+    public void onTemperatureError() {
+        mTemperatureText.setText("--");
+    }
+
+    @Override
+    public void onAlarmTriggered() {
+        mAlarmSwitch.setChecked(false);
+    }
+
     public interface OnAlarmFragmentListener {
         public void onAlarmTextChanged(String alarmText);
         public void onAlarmSwitchChanged(Boolean isChecked);
         public void onServiceStatus(ServiceStatus status);
         public void onAlarmConditionChanged(AlarmCondition mAlarmCondition);
-        public void onNewTemperature(String text);
     }
 
 }

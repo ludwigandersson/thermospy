@@ -15,48 +15,45 @@
         android:id="@+id/linearLayout">
 
 
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            layout="@layout/temperature_layout" />
-
         <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="wrap_content">
 
-            <fragment
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:name="com.luan.thermospy.android.fragments.RealtimeChartFragment"
-                android:id="@+id/fragment_realtime"
-                android:layout_below="@+id/linearLayout"
-                android:layout_centerHorizontal="true"
-                android:tag="realtime_graph"
-                android:layout_weight="0.8"
-                tools:layout="@layout/fragment_realtime_chart" />
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                layout="@layout/temperature_layout" />
+        </LinearLayout>
+
+        <android.support.v4.app.FragmentTabHost
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/tabHost">
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="fill_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.2">
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
 
-                <include
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    layout="@layout/log_session_layout"
-                    android:id="@+id/log_session_control"
-                    android:layout_weight="0.5" />
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"></TabWidget>
 
                 <FrameLayout
+                    android:id="@android:id/tabcontent"
                     android:layout_width="0dp"
-                    android:layout_height="fill_parent"
-                    android:id="@+id/server_control_container"
-                    android:layout_weight="0.5"></FrameLayout>
+                    android:layout_height="0dp">
 
+                </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/realtabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
             </LinearLayout>
-        </LinearLayout>
+        </android.support.v4.app.FragmentTabHost>
 
     </LinearLayout>
 

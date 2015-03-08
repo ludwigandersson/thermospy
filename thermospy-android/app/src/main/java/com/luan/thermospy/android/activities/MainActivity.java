@@ -226,12 +226,12 @@ public class MainActivity extends ActionBarActivity
         final AlarmCondition condition = alarmSettings.getAlarmCondition();
         final String alarm = alarmSettings.getAlarm();
 
-        FragmentTransaction transaction;
         if (position == 0) {
 
             if (ip.isEmpty() == false && port != -1)
             {
-                Fragment fragment;
+                android.support.v4.app.FragmentTransaction transaction;
+                MonitorFragment fragment;
                 if (isAlarmSwitchChecked)
                 {
                     fragment = MonitorFragment.newInstance(ip, port, alarm, temperature);
@@ -240,29 +240,36 @@ public class MainActivity extends ActionBarActivity
                 {
                     fragment = MonitorFragment.newInstance(ip, port, getString(R.string.not_enabled), temperature);
                 }
-                transaction = fragmentManager.beginTransaction()
+                transaction = getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, fragment);
+            transaction.commit();
             }
             else
             {
+                FragmentTransaction transaction;
                 // No ip or port available. Show server setup fragment
-                transaction = fragmentManager.beginTransaction()
-                       .replace(R.id.container, SetupService.newInstance(ip, port));
+                transaction = getFragmentManager().beginTransaction()
+                       .replace(R.id.container, (Fragment)SetupService.newInstance(ip, port));
+                transaction.commit();
 
             }
         }
         else if (position == 1)
         {
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            transaction = ft.replace(R.id.container, Alarm.newInstance(alarm, isAlarmSwitchChecked, Coordinator.getInstance().getServerSettings(), condition));
+            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction = transaction.replace(R.id.container, Alarm.newInstance(alarm, isAlarmSwitchChecked, Coordinator.getInstance().getServerSettings(), condition));
+            transaction.commit();
         }
         else if (position == 2)
         {
+            FragmentTransaction transaction;
             transaction = fragmentManager.beginTransaction()
                     .replace(R.id.container, SetupService.newInstance(ip, port));
+            transaction.commit();
         }
         else if (position == 3)
         {
+
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
             String dateformat = settings.getString(getString(R.string.pref_key_dateformat), "yyyy-MM-dd");
             String timeformat = settings.getString(getString(R.string.pref_key_timeformat), "HH");
@@ -277,13 +284,8 @@ public class MainActivity extends ActionBarActivity
             startActivity(intent);
             return;
         }
-        else
-        {
-            transaction = fragmentManager.beginTransaction();
-        }
 
         mLastSelected = position;
-        transaction.commit();
     }
 
     public void onSectionAttached(int number) {

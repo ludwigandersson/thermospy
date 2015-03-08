@@ -23,12 +23,9 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile project(':croplib')
-
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.snappydb:snappydb-lib:0.5.0'
     compile 'com.google.code.gson:gson:1.7.2'
     compile 'com.android.support:support-v4:21.0.3'
-
-
-
+    compile 'com.android.support:support-v4:21.0.3'
 }

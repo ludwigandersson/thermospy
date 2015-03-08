@@ -21,7 +21,7 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.luan.thermospy.android.fragments.RealtimeChartFragment"
-    android:id="@+id/fragment_realtime_chart">
+    android:id="@+id/tabcontent">
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"

@@ -1,15 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
-android:id="@+id/temperature_container"
-android:gravity="center_vertical|top">
+android:id="@+id/temperature_container">
 
 
-        <TextView android:id="@+id/section_label" android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/current_temperature" />
-
-        <LinearLayout
+    <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -18,26 +13,33 @@ android:gravity="center_vertical|top">
             android:layout_alignParentEnd="false"
             android:gravity="center">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="042"
+        <TextView android:id="@+id/section_label" android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/current_temperature" />
 
-                android:id="@+id/text"
-                android:textSize="45dp" />
+        <Space
+            android:layout_width="20px"
+            android:layout_height="20px" />
 
-            <TextView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="042"
+
+            android:id="@+id/text"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/section_label" />
+
+        <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="@string/temperature_scale_celsius"
                 android:id="@+id/txtTemperatureScale"
                 android:layout_below="@+id/section_label"
-                android:layout_marginLeft="5dp"
-                android:gravity="top"
-                android:textSize="30dp"
-                android:layout_gravity="center_vertical|top"
-                android:layout_marginTop="5dp" />
+            android:gravity="top"
+            android:layout_gravity="center_vertical|top" />
+
         </LinearLayout>
 
-    </RelativeLayout>
+</RelativeLayout>
 

@@ -141,12 +141,18 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         View o = v.findViewById(R.id.tabHost);
         mTabHost = (android.support.v4.app.FragmentTabHost)o;
         mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
+
+        RealtimeChartFragment realtimeChartFragment = RealtimeChartFragment.newInstance(mIpAddress, mPort);
         mTabHost.addTab(mTabHost.newTabSpec("realtime").setIndicator("Monitoring"),
-                RealtimeChartFragment.class, null);
+                RealtimeChartFragment.class, realtimeChartFragment.getArguments());
+        Alarm alarm = Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings());
         mTabHost.addTab(mTabHost.newTabSpec("alarm").setIndicator("Alarm"),
-                Alarm.class, null);
+                Alarm.class, alarm.getArguments());
+        ServerControl control = ServerControl.newInstance(mIpAddress, mPort, false);
         mTabHost.addTab(mTabHost.newTabSpec("custom").setIndicator("Control"),
-                ServerControl.class, null);
+                ServerControl.class, control.getArguments());
+
+
 
         /*mStartStopLogSessionButton = (ToggleButton)v.findViewById(R.id.btnStartStopLogSession);
         mStartStopLogSessionButton.setOnClickListener(new View.OnClickListener() {

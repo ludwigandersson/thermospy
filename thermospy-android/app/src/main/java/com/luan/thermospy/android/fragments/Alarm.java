@@ -23,12 +23,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +37,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.core.AlarmSettings;
 import com.luan.thermospy.android.core.LocalServiceObserver;
 import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.ServerSettings;
@@ -70,25 +67,23 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
 
     private Switch mAlarmSwitch;
     private TextView mAlarmText;
-    private TextView mTemperatureText;
+
     private Spinner mAlarmConditionSpinner;
     private OnAlarmFragmentListener mListener;
-    private ServerControl mServerControl;
-    private String mTemperatureScaleStr;
-    private TextView mTemperatureScale;
+
     private LocalServiceSubject mTemperatureService;
 
 
-    public static Alarm newInstance(String alarm, Boolean switchEnabled, ServerSettings serverSettings, AlarmCondition alarmCondition) {
+    public static Alarm newInstance(ServerSettings serverSettings, AlarmSettings alarmSettings) {
         Alarm fragment = new Alarm();
         Bundle args = new Bundle();
 
-        args.putString(ARG_ALARM_STRING, alarm);
-        args.putBoolean(ARG_ALARM_ENABLED, switchEnabled);
+        args.putString(ARG_ALARM_STRING, alarmSettings.getAlarm());
+        args.putBoolean(ARG_ALARM_ENABLED, alarmSettings.isAlarmSwitchEnabled());
         args.putString(ARG_IP_ADDRESS, serverSettings.getIpAddress());
         args.putInt(ARG_PORT, serverSettings.getPort());
         args.putBoolean(ARG_SERVER_RUNNING, serverSettings.isRunning());
-        args.putInt(ARG_ALARM_CONDITION, alarmCondition.getId());
+        args.putInt(ARG_ALARM_CONDITION, alarmSettings.getAlarmCondition().getId());
         fragment.setArguments(args);
         return fragment;
     }
@@ -107,7 +102,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
             mPort = getArguments().getInt(ARG_PORT);
             mRunning = getArguments().getBoolean(ARG_SERVER_RUNNING);
             mAlarmCondition = AlarmCondition.fromInt(getArguments().getInt(ARG_ALARM_CONDITION));
-            mTemperatureScaleStr = getArguments().getString(ARG_TEMPERATURE_SCALE);
+
         }
     }
 
@@ -138,15 +133,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
             }
         });
 
-        mTemperatureText = (TextView)v.findViewById(R.id.text);
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/digital-7.ttf");
-        mTemperatureText.setTypeface(typeface);
-        mTemperatureText.setTextSize(72);
-
-        mTemperatureScale = (TextView)v.findViewById(R.id.txtTemperatureScale);
-        mTemperatureScale.setTextSize(36);
-        mTemperatureScale.setText(mTemperatureScaleStr);
-
         mAlarmConditionSpinner = (Spinner)v.findViewById(R.id.spinner);
 
         String[] items = new String[]{getString(R.string.gt_or_equal), getString(R.string.lt_or_equal)};
@@ -171,8 +157,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
             }
         });
 
-        FragmentManager manager = getChildFragmentManager();
-        manager.beginTransaction().replace(R.id.server_control_alarm, mServerControl).commit();
 
         setAlarmText();
 
@@ -208,10 +192,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
                 mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
                 mPort = getArguments().getInt(ARG_PORT);
                 mRunning = getArguments().getBoolean(ARG_SERVER_RUNNING);
-                if (mAlarmSwitchChecked)
-                    mServerControl = ServerControl.newInstance(mIpAddress, mPort, mRunning);
-                else
-                    mServerControl = ServerControl.newInstance(mIpAddress, mPort, mRunning);
+
 
                 mAlarmCondition = AlarmCondition.fromInt(getArguments().getInt(ARG_ALARM_CONDITION));
             }
@@ -232,17 +213,9 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String temperatureScale = settings.getString(getString(R.string.pref_key_temperature_degree), "");
-        if (temperatureScale.equals("1"))
-        {
-            mTemperatureScaleStr = getString(R.string.temperature_scale_celsius);
-        }
-        else
-        {
-            mTemperatureScaleStr = getString(R.string.temperature_scale_fahrenheit);
-        }
-        mTemperatureScale.setText(mTemperatureScaleStr);
+
+
+
         mTemperatureService.registerObserver(this);
     }
 
@@ -261,7 +234,6 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
         outState.putInt(ARG_PORT, mPort);
         outState.putBoolean(ARG_SERVER_RUNNING, mRunning);
         outState.putInt(ARG_ALARM_CONDITION, mAlarmCondition.getId());
-        outState.putString(ARG_TEMPERATURE_SCALE, mTemperatureScaleStr);
     }
 
     private void showAlarmPicker()
@@ -330,12 +302,11 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
 
     @Override
     public void onTemperatureRecv(Temperature temperature) {
-        mTemperatureText.setText(temperature.toString());
+
     }
 
     @Override
     public void onTemperatureError() {
-        mTemperatureText.setText("--");
     }
 
     @Override

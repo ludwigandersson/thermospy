@@ -42,7 +42,6 @@
         android:layout_gravity="center_horizontal|top"
         android:textOn="@string/stop"
         android:textOff="@string/start"
-        android:layout_marginLeft="296dp"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
 

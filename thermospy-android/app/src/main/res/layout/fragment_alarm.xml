@@ -13,12 +13,6 @@
         android:layout_marginTop="20dp"
         android:layout_gravity="center_horizontal|top">
 
-        <include
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/temperature_layout"
-            android:layout_gravity="center_horizontal" />
-
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
@@ -84,12 +78,6 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/spinner" />
         </LinearLayout>
-
-        <FrameLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/server_control_alarm"
-            android:layout_marginTop="30dp"></FrameLayout>
 
     </LinearLayout>
 

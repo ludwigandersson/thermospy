@@ -257,7 +257,7 @@ public class MainActivity extends ActionBarActivity
         else if (position == 1)
         {
             android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction = transaction.replace(R.id.container, Alarm.newInstance(alarm, isAlarmSwitchChecked, Coordinator.getInstance().getServerSettings(), condition));
+            transaction = transaction.replace(R.id.container, Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings()));
             transaction.commit();
         }
         else if (position == 2)

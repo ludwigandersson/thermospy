@@ -44,6 +44,7 @@ import com.luan.thermospy.android.core.pojo.ServiceStatus;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
+import com.luan.thermospy.android.core.rest.ServiceStatusPolling;
 import com.luan.thermospy.android.core.rest.StopLogSessionReq;
 
 
@@ -51,7 +52,13 @@ import com.luan.thermospy.android.core.rest.StopLogSessionReq;
  * The monitor fragment is responsible for displaying temperature as well as holding a sub-fragment.
  * The sub-fragment displays some server information etc.
  */
-public class MonitorFragment extends android.support.v4.app.Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,ServerControl.OnServerControlListener, GetServiceStatusReq.OnGetServiceStatus, StopLogSessionReq.OnStopLogSessionListener, DialogInterface.OnDismissListener, LocalServiceObserver {
+public class MonitorFragment extends android.support.v4.app.Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,
+        ServerControl.OnServerControlListener,
+        GetServiceStatusReq.OnGetServiceStatus,
+        StopLogSessionReq.OnStopLogSessionListener,
+        DialogInterface.OnDismissListener,
+        LocalServiceObserver,
+        ServiceStatusPolling.OnServiceStatusListener {
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_ALARM_STR = "alarm";
@@ -67,6 +74,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
     private RequestQueue mRequestQueue;
     private TextView mTemperature;
     private boolean mLogSessionActive = false;
+    private ServiceStatusPolling mStatusPoller;
 
     private TextView mTemperatureScale;
 
@@ -116,14 +124,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
 
     }
 
-    private void loadServerControlPanel(boolean isRunning) {
-        /*FragmentManager manager = getChildFragmentManager();
-
-        manager.beginTransaction().replace(R.id.tab1, RealtimeChartFragment.newInstance(mIpAddress, mPort)).commit();
-        manager.beginTransaction().replace(R.id.tab2, Alarm.newInstance("", false, Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings().getAlarmCondition())).commit();
-        manager.beginTransaction().replace(R.id.tab3, ServerControl.newInstance(mIpAddress, mPort, isRunning)).commit();*/
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -148,7 +148,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         Alarm alarm = Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings());
         mTabHost.addTab(mTabHost.newTabSpec("alarm").setIndicator("Alarm"),
                 Alarm.class, alarm.getArguments());
-        ServerControl control = ServerControl.newInstance(mIpAddress, mPort, false);
+        ServerControl control = ServerControl.newInstance(mIpAddress, mPort, Coordinator.getInstance().getServerSettings().isRunning());
         mTabHost.addTab(mTabHost.newTabSpec("custom").setIndicator("Control"),
                 ServerControl.class, control.getArguments());
 
@@ -223,6 +223,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
         mGetActiveLogSession = new GetActiveLogSessionReq(mRequestQueue, this);
         mStopLogSessionReq = new StopLogSessionReq(mRequestQueue, this);
+        mStatusPoller = new ServiceStatusPolling(getActivity(), mRequestQueue, this);
     }
 
     @Override
@@ -260,6 +261,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         mServiceStatusReq.cancel();
         mStopLogSessionReq.cancel();
         mGetActiveLogSession.cancel();
+        mStatusPoller.cancel();
     }
 
     @Override
@@ -275,6 +277,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         mServiceStatusReq.cancel();
         mStopLogSessionReq.cancel();
         mGetActiveLogSession.cancel();
+        mStatusPoller.cancel();
 
     }
 
@@ -302,6 +305,11 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
+
+
+        if (!status.isRunning()) {
+            mTemperature.setText("--");
+        }
         if (status.getError() != ServerStatus.OK) {
             mListener.onServerNotRunning();
         }
@@ -313,7 +321,14 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
 
     @Override
     public void onServiceStatusRecv(ServiceStatus status) {
-       loadServerControlPanel(status.isRunning());
+        if (!mStatusPoller.isRunning())
+        {
+            mStatusPoller.start();
+        }
+        if (!status.isRunning()) {
+            mTemperature.setText("--");
+        }
+
        mProgress.dismiss();
        mListener.onServiceStatus(status);
     }
@@ -367,13 +382,23 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
     }
 
     @Override
-    public void onTemperatureError() {
+    public void onServerError() {
         mTemperature.setText("--");
     }
 
     @Override
     public void onAlarmTriggered() {
         // Dont care... yet
+    }
+
+    @Override
+    public void onServiceStatusPollerRecv(ServiceStatus status) {
+        onServiceStatus(status);
+    }
+
+    @Override
+    public void onServiceStatusPollerError() {
+        onServiceStatusError();
     }
 
     public interface OnMonitorFragmentListener {

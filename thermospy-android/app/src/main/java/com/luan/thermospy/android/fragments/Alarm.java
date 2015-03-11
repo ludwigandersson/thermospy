@@ -306,7 +306,7 @@ public class Alarm extends Fragment implements ServerControl.OnServerControlList
     }
 
     @Override
-    public void onTemperatureError() {
+    public void onServerError() {
     }
 
     @Override

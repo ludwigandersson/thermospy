@@ -62,6 +62,7 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
       private ProgressDialog mProgress = null;
       private final static String LOG_TAG = ServerControl.class.getSimpleName();
 
+
       public static ServerControl newInstance(String ip, int port, boolean serverStatus) {
         ServerControl fragment = new ServerControl();
         Bundle args = new Bundle();
@@ -154,9 +155,16 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
       }
 
       @Override
+      public void onStart() {
+          super.onStart();
+      }
+
+      @Override
       public void onResume()
       {
           super.onResume();
+          mToggleServerStatus.setChecked(Coordinator.getInstance().getServerSettings().isRunning());
+          getStatus();
       }
 
       @Override
@@ -177,6 +185,7 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
           }
           mServiceStatusReq.cancel();
           mCameraControlReq.cancel();
+
       }
 
     @Override
@@ -192,6 +201,7 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
             mRequestQueue = Coordinator.getInstance().getRequestQueue();
             mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
             mCameraControlReq = new CameraControlReq(mRequestQueue, this, new Action(CameraControlAction.UNKNOWN));
+
 
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
@@ -217,9 +227,10 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
 
       private void hideProgress()
       {
-          if (mProgress != null && mProgress.isShowing())
+          if (mProgress != null)
           {
               mProgress.hide();
+              mProgress = null;
           }
       }
 
@@ -237,11 +248,15 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
 
       @Override 
       public void onServiceStatusRecv(ServiceStatus status) {
+
+
           mRunning = status.isRunning();
           mToggleServerStatus.setChecked(mRunning);
           mListener.onServiceStatus(status);
           hideProgress();
       }
+
+
 
       @Override
       public void onServiceStatusError() {

@@ -101,7 +101,8 @@ public class LocalService extends Observable implements LocalServiceSubject {
         if (mTemperatureEntry != null) {
             listener.onTemperatureRecv(mTemperatureEntry);
         }
-        mObservers.add(listener);
+        if (!mObservers.contains(listener))
+            mObservers.add(listener);
     }
 
     @Override
@@ -158,5 +159,13 @@ public class LocalService extends Observable implements LocalServiceSubject {
     
     synchronized  public void setRunning(boolean running) {
         this.running = running;
+    }
+
+
+    public void onServerError() {
+        for (LocalServiceObserver observer : mObservers)
+        {
+            observer.onServerError();
+        }
     }
 }

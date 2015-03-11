@@ -121,6 +121,7 @@ public class TemperatureMonitorService extends Service {
                 }
                 if (m_error || m_temperature == null)
                 {
+                    mService.onServerError();
                     break;
                 }
 
@@ -235,6 +236,7 @@ public class TemperatureMonitorService extends Service {
 
     @Override
     public void onDestroy() {
+
         mServiceLooper.quit();
         mServiceLooper.getThread().interrupt();
 

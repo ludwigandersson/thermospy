@@ -32,6 +32,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -83,6 +84,13 @@ public class MainActivity extends ActionBarActivity
      * Keeps track of the last selected "page"/fragment
      */
     private int mLastSelected = -1;
+    RequestQueue requestQueue;
+    /**
+     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
+     */
+    private CharSequence mTitle;
+    private ArrayList<LocalServiceObserver> mTemperatureObservers = new ArrayList<>();
+    private String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
      * The local service is responsible for notification handling. The main activity communicates
@@ -127,21 +135,19 @@ public class MainActivity extends ActionBarActivity
 
             mBound = true;
             mService.registerObserver(MainActivity.this);
+
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
             mService.unregisterObserver(MainActivity.this);
+
+
         }
     };
 
-    RequestQueue requestQueue;
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
-    private ArrayList<LocalServiceObserver> mTemperatureObservers = new ArrayList<>();
+    ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -446,7 +452,7 @@ public class MainActivity extends ActionBarActivity
                 unbindService(mConnection);
                 mBound = false;
             }
-
+            mService.unregisterObserver(this);
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             stopService(intent);
         }
@@ -471,7 +477,7 @@ public class MainActivity extends ActionBarActivity
             bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
             bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
             intent.putExtras(bundle);
-
+            mService.registerObserver(MainActivity.this);
             startService(intent);
         }
     }
@@ -499,6 +505,7 @@ public class MainActivity extends ActionBarActivity
                     unbindService(mConnection);
                     mBound = false;
                 }
+                mService.unregisterObserver(this);
                 Intent intent = new Intent(this, TemperatureMonitorService.class);
                 stopService(intent);
             }
@@ -589,7 +596,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void alarmTriggered() {
-
+        Log.d(LOG_TAG, "Alarm triggered!");
     }
 
     @Override
@@ -605,7 +612,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onTemperatureError() {
+    public void onServerError() {
 
         runOnUiThread(new Runnable() {
             @Override
@@ -613,8 +620,9 @@ public class MainActivity extends ActionBarActivity
                 Coordinator.getInstance().setTemperature(null);
                 for (LocalServiceObserver observer : mTemperatureObservers)
                 {
-                    observer.onTemperatureError();
+                    observer.onServerError();
                 }
+                onServerNotRunning();
             }
         });
     }

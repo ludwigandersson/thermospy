@@ -22,7 +22,6 @@ package com.luan.thermospy.android.core;
 import android.content.Context;
 
 import com.android.volley.RequestQueue;
-import com.google.gson.Gson;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 
@@ -69,28 +68,14 @@ public class Coordinator {
             mServerSettings = new ServerSettings(0, "", false);
             mAlarmSettings = new AlarmSettings("0", false, AlarmCondition.GREATER_THAN_OR_EQUAL);
         }
-        try {
-            Gson gson = new Gson();
-            temperature = gson.fromJson(database.getString("temperature"), Temperature.class);
-        } catch (Exception e) {
-            temperature = null;
-        }
+
+        temperature = null;
     }
 
     public void save()
     {
         mServerSettings.serialize(database);
         mAlarmSettings.serialize(database);
-        try {
-            Gson gson = new Gson();
-            database.putString("temperature", gson.toJson(temperature));
-        } catch (Exception e) {
-            try {
-                database.putString("temperature", "");
-            } catch (Exception e1) {
-                // dont care
-            }
-        }
     }
 
     public ServerSettings getServerSettings() {

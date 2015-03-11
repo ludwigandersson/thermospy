@@ -26,6 +26,6 @@ import com.luan.thermospy.android.core.pojo.Temperature;
  */
 public interface LocalServiceObserver {
     public void onTemperatureRecv(Temperature temperature);
-    public void onTemperatureError();
+    public void onServerError();
     public void onAlarmTriggered();
 }

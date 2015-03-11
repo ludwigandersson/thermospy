@@ -319,7 +319,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     }
 
     @Override
-    public void onTemperatureError() {
+    public void onServerError() {
         Log.i(LOG_TAG, "Received temperature error");
     }
 

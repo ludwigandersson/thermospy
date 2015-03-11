@@ -9,50 +9,52 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/linearLayout">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_alignParentTop="false"
-            android:layout_alignParentEnd="true"
-            android:layout_weight="0.4">
-
-
-            <include
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                layout="@layout/temperature_layout"
-                android:layout_weight="0.6" />
-
-            <include
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                layout="@layout/log_session_layout"
-                android:layout_weight="0.8" />
-
-            <include
-                layout="@layout/fragment_server_control"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.8" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.6">
+            android:layout_height="wrap_content">
 
-            <fragment
-                android:layout_width="fill_parent"
-                android:layout_height="match_parent"
-                android:name="com.luan.thermospy.android.fragments.RealtimeChartFragment"
-                android:id="@+id/realtime_graph"
-                android:tag="realtime_graph" />
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                layout="@layout/temperature_layout" />
         </LinearLayout>
+
+        <android.support.v4.app.FragmentTabHost
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/tabHost">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"></TabWidget>
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp">
+
+                </FrameLayout>
+                <FrameLayout
+                    android:id="@+id/realtabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+        </android.support.v4.app.FragmentTabHost>
+
     </LinearLayout>
 
 </RelativeLayout>

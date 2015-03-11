@@ -19,7 +19,6 @@
 
 package com.luan.thermospy.android.activities;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -106,8 +105,28 @@ public class MainActivity extends ActionBarActivity
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             ServiceBinder binder = (ServiceBinder) service;
             mService = binder.getService();
-            mService.registerObserver(MainActivity.this);
+
+            // Update the service with the latest values
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            try {
+                int refreshRate = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
+                mService.setRefreshInterval(refreshRate);
+            } catch (Exception e) {
+                mService.setRefreshInterval(5);
+            }
+
+            try {
+                mService.setAlarm(Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
+            } catch (Exception e) {
+                mService.setAlarmEnabled(false);
+                mService.setAlarm(0);
+            }
+
+            mService.setAlarmEnabled(Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
+            mService.setAlarmCondition(Coordinator.getInstance().getAlarmSettings().getAlarmCondition());
+
             mBound = true;
+            mService.registerObserver(MainActivity.this);
         }
 
         @Override
@@ -181,12 +200,16 @@ public class MainActivity extends ActionBarActivity
     protected void onResume()
     {
         super.onResume();
+
+
         if (mLastSelected == 3)
         {
             mNavigationDrawerFragment.selectItem(0);
         }
 
     }
+
+
 
     @Override
     protected void onDestroy() {
@@ -454,18 +477,14 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-
-        }
-    }
-
-    @Override
     public void onServiceStatus(ServiceStatus status) {
 
         if (!Coordinator.getInstance().getServerSettings().isConnected()) {
             Coordinator.getInstance().getServerSettings().setConnected(true);
+        }
+        else
+        {
+            Coordinator.getInstance().getServerSettings().setConnected(false);
         }
 
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());

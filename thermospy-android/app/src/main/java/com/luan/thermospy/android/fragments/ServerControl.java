@@ -20,23 +20,22 @@
 package com.luan.thermospy.android.fragments;
 
   import android.app.Activity;
-  import android.app.ProgressDialog;
-  import android.os.Bundle;
-  import android.support.v4.app.Fragment;
-  import android.util.Log;
-  import android.view.LayoutInflater;
-  import android.view.View;
-  import android.view.ViewGroup;
-  import android.widget.ToggleButton;
+import android.app.ProgressDialog;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ToggleButton;
 
-  import com.android.volley.RequestQueue;
-  import com.luan.thermospy.android.R;
-  import com.luan.thermospy.android.core.Coordinator;
-  import com.luan.thermospy.android.core.pojo.Action;
-  import com.luan.thermospy.android.core.pojo.CameraControlAction;
-  import com.luan.thermospy.android.core.pojo.ServiceStatus;
-  import com.luan.thermospy.android.core.rest.CameraControlReq;
-  import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
+import com.android.volley.RequestQueue;
+import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.core.Coordinator;
+import com.luan.thermospy.android.core.pojo.Action;
+import com.luan.thermospy.android.core.pojo.CameraControlAction;
+import com.luan.thermospy.android.core.pojo.ServiceStatus;
+import com.luan.thermospy.android.core.rest.CameraControlReq;
+import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
 
   /**
    * The server control class is responsible for polling temperature from the server service
@@ -170,7 +169,7 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
       public void onStop()
       {
           super.onStop();
-          if (mToggleServerStatus.hasOnClickListeners()) Log.d(LOG_TAG, "There are bastards and gobblins here!");
+
           if (mProgress != null && mProgress.isShowing())
           {
               mProgress.dismiss();

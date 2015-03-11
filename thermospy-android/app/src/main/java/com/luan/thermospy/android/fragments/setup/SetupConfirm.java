@@ -20,10 +20,10 @@
 package com.luan.thermospy.android.fragments.setup;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +45,7 @@ import com.luan.thermospy.android.core.rest.GetTemperatureReq;
  * received from the server is valid. If the user accepts a request is sent to start the
  * photo service in continuous mode. If cancelled the user is sent back to the Setup view.
  */
-public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTemperatureListener, 
+public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTemperatureListener,
                                                       CameraControlReq.OnCameraControlListener, 
                                                       DialogInterface.OnCancelListener {
 

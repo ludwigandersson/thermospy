@@ -23,7 +23,7 @@ package com.luan.thermospy.android.core.pojo;
  */
 public class Temperature {
 
-    private int temperature = 0;
+    private int temperature = Integer.MIN_VALUE;
     private int id = 0;
     private long timestamp;
     public Temperature(){}

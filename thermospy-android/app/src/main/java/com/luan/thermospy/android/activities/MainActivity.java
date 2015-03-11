@@ -19,10 +19,7 @@
 
 package com.luan.thermospy.android.activities;
 
-import android.app.ActivityManager;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,6 +29,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -152,6 +150,18 @@ public class MainActivity extends ActionBarActivity
     protected void onStart()
     {
         super.onStart();
+        if (!mBound) {
+            Intent intent = new Intent(this, TemperatureMonitorService.class);
+            Bundle bundle = new Bundle();
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM_CONDITION, Coordinator.getInstance().getAlarmSettings().getAlarmCondition().getId());
+            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
+            bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
+            intent.putExtras(bundle);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
 
     }
 
@@ -161,13 +171,10 @@ public class MainActivity extends ActionBarActivity
         super.onStop();
         Coordinator.getInstance().save();
 
-
         if (mBound) {
             unbindService(mConnection);
             mBound = false;
         }
-
-
     }
 
     @Override
@@ -179,20 +186,14 @@ public class MainActivity extends ActionBarActivity
             mNavigationDrawerFragment.selectItem(0);
         }
 
-        if (mBound) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            int interval = Integer.parseInt(settings.getString(getString(R.string.pref_key_refresh_interval), "5"));
-            if (mService.getRefreshInterval() != interval)
-            {
-                mService.setRefreshInterval(interval);
-            }
-        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Coordinator.getInstance().save();
+
+
     }
 
     @Override
@@ -213,7 +214,7 @@ public class MainActivity extends ActionBarActivity
         // update the main content by replacing fragments
 
         onSectionAttached(position);
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         final ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
         final AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
         final Temperature lastTemperature = Coordinator.getInstance().getTemperature();
@@ -246,10 +247,10 @@ public class MainActivity extends ActionBarActivity
             }
             else
             {
-                FragmentTransaction transaction;
+                android.support.v4.app.FragmentTransaction transaction;
                 // No ip or port available. Show server setup fragment
-                transaction = getFragmentManager().beginTransaction()
-                       .replace(R.id.container, (Fragment)SetupService.newInstance(ip, port));
+                transaction = getSupportFragmentManager().beginTransaction()
+                       .replace(R.id.container, SetupService.newInstance(ip, port));
                 transaction.commit();
 
             }
@@ -262,8 +263,8 @@ public class MainActivity extends ActionBarActivity
         }
         else if (position == 2)
         {
-            FragmentTransaction transaction;
-            transaction = fragmentManager.beginTransaction()
+            android.support.v4.app.FragmentTransaction transaction;
+            transaction = getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, SetupService.newInstance(ip, port));
             transaction.commit();
         }
@@ -347,12 +348,18 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onSetupServerConnectionEstablished(String ipAddress, int port, boolean running) {
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
         serverSettings.setRunning(running);
         serverSettings.setIpAddress(ipAddress);
         serverSettings.setPort(port);
         serverSettings.setConnected(true);
+
+        if (mBound)
+        {
+            mService.setIpAddress(ipAddress);
+            mService.setPort(port);
+        }
 
         fragmentManager.beginTransaction()
                 .replace(R.id.container, SetupBoundary.newInstance(serverSettings.getIpAddress(), serverSettings.getPort()))
@@ -363,7 +370,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onResetBounds() {
         ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, SetupBoundary.newInstance(serverSettings.getIpAddress(), serverSettings.getPort()))
                 .commit();
@@ -391,7 +398,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onBoundsSpecified(Boundary bounds) {
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         fragmentManager.beginTransaction()
                 .replace(R.id.container, SetupConfirm.newInstance())
@@ -424,13 +431,8 @@ public class MainActivity extends ActionBarActivity
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+        return (mBound && mService.isRunning());
+
     }
 
     public void startBackgroundService() {
@@ -449,21 +451,15 @@ public class MainActivity extends ActionBarActivity
 
             startService(intent);
         }
-
-        if (isMyServiceRunning(TemperatureMonitorService.class) && !mBound) {
-            // Create bind to service after the server has been started
-            Intent intent = new Intent(this, TemperatureMonitorService.class);
-            Bundle bundle = new Bundle();
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM, Integer.parseInt(Coordinator.getInstance().getAlarmSettings().getAlarm()));
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.ALARM_CONDITION, Coordinator.getInstance().getAlarmSettings().getAlarmCondition().getId());
-            bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
-            bundle.putBoolean(TemperatureMonitorService.ServiceArguments.ALARM_ENABLED, Coordinator.getInstance().getAlarmSettings().isAlarmSwitchEnabled());
-            intent.putExtras(bundle);
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        }
-
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+
+        }
+    }
 
     @Override
     public void onServiceStatus(ServiceStatus status) {
@@ -475,9 +471,8 @@ public class MainActivity extends ActionBarActivity
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
         if (status.isRunning()) {
             // Service is up and running, check if we are bound if not start the service
-            if (!mBound) {
-                startBackgroundService();
-            }
+            startBackgroundService();
+
         } else {
             if (isMyServiceRunning(TemperatureMonitorService.class)) {
                 // Service is stopped. Unbound and stop the service
@@ -493,7 +488,7 @@ public class MainActivity extends ActionBarActivity
 
 
     public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener) {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         LogSessionDialogFragment editNameDialog = LogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings());
         editNameDialog.setDismissListener(dismissListener);
         editNameDialog.show(fm, "fragment_edit_name");

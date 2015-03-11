@@ -193,17 +193,17 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
             // add a new x-value first
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             data.addXValue(dateFormat.format(temperatureEntry.getTimestamp()));
-            data.addEntry(new Entry(temperatureEntry.getTemperature(), set.getEntryCount(), temperatureEntry), 0);
+            data.addEntry(new Entry(temperatureEntry.getTemperature() == Integer.MIN_VALUE ? 0 : temperatureEntry.getTemperature(), set.getEntryCount(), temperatureEntry), 0);
 
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            mChart.setVisibleXRange(4);
+            mChart.setVisibleXRange(5);
             // mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(data.getXValCount());
+            mChart.moveViewToX(data.getXValCount()-6);
 
             // this automatically refreshes the chart (calls invalidate())
 //             mChart.moveViewTo(data.getXValCount()-7, 55f, AxisDependency.LEFT);
@@ -211,14 +211,21 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
             // redraw the chart
 //            mChart.invalidate();
 
-            if (set.getEntryCount() > 0) {
+            if (set.getEntryCount() > 0 && temperature.getTemperature() != Integer.MIN_VALUE) {
 
 
-
+                if (temperature.getTemperature() > mAverageMaxY)
+                {
+                    mAverageMaxY = temperature.getTemperature()*set.getEntryCount();
+                }
+                if (temperature.getTemperature() < mAverageMinY)
+                {
+                    mAverageMinY = temperature.getTemperature()*set.getEntryCount();
+                }
                 mAverageMaxY += temperature.getTemperature() + 20;
                 mAverageMinY += temperature.getTemperature() - 20;
                 YAxis yaxis = mChart.getAxisLeft();
-                yaxis.setAxisMaxValue(mAverageMaxY/set.getEntryCount());
+                yaxis.setAxisMaxValue(mAverageMaxY/(set.getEntryCount()));
                 yaxis.setAxisMinValue(mAverageMinY/set.getEntryCount());
             }
 

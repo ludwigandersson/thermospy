@@ -133,6 +133,11 @@ public class Crop {
         fragment.startActivityForResult(getIntent(context), requestCode);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void start(Context context, android.support.v4.app.Fragment fragment) {
+        fragment.startActivityForResult(getIntent(context), REQUEST_CROP);
+    }
+
     /**
      * Get Intent to start crop Activity
      *

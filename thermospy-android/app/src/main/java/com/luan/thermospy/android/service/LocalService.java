@@ -38,6 +38,9 @@ public class LocalService extends Observable implements LocalServiceSubject {
     private boolean alarmEnabled = false;
     private ArrayList<LocalServiceObserver> mObservers = new ArrayList<>();
     private Temperature mTemperatureEntry = null;
+    private int port = 0;
+    private String ipAddress = "";
+    private boolean running = false;
 
     synchronized public int getRefreshInterval() {
         return mRefreshInterval;
@@ -121,5 +124,39 @@ public class LocalService extends Observable implements LocalServiceSubject {
         {
             observer.onAlarmTriggered();
         }
+    }
+
+    synchronized public void setIpAddress(String ipAddress) {
+        if (!this.ipAddress.equals(ipAddress))
+        {
+            this.ipAddress = ipAddress;
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    synchronized public void setPort (int port) {
+        if (this.port != port) {
+            this.port = port;
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    synchronized public String getIpAddress() {
+        return ipAddress;
+    }
+
+    synchronized public int getPort()
+    {
+        return port;
+    }
+
+    synchronized public boolean isRunning() {
+        return running;
+    }
+    
+    synchronized  public void setRunning(boolean running) {
+        this.running = running;
     }
 }

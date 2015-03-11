@@ -199,6 +199,8 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         mProgress.show();
     }
 
+
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);

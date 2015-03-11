@@ -78,9 +78,10 @@ public class TemperatureMonitorService extends Service {
         public void handleMessage(Message msg) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
+
             long refreshInterval = msg.getData().getInt(ServiceArguments.REFRESH_RATE)*1000;
-            final String ip = msg.getData().getString(ServiceArguments.IP_ADDRESS);
-            final int port = msg.getData().getInt(ServiceArguments.PORT);
+            String ip = msg.getData().getString(ServiceArguments.IP_ADDRESS);
+            int port = msg.getData().getInt(ServiceArguments.PORT);
 
             RequestQueue requestQueue = Volley.newRequestQueue(TemperatureMonitorService.this);
             boolean mAlarmFired =false;
@@ -104,6 +105,8 @@ public class TemperatureMonitorService extends Service {
                     }
                 }
             });
+
+            mService.setRunning(true);
 
             while (!mServiceLooper.getThread().isInterrupted()) {
 
@@ -157,6 +160,7 @@ public class TemperatureMonitorService extends Service {
             temperatureReq.cancel();
             mNotificationHandler.cancel(TemperatureMonitorService.this);
             stopSelf(msg.arg1);
+            mService.setRunning(false);
         }
 
         private int getColor(AlarmCondition condition, int temperature, int alarm) {

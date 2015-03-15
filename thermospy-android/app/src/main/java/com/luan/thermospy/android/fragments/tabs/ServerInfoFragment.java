@@ -258,7 +258,7 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
     }
 
     private void initializeAdapter() {
-        mItems.add(new SwitchItem("Control service", true, new View.OnClickListener() {
+        mItems.add(new SwitchItem("Control service", mRunning, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CameraControlAction action;

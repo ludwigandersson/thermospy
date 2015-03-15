@@ -135,7 +135,7 @@ public class MainActivity extends ActionBarActivity
 
             mBound = true;
             mService.registerObserver(MainActivity.this);
-            
+
 
         }
 

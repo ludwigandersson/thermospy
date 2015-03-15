@@ -38,6 +38,9 @@ import com.luan.thermospy.android.R;
         private String mText;
         private String mDescription;
         private String mValue;
+        private TextView mTxtValue;
+        private TextView mTxtDesc;
+        private TextView mTxtName;
 
         public SimpleItem(String text, String des, String value) {
             this.mText = text;
@@ -51,6 +54,27 @@ import com.luan.thermospy.android.R;
             this.mDescription = "";
         }
 
+        public void setText(String text) {
+            mText = text;
+            if (mTxtName != null) {
+                mTxtName.setText(mText);
+            }
+        }
+
+        public void setValue(String value) {
+            mValue = value;
+            if (mTxtValue != null) {
+                mTxtValue.setText(mValue);
+            }
+        }
+
+        public void setDescription(String description) {
+            mDescription = description;
+            if (mTxtDesc != null) {
+                mTxtDesc.setText(mDescription);
+            }
+        }
+
         @Override
         public int getContentLayoutId() {
             return R.layout.simple_list_item;
@@ -59,13 +83,13 @@ import com.luan.thermospy.android.R;
         @Override
         public View populateContentView(View view) {
 
-            TextView txtName = (TextView)view.findViewById(R.id.txtText);
-            TextView txtDesc = (TextView)view.findViewById(R.id.txtDescription);
-            TextView txtValue = (TextView)view.findViewById(R.id.txtValue);
+            mTxtName = (TextView)view.findViewById(R.id.txtText);
+            mTxtDesc = (TextView)view.findViewById(R.id.txtDescription);
+            mTxtValue = (TextView)view.findViewById(R.id.txtValue);
 
-            txtName.setText(mText);
-            txtDesc.setText(mDescription);
-            txtValue.setText(mValue);
+            mTxtName.setText(mText);
+            mTxtDesc.setText(mDescription);
+            mTxtValue.setText(mValue);
 
             return view;
         }

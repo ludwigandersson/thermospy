@@ -19,7 +19,6 @@
 
 package com.luan.thermospy.android.core.rest;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.android.volley.RequestQueue;
@@ -31,7 +30,7 @@ import com.luan.thermospy.android.core.pojo.ServiceStatus;
  */
 public class ServiceStatusPolling implements GetServiceStatusReq.OnGetServiceStatus {
     volatile private int mInterval = 2;
-    private final Context mContext;
+
 
     private final GetServiceStatusReq mGetServiceStatusReq;
     private OnServiceStatusListener mListener = null;
@@ -65,8 +64,8 @@ public class ServiceStatusPolling implements GetServiceStatusReq.OnGetServiceSta
     }
 
 
-    public ServiceStatusPolling(Context context, RequestQueue queue, OnServiceStatusListener listener) {
-        mContext = context;
+    public ServiceStatusPolling(RequestQueue queue, OnServiceStatusListener listener) {
+
 
         mListener = listener;
 

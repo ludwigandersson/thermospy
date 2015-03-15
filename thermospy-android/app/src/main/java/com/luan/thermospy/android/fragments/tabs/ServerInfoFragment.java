@@ -20,6 +20,7 @@
 package com.luan.thermospy.android.fragments.tabs;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -28,10 +29,20 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.core.Coordinator;
+import com.luan.thermospy.android.core.pojo.Action;
+import com.luan.thermospy.android.core.pojo.CameraControlAction;
+import com.luan.thermospy.android.core.pojo.ServerStatus;
+import com.luan.thermospy.android.core.pojo.ServiceStatus;
+import com.luan.thermospy.android.core.rest.CameraControlReq;
+import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
+import com.luan.thermospy.android.core.rest.ServiceStatusPolling;
 import com.luan.thermospy.android.fragments.tabs.listadapter.ServerInfoListAdapter;
 import com.luan.thermospy.android.fragments.tabs.listcontent.generic.ListContent;
 import com.luan.thermospy.android.fragments.tabs.listcontent.generic.SimpleItem;
+import com.luan.thermospy.android.fragments.tabs.listcontent.generic.SwitchItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,18 +56,21 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link com.luan.thermospy.android.fragments.tabs.ServerInfoFragment.OnServerInfoListener}
  * interface.
  */
-public class ServerInfoFragment extends ListFragment {
+public class ServerInfoFragment extends ListFragment implements ServiceStatusPolling.OnServiceStatusListener, CameraControlReq.OnCameraControlListener, GetServiceStatusReq.OnGetServiceStatus {
 
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
-
+    private static final String ARG_SERVICE_STATUS = "servicestatus";
+    private static final String ARG_CONNECTION_STATUS = "connection";
 
     private String mIpAddress;
     private int mPort;
+    private ServerStatus mServerStatus;
 
     private OnServerInfoListener mListener;
+    private CameraControlReq mCameraControlReq;
 
     /**
      * The fragment's ListView/GridView.
@@ -67,14 +81,60 @@ public class ServerInfoFragment extends ListFragment {
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ServerInfoListAdapter mAdapter;
+    private ServerInfoListAdapter mAdapter = null;
     private List<ListContent> mItems;
+    private String LOG_TAG = ServerInfoFragment.class.getSimpleName();
+    private boolean mRunning;
+    private boolean mConnected;
+    private RequestQueue mRequestQueue;
+    private ServiceStatusPolling mServiceStatusPoller;
+    private ProgressDialog mProgress;
+    private GetServiceStatusReq mServiceStatusReq;
+
+    @Override
+    public void onCameraControlResp(Action action) {
+        getStatus();
+    }
+
+    private void getStatus() {
+        mServiceStatusReq.request(mIpAddress, mPort);
+    }
+
+    @Override
+    public void onCameraControlError() {
+        updateControlServiceSwitch(ServerInfoItems.CONTROL_SERVICE_ITEM);
+        hideProgressDialog();
+    }
+
+    @Override
+    public void onServiceStatusRecv(ServiceStatus status) {
+        hideProgressDialog();
+        onServiceStatusPollerRecv(status);
+    }
+
+    @Override
+    public void onServiceStatusError() {
+        onServiceStatusPollerError();
+
+    }
+
+    private interface ServerInfoItems {
+        public int CONTROL_SERVICE_ITEM = 0;
+        public int IP_ADDRESS_ITEM = 1;
+        public int PORT_ITEM = 2;
+        public int SERVICE_STATUS_ITEM = 3;
+        public int SERVER_STATUS_ITEM = 4;
+        public int CONNECTION_STATUS_ITEM = 5;
+    }
 
     public static ServerInfoFragment newInstance(String ipAddress, int port) {
         ServerInfoFragment fragment = new ServerInfoFragment();
         Bundle args = new Bundle();
         args.putString(ARG_IP_ADDRESS, ipAddress);
         args.putInt(ARG_PORT, port);
+        args.putBoolean(ARG_SERVICE_STATUS, false);
+        args.putBoolean(ARG_CONNECTION_STATUS, false);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -94,20 +154,18 @@ public class ServerInfoFragment extends ListFragment {
         if (getArguments() != null) {
             mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
             mPort = getArguments().getInt(ARG_PORT);
-            mItems.add(new SimpleItem("IP Address", "The server ip address", mIpAddress));
-            mItems.add(new SimpleItem("Port", "The server port", Integer.toString(mPort)));
-            mItems.add(new SimpleItem("Status", "Service status", "Running"));
-            mItems.add(new SimpleItem("Connected", "Connected to server", "true"));
-
-
+            mRunning = getArguments().getBoolean(ARG_SERVICE_STATUS);
+            mConnected = getArguments().getBoolean(ARG_CONNECTION_STATUS);
         }
-        else {
-            mItems.add(new SimpleItem("IP Address", "The server ip address", "Unknown"));
+        else
+        {
+            mIpAddress = "Unknown";
+            mPort = -1;
+            mRunning = false;
+            mConnected = false;
         }
 
 
-        // TODO: Change Adapter to display your content
-        mAdapter = new ServerInfoListAdapter(getActivity(), mItems);
     }
 
     @Override
@@ -115,9 +173,28 @@ public class ServerInfoFragment extends ListFragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_serverinfo, container, false);
 
-        setListAdapter(mAdapter);
+
 
         return view;
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        mServiceStatusPoller.start();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        hideProgressDialog();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        hideProgressDialog();
+        mServiceStatusPoller.cancel();
     }
 
     @Override
@@ -125,6 +202,10 @@ public class ServerInfoFragment extends ListFragment {
         super.onAttach(activity);
         try {
             mListener = (OnServerInfoListener) getParentFragment();
+            mRequestQueue = Coordinator.getInstance().getRequestQueue();
+            mServiceStatusPoller = new ServiceStatusPolling(mRequestQueue, this);
+            mCameraControlReq = new CameraControlReq(mRequestQueue, this, new Action(CameraControlAction.UNKNOWN));
+            mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -150,6 +231,111 @@ public class ServerInfoFragment extends ListFragment {
         }
     }
 
+    @Override
+    public void onServiceStatusPollerRecv(ServiceStatus status) {
+        if (mAdapter == null)
+        {
+            initializeAdapter();
+        }
+
+        if (mRunning != status.isRunning())
+        {
+            mRunning = status.isRunning();
+            updateSimpleItemValue(ServerInfoItems.SERVICE_STATUS_ITEM, mRunning ? "Running" : "Not running");
+            updateControlServiceSwitch(ServerInfoItems.CONTROL_SERVICE_ITEM);
+        }
+
+        if (!mConnected)
+        {
+            mConnected = true;
+            updateSimpleItemValue(ServerInfoItems.CONNECTION_STATUS_ITEM, "Connected");
+        }
+
+        if (mServerStatus != status.getError()) {
+            mServerStatus = status.getError();
+            updateSimpleItemValue(ServerInfoItems.SERVER_STATUS_ITEM, mServerStatus.toString());
+        }
+    }
+
+    private void initializeAdapter() {
+        mItems.add(new SwitchItem("Control service", true, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraControlAction action;
+                if (mRunning)
+                {
+                    // Stop server service
+                    action = CameraControlAction.STOP;
+                }
+                else
+                {
+                    // Start server service
+                    action = CameraControlAction.START;
+                }
+                controlServer(action);
+            }
+        }));
+        mItems.add(new SimpleItem("IP Address", mIpAddress));
+        mItems.add(new SimpleItem("Port", Integer.toString(mPort)));
+        mItems.add(new SimpleItem("State", mRunning ? "Running" : "Not running"));
+        mItems.add(new SimpleItem("Server status", "OK"));
+        mItems.add(new SimpleItem("Connection status", mConnected ? "Connected" : "Not connected"));
+
+
+        mAdapter = new ServerInfoListAdapter(getActivity(), mItems);
+        setListAdapter(mAdapter);
+
+    }
+
+    private void controlServer(CameraControlAction action)
+    {
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setTitle("Please wait");
+        mProgress.setCanceledOnTouchOutside(false);
+        if (!mRunning) {
+            mProgress.setMessage("Starting thermospy service...");
+        }
+        else
+        {
+            mProgress.setMessage("Stopping thermospy service...");
+        }
+        mProgress.show();
+        mCameraControlReq.setCameraControlAction(new Action(action));
+        mCameraControlReq.request(mIpAddress, mPort);
+    }
+
+    private void updateControlServiceSwitch(int controlServiceItem) {
+        SwitchItem switchItem = (SwitchItem)mItems.get(controlServiceItem);
+        switchItem.setRunning(mRunning);
+    }
+
+    private void updateSimpleItemValue(int itemId, String value)
+    {
+        SimpleItem item = (SimpleItem)mItems.get(itemId);
+        item.setValue(value);
+    }
+
+    @Override
+    public void onServiceStatusPollerError() {
+        if (mAdapter == null)
+        {
+            initializeAdapter();
+        }
+
+        if (mConnected)
+        {
+            updateSimpleItemValue(ServerInfoItems.CONNECTION_STATUS_ITEM, "Not connected");
+            updateSimpleItemValue(ServerInfoItems.SERVICE_STATUS_ITEM, "Unknown");
+        }
+    }
+
+    private void hideProgressDialog()
+    {
+        if (mProgress != null) {
+            mProgress.dismiss();
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -161,7 +347,6 @@ public class ServerInfoFragment extends ListFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnServerInfoListener {
-        // TODO: Update argument type and name
         public void onFragmentInteraction(String id);
     }
 

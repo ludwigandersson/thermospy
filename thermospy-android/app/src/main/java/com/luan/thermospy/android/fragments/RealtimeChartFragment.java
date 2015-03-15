@@ -68,8 +68,9 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     private LocalServiceSubject mTemperatureSubject;
     private LineChart mChart;
     private String LOG_TAG = RealtimeChartFragment.class.getSimpleName();
-    private long mAverageMaxY = Integer.MIN_VALUE;
-    private long mAverageMinY = Integer.MAX_VALUE;
+    private long mMaxY = Integer.MIN_VALUE;
+    private long mMinY = Integer.MAX_VALUE;
+
     private String mIpAddress;
     private int mPort;
     private RequestQueue mRequestQueue;
@@ -214,18 +215,18 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
             if (set.getEntryCount() > 0 && temperature.getTemperature() != Integer.MIN_VALUE) {
 
 
-                if (temperature.getTemperature() > mAverageMaxY)
+                if (temperature.getTemperature() > mMaxY)
                 {
-                    mAverageMaxY = temperature.getTemperature()+20;
+                    mMaxY = temperature.getTemperature()+20;
                 }
-                if (temperature.getTemperature() < mAverageMinY)
+                if (temperature.getTemperature() < mMinY)
                 {
-                    mAverageMinY = temperature.getTemperature()-20;
+                    mMinY = temperature.getTemperature()-20;
                 }
 
                 YAxis yaxis = mChart.getAxisLeft();
-                yaxis.setAxisMaxValue(mAverageMaxY);
-                yaxis.setAxisMinValue(mAverageMinY);
+                yaxis.setAxisMaxValue(mMaxY);
+                yaxis.setAxisMinValue(mMinY);
             }
 
         }

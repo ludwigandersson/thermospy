@@ -135,6 +135,7 @@ public class MainActivity extends ActionBarActivity
 
             mBound = true;
             mService.registerObserver(MainActivity.this);
+            
 
         }
 
@@ -175,6 +176,12 @@ public class MainActivity extends ActionBarActivity
     protected void onStart()
     {
         super.onStart();
+        bindLocalService();
+
+    }
+
+    private void bindLocalService()
+    {
         if (!mBound) {
             Intent intent = new Intent(this, TemperatureMonitorService.class);
             Bundle bundle = new Bundle();
@@ -187,7 +194,6 @@ public class MainActivity extends ActionBarActivity
             intent.putExtras(bundle);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
-
     }
 
     @Override
@@ -495,6 +501,10 @@ public class MainActivity extends ActionBarActivity
 
         Coordinator.getInstance().getServerSettings().setRunning(status.isRunning());
         if (status.isRunning()) {
+            if (!mBound) {
+                bindLocalService();
+            }
+
             // Service is up and running, check if we are bound if not start the service
             startBackgroundService();
 

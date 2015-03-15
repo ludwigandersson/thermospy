@@ -226,7 +226,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
         mGetActiveLogSession = new GetActiveLogSessionReq(mRequestQueue, this);
         mStopLogSessionReq = new StopLogSessionReq(mRequestQueue, this);
-        mStatusPoller = new ServiceStatusPolling(getActivity(), mRequestQueue, this);
+        mStatusPoller = new ServiceStatusPolling(mRequestQueue, this);
     }
 
     @Override

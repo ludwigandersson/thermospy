@@ -64,4 +64,17 @@ public enum ServerStatus {
 
         }
     }
+
+    @Override
+    public String toString() {
+        switch (id)
+        {
+            case 0:
+                return "OK";
+            case 100:
+                return "Internal Server Error";
+            default:
+                return "Unknown Error";
+        }
+    }
 }

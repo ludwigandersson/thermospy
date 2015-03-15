@@ -46,6 +46,7 @@ import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
 import com.luan.thermospy.android.core.rest.ServiceStatusPolling;
 import com.luan.thermospy.android.core.rest.StopLogSessionReq;
+import com.luan.thermospy.android.fragments.tabs.ServerInfoFragment;
 
 
 /**
@@ -58,7 +59,8 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         StopLogSessionReq.OnStopLogSessionListener,
         DialogInterface.OnDismissListener,
         LocalServiceObserver,
-        ServiceStatusPolling.OnServiceStatusListener {
+        ServiceStatusPolling.OnServiceStatusListener,
+        ServerInfoFragment.OnServerInfoListener{
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_ALARM_STR = "alarm";
@@ -148,9 +150,10 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         Alarm alarm = Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings());
         mTabHost.addTab(mTabHost.newTabSpec("alarm").setIndicator("Alarm"),
                 Alarm.class, alarm.getArguments());
-        ServerControl control = ServerControl.newInstance(mIpAddress, mPort, Coordinator.getInstance().getServerSettings().isRunning());
-        mTabHost.addTab(mTabHost.newTabSpec("custom").setIndicator("Control"),
-                ServerControl.class, control.getArguments());
+        //ServerControl control = ServerControl.newInstance(mIpAddress, mPort, Coordinator.getInstance().getServerSettings().isRunning());
+        ServerInfoFragment infoFragment = ServerInfoFragment.newInstance(mIpAddress, mPort);
+        mTabHost.addTab(mTabHost.newTabSpec("info").setIndicator("Info"),
+                ServerInfoFragment.class, infoFragment.getArguments());
 
 
 
@@ -399,6 +402,11 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
     @Override
     public void onServiceStatusPollerError() {
         onServiceStatusError();
+    }
+
+    @Override
+    public void onFragmentInteraction(String id) {
+
     }
 
     public interface OnMonitorFragmentListener {

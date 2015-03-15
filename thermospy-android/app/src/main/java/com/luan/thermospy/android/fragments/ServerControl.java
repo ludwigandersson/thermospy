@@ -29,7 +29,6 @@ import android.view.ViewGroup;
 import android.widget.ToggleButton;
 
 import com.android.volley.RequestQueue;
-import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.Action;
 import com.luan.thermospy.android.core.pojo.CameraControlAction;
@@ -115,10 +114,10 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Inflate the layout for this fragment
-        View v  =  inflater.inflate(R.layout.fragment_server_control, container, false);
+        //View v  =  inflater.inflate(R.layout.fragment_server_control, container, false);
 
-        mToggleServerStatus = (ToggleButton) v.findViewById(R.id.toggleButton);
-        mToggleServerStatus.setChecked(mRunning);
+        //mToggleServerStatus = (ToggleButton) v.findViewById(R.id.toggleButton);
+/*        mToggleServerStatus.setChecked(mRunning);
 
         mToggleServerStatus.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,9 +137,10 @@ public class ServerControl extends Fragment implements GetServiceStatusReq.OnGet
 
         });
 
+*/
 
-
-        return v;
+        //return v;
+        return null;
     }
 
       @Override

@@ -100,6 +100,12 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
     }
 
     @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+    }
+
+    @Override
     public void onBackPressed() {
         setTitle(getString(R.string.temperature_log));
         android.app.FragmentManager fm = getFragmentManager();
@@ -119,6 +125,14 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
     @Override
     public void onLogSessionListError() {
         Log.d(LOG_TAG, "An error occurred within the log session fragment...");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putString(DATEFORMAT, mDateFormat);
+
+        super.onSaveInstanceState(outState);
     }
 
 

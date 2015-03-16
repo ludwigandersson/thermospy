@@ -33,12 +33,12 @@ import java.util.List;
 /**
  * Created by ludde on 15-03-14.
  */
-public class ServerInfoListAdapter extends ArrayAdapter<ListContent> {
+public class GenericItemListAdapter extends ArrayAdapter<ListContent> {
 
     private final Context mContext;
     private final List<ListContent> mList;
 
-    public ServerInfoListAdapter(Context context, List<ListContent> objects) {
+    public GenericItemListAdapter(Context context, List<ListContent> objects) {
         super(context, R.layout.fragment_serverinfo_list, objects);
         mList = objects;
         mContext = context;

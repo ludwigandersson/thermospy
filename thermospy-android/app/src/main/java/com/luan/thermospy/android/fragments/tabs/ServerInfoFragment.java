@@ -39,7 +39,7 @@ import com.luan.thermospy.android.core.pojo.ServiceStatus;
 import com.luan.thermospy.android.core.rest.CameraControlReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
 import com.luan.thermospy.android.core.rest.ServiceStatusPolling;
-import com.luan.thermospy.android.fragments.tabs.listadapter.ServerInfoListAdapter;
+import com.luan.thermospy.android.fragments.tabs.listadapter.GenericItemListAdapter;
 import com.luan.thermospy.android.fragments.tabs.listcontent.generic.ListContent;
 import com.luan.thermospy.android.fragments.tabs.listcontent.generic.SimpleItem;
 import com.luan.thermospy.android.fragments.tabs.listcontent.generic.SwitchItem;
@@ -81,7 +81,7 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ServerInfoListAdapter mAdapter = null;
+    private GenericItemListAdapter mAdapter = null;
     private List<ListContent> mItems;
     private String LOG_TAG = ServerInfoFragment.class.getSimpleName();
     private boolean mRunning;
@@ -282,7 +282,7 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
         mItems.add(new SimpleItem("Connection status", mConnected ? "Connected" : "Not connected"));
 
 
-        mAdapter = new ServerInfoListAdapter(getActivity(), mItems);
+        mAdapter = new GenericItemListAdapter(getActivity(), mItems);
         setListAdapter(mAdapter);
 
     }

@@ -35,17 +35,18 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.core.AlarmSettings;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.LocalServiceObserver;
 import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.pojo.LogSession;
-import com.luan.thermospy.android.core.pojo.ServerStatus;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
 import com.luan.thermospy.android.core.rest.ServiceStatusPolling;
 import com.luan.thermospy.android.core.rest.StopLogSessionReq;
+import com.luan.thermospy.android.fragments.tabs.AlarmTabFragment;
 import com.luan.thermospy.android.fragments.tabs.ServerInfoFragment;
 
 
@@ -54,13 +55,13 @@ import com.luan.thermospy.android.fragments.tabs.ServerInfoFragment;
  * The sub-fragment displays some server information etc.
  */
 public class MonitorFragment extends android.support.v4.app.Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,
-        ServerControl.OnServerControlListener,
         GetServiceStatusReq.OnGetServiceStatus,
         StopLogSessionReq.OnStopLogSessionListener,
         DialogInterface.OnDismissListener,
         LocalServiceObserver,
         ServiceStatusPolling.OnServiceStatusListener,
-        ServerInfoFragment.OnServerInfoListener{
+        ServerInfoFragment.OnServerInfoListener,
+        AlarmTabFragment.OnAlarmTabListener{
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_ALARM_STR = "alarm";
@@ -147,9 +148,11 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         RealtimeChartFragment realtimeChartFragment = RealtimeChartFragment.newInstance(mIpAddress, mPort);
         mTabHost.addTab(mTabHost.newTabSpec("realtime").setIndicator("Monitoring"),
                 RealtimeChartFragment.class, realtimeChartFragment.getArguments());
-        Alarm alarm = Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings());
+        //Alarm alarm = Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings());
+        AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
+        AlarmTabFragment alarm = AlarmTabFragment.newInstance(alarmSettings.getAlarm(), alarmSettings.getAlarmCondition(), alarmSettings.isAlarmSwitchEnabled());
         mTabHost.addTab(mTabHost.newTabSpec("alarm").setIndicator("Alarm"),
-                Alarm.class, alarm.getArguments());
+                AlarmTabFragment.class, alarm.getArguments());
         //ServerControl control = ServerControl.newInstance(mIpAddress, mPort, Coordinator.getInstance().getServerSettings().isRunning());
         ServerInfoFragment infoFragment = ServerInfoFragment.newInstance(mIpAddress, mPort);
         mTabHost.addTab(mTabHost.newTabSpec("info").setIndicator("Info"),
@@ -296,32 +299,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
         super.onSaveInstanceState(outState);
     }
 
-
-    @Override
-    public void onConnectionLost() {
-       // mStartStopLogSessionButton.setChecked(false);
-       // mStartStopLogSessionButton.setEnabled(true);
-        Toast t = Toast.makeText(getActivity(), R.string.lost_connection, Toast.LENGTH_SHORT);
-        t.show();
-        mListener.onServerNotRunning();
-    }
-
-    @Override
-    public void onServiceStatus(ServiceStatus status) {
-
-
-        if (!status.isRunning()) {
-            mTemperature.setText("--");
-        }
-        if (status.getError() != ServerStatus.OK) {
-            mListener.onServerNotRunning();
-        }
-        else {
-            mListener.onServiceStatus(status);
-        }
-
-    }
-
     @Override
     public void onServiceStatusRecv(ServiceStatus status) {
         if (!mStatusPoller.isRunning())
@@ -336,9 +313,11 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
        mListener.onServiceStatus(status);
     }
 
-    @Override
+
     public void onServiceStatusError() {
         mProgress.dismiss();
+        Toast t = Toast.makeText(getActivity(), R.string.lost_connection, Toast.LENGTH_SHORT);
+        t.show();
         mListener.onServerNotRunning();
     }
 
@@ -396,7 +375,10 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
 
     @Override
     public void onServiceStatusPollerRecv(ServiceStatus status) {
-        onServiceStatus(status);
+        if (!status.isRunning()) {
+            mTemperature.setText("--");
+        }
+        mListener.onServiceStatus(status);
     }
 
     @Override
@@ -409,10 +391,31 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements 
 
     }
 
+    @Override
+    public void onAlarmEnableSwitchChanged(boolean checked) {
+        mListener.onAlarmEnableSwitchChanged(checked);
+    }
+
+    @Override
+    public void onAlarmChanged(int alarm) {
+        mListener.onAlarmChanged(alarm);
+    }
+
+    @Override
+    public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
+        mListener.onAlarmConditionChanged(alarmCondition);
+    }
+
     public interface OnMonitorFragmentListener {
         public void onServerNotRunning();
         public void onServiceStatus(ServiceStatus status);
         public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener);
+
+        void onAlarmEnableSwitchChanged(boolean checked);
+
+        void onAlarmChanged(int alarm);
+
+        void onAlarmConditionChanged(AlarmCondition alarmCondition);
     }
 
 }

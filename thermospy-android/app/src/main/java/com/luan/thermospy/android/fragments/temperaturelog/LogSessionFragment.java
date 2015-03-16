@@ -64,7 +64,6 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     private static final String ARG_PARAM_PORT = "port";
     private static final String LOG_TAG = LogSessionFragment.class.getSimpleName();
     private static final String ARG_DATEFORMAT = "dateformat";
-    private static final String ARG_TIMEFORMAT = "timeformat";
 
     // TODO: Rename and change types of parameters
     private String mIpAddress;
@@ -117,17 +116,17 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mIpAddress = getArguments().getString(ARG_PARAM_IP_ADDRESS);
-            mPort = getArguments().getInt(ARG_PARAM_PORT);
-            mDateFormat = getArguments().getString(ARG_DATEFORMAT);
+        if (savedInstanceState != null) {
+            mIpAddress = savedInstanceState.getString(ARG_PARAM_IP_ADDRESS);
+            mPort = savedInstanceState.getInt(ARG_PARAM_PORT);
+            mDateFormat = savedInstanceState.getString(ARG_DATEFORMAT);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_log_session, container, false);
+        View view = inflater.inflate(R.layout.fragment_logsession_list, container, false);
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -318,6 +317,16 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
             mLogSessionList.add(0, session);
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putString(ARG_PARAM_IP_ADDRESS, mIpAddress);
+        outState.putInt(ARG_PARAM_PORT, mPort);
+        outState.putString(ARG_DATEFORMAT, mDateFormat);
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override

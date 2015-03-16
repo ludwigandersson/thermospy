@@ -36,22 +36,18 @@ import com.luan.thermospy.android.R;
      */
      public class SimpleItem implements ListContent {
         private String mText;
-        private String mDescription;
         private String mValue;
         private TextView mTxtValue;
-        private TextView mTxtDesc;
         private TextView mTxtName;
 
         public SimpleItem(String text, String des, String value) {
             this.mText = text;
             this.mValue = value;
-            this.mDescription = des;
         }
 
         public SimpleItem(String text, String value) {
             this.mText = text;
             this.mValue = value;
-            this.mDescription = "";
         }
 
         public void setText(String text) {
@@ -68,12 +64,6 @@ import com.luan.thermospy.android.R;
             }
         }
 
-        public void setDescription(String description) {
-            mDescription = description;
-            if (mTxtDesc != null) {
-                mTxtDesc.setText(mDescription);
-            }
-        }
 
         @Override
         public int getContentLayoutId() {
@@ -84,11 +74,9 @@ import com.luan.thermospy.android.R;
         public View populateContentView(View view) {
 
             mTxtName = (TextView)view.findViewById(R.id.txtText);
-            mTxtDesc = (TextView)view.findViewById(R.id.txtDescription);
             mTxtValue = (TextView)view.findViewById(R.id.txtValue);
 
             mTxtName.setText(mText);
-            mTxtDesc.setText(mDescription);
             mTxtValue.setText(mValue);
 
             return view;

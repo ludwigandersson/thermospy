@@ -39,7 +39,7 @@
                 android:text="180"
                 android:id="@+id/txtViewAlarm"
                 android:layout_alignWithParentIfMissing="false"
-                android:textSize="70dp"
+                android:textSize="75dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true" />
 

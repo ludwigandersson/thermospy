@@ -83,11 +83,17 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
         setContentView(R.layout.activity_line_graph);
 
 
-
-        mLogSession = LogSession.fromJson(getIntent().getStringExtra(ARG_SESSION_ID));
-        mPort = getIntent().getIntExtra(ARG_PORT,0);
-        mIpAddress = getIntent().getStringExtra(ARG_IP_ADDRESS);
-        mDateFormat = getIntent().getStringExtra(ARG_DATEFORMAT);
+        if (savedInstanceState != null) {
+            mLogSession = LogSession.fromJson(savedInstanceState.getString(ARG_SESSION_ID));
+            mPort = savedInstanceState.getInt(ARG_PORT, 0);
+            mIpAddress = savedInstanceState.getString(ARG_IP_ADDRESS);
+            mDateFormat = savedInstanceState.getString(ARG_DATEFORMAT);
+        } else {
+            mLogSession = LogSession.fromJson(getIntent().getStringExtra(ARG_SESSION_ID));
+            mPort = getIntent().getIntExtra(ARG_PORT, 0);
+            mIpAddress = getIntent().getStringExtra(ARG_IP_ADDRESS);
+            mDateFormat = getIntent().getStringExtra(ARG_DATEFORMAT);
+        }
 
 
         mRequestQueue = Volley.newRequestQueue(this);
@@ -381,6 +387,7 @@ public class LineGraphActivity extends ActionBarActivity implements GetTemperatu
             mProgressDialog.dismiss();
         }
         mGetTemperatureEntryListReq.cancel();
+        mRequestQueue.cancelAll(this);
     }
 
     @Override

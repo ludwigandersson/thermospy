@@ -48,7 +48,6 @@ import com.luan.thermospy.android.core.ServerSettings;
 import com.luan.thermospy.android.core.pojo.Boundary;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
 import com.luan.thermospy.android.core.pojo.Temperature;
-import com.luan.thermospy.android.fragments.Alarm;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 import com.luan.thermospy.android.fragments.MonitorFragment;
 import com.luan.thermospy.android.fragments.NavigationDrawerFragment;
@@ -71,7 +70,6 @@ public class MainActivity extends ActionBarActivity
         SetupBoundary.OnSetupBoundaryListener,
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
-        Alarm.OnAlarmFragmentListener,
         LocalServiceSubject,
         LocalServiceObserver {
 
@@ -292,18 +290,12 @@ public class MainActivity extends ActionBarActivity
         }
         else if (position == 1)
         {
-            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction = transaction.replace(R.id.container, Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings()));
-            transaction.commit();
-        }
-        else if (position == 2)
-        {
             android.support.v4.app.FragmentTransaction transaction;
             transaction = getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, SetupService.newInstance(ip, port));
             transaction.commit();
         }
-        else if (position == 3)
+        else if (position == 2)
         {
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -334,9 +326,6 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 2:
                 mTitle = getString(com.luan.thermospy.android.R.string.title_section3);
-                break;
-            case 3:
-                mTitle = getString(com.luan.thermospy.android.R.string.title_section4);
                 break;
             default:
                 mTitle = "";
@@ -417,7 +406,7 @@ public class MainActivity extends ActionBarActivity
         onServiceStatus(new ServiceStatus());
         Toast toast = Toast.makeText(getApplicationContext(), R.string.setup_server_failed, Toast.LENGTH_SHORT);
         toast.show();
-        mNavigationDrawerFragment.selectItem(2);
+        mNavigationDrawerFragment.selectItem(1);
         Coordinator.getInstance().getServerSettings().setConnected(false);
     }
 
@@ -426,7 +415,7 @@ public class MainActivity extends ActionBarActivity
         onServiceStatus(new ServiceStatus());
         Toast toast = Toast.makeText(getApplicationContext(), R.string.setup_aborted, Toast.LENGTH_SHORT);
         toast.show();
-        mNavigationDrawerFragment.selectItem(2);
+        mNavigationDrawerFragment.selectItem(1);
         Coordinator.getInstance().getServerSettings().setConnected(false);
     }
 
@@ -450,7 +439,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onServerNotRunning() {
         onServiceStatus(new ServiceStatus());
-        mNavigationDrawerFragment.selectItem(2);
+        mNavigationDrawerFragment.selectItem(1);
         mLastSelected = -1;
 
         if (isMyServiceRunning(TemperatureMonitorService.class)) {
@@ -531,6 +520,16 @@ public class MainActivity extends ActionBarActivity
 
     }
 
+    @Override
+    public void onAlarmEnableSwitchChanged(boolean checked) {
+        onAlarmSwitchChanged(checked);
+    }
+
+    @Override
+    public void onAlarmChanged(int alarm) {
+        onAlarmTextChanged(Integer.toString(alarm));
+    }
+
     public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
             Coordinator.getInstance().getAlarmSettings().setAlarmCondition(alarmCondition);
 
@@ -557,7 +556,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    @Override
     public void onAlarmSwitchChanged(Boolean isChecked) {
         CharSequence text;
         if (isChecked)

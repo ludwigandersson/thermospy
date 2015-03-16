@@ -32,6 +32,7 @@
         <activity
             android:name=".activities.LogSessionActivity"
             android:label="@string/title_activity_log_session"
+            android:launchMode="singleTop"
             android:parentActivityName=".activities.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

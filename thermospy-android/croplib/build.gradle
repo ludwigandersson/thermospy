@@ -25,5 +25,6 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
     compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.github.PhilJay:MPAndroidChart:v2.0.8'
 }
 

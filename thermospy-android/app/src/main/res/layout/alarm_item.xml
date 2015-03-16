@@ -20,36 +20,38 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="15dp">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="fill_parent">
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
-            android:id="@+id/txtText"
-            android:layout_weight="0.5" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="125"
+            android:id="@+id/text_alarm"
+            android:layout_weight="0.8"
+            android:textSize="75dp" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
-            android:id="@+id/txtValue"
-            android:layout_weight="0.5"
-            android:gravity="right" />
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:id="@+id/switch_alarm_enabled"
+            android:gravity="center_vertical" />
     </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="fill_parent">
 
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_alarm_condition" />
     </LinearLayout>
 </LinearLayout>

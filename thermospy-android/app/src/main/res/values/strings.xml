@@ -3,8 +3,8 @@
 
     <string name="app_name">Thermospy</string>
     <string name="title_section1">Thermospy</string>
-    <string name="title_section2">Alarm</string>
-    <string name="title_section3">Setup</string>
+    <string name="title_section2">Setup</string>
+    <string name="title_section3">Temperature Log</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
@@ -59,7 +59,7 @@
     <string name="temperature_scale_celsius">°C</string>
     <string name="temperature_scale_fahrenheit">°F</string>
     <string name="title_activity_log_session">LogSessionActivity</string>
-    <string name="title_section4">Temperature Log</string>
+
     <string name="temperature_log">Temperature Log</string>
     <string name="start_recording">Start Logging Temperature</string>
     <string name="stop_recording">Stop Logging Temperature</string>

@@ -51,6 +51,7 @@ import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 import com.luan.thermospy.android.fragments.MonitorFragment;
 import com.luan.thermospy.android.fragments.NavigationDrawerFragment;
+import com.luan.thermospy.android.fragments.RealtimeChartFragment;
 import com.luan.thermospy.android.fragments.setup.SetupBoundary;
 import com.luan.thermospy.android.fragments.setup.SetupConfirm;
 import com.luan.thermospy.android.fragments.setup.SetupService;
@@ -71,7 +72,8 @@ public class MainActivity extends ActionBarActivity
         SetupConfirm.OnThermoSpySetupConfirmedListener,
         MonitorFragment.OnMonitorFragmentListener,
         LocalServiceSubject,
-        LocalServiceObserver {
+        LocalServiceObserver,
+        RealtimeChartFragment.OnRealtimeChartFragmentListener{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.

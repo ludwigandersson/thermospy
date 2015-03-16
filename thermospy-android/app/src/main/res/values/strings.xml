@@ -61,8 +61,8 @@
     <string name="title_activity_log_session">LogSessionActivity</string>
 
     <string name="temperature_log">Temperature Log</string>
-    <string name="start_recording">Start Logging Temperature</string>
-    <string name="stop_recording">Stop Logging Temperature</string>
+    <string name="start_recording">Start logging temperature</string>
+    <string name="stop_recording">Stop logging temperature</string>
     <string name="title_activity_new_temperature_log">New Temperature Log</string>
     <string name="form_log_session_name">Log Name</string>
     <string name="form_food_type">Food Type</string>

@@ -20,6 +20,8 @@
 package com.luan.thermospy.android.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,6 +29,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -44,9 +49,12 @@ import com.github.mikephil.charting.utils.Highlight;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.LocalServiceObserver;
 import com.luan.thermospy.android.core.LocalServiceSubject;
+import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.pojo.TemperatureEntry;
+import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
 import com.luan.thermospy.android.core.rest.GetTemperatureHistoryReq;
+import com.luan.thermospy.android.core.rest.StopLogSessionReq;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,10 +68,11 @@ import java.util.List;
  * Use the {@link RealtimeChartFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RealtimeChartFragment extends Fragment implements OnChartValueSelectedListener, LocalServiceObserver, GetTemperatureHistoryReq.OnGetTemperatureHistoryListener {
+public class RealtimeChartFragment extends Fragment implements          StopLogSessionReq.OnStopLogSessionListener,       DialogInterface.OnDismissListener,OnChartValueSelectedListener, LocalServiceObserver, GetTemperatureHistoryReq.OnGetTemperatureHistoryListener, GetActiveLogSessionReq.OnGetActiveLogSessionsListener {
 
     private final static String ARG_IP_ADDRESS = "ipaddress";
     private final static String ARG_PORT = "port";
+    private final static String ARG_LOG_SESSION_ACTIVE = "logsessionactive";
 
     private LocalServiceSubject mTemperatureSubject;
     private LineChart mChart;
@@ -75,6 +84,13 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     private int mPort;
     private RequestQueue mRequestQueue;
     private GetTemperatureHistoryReq mGetTemperatureHistoryReq;
+    private GetActiveLogSessionReq mGetActiveLogSession;
+    private StopLogSessionReq mStopLogSessionReq;
+    private ImageButton mImageButton;
+    private TextView mLogSessionText;
+    private boolean mActiveLogSession = false;
+    private ProgressDialog mProgress;
+    private OnRealtimeChartFragmentListener mListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -105,6 +121,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         {
             mIpAddress = savedInstanceState.getString(ARG_IP_ADDRESS);
             mPort = savedInstanceState.getInt(ARG_PORT);
+            mActiveLogSession = savedInstanceState.getBoolean(ARG_LOG_SESSION_ACTIVE);
         }
     }
 
@@ -113,6 +130,26 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_realtime_chart, container, false);
+
+        mImageButton = (ImageButton)v.findViewById(R.id.imageButton);
+        mLogSessionText = (TextView)v.findViewById(R.id.txt_startstop_logsession);
+        final LinearLayout layout = (LinearLayout)v.findViewById(R.id.log_session_layout);
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!mActiveLogSession) {
+                    mListener.onShowCreateLogSessionDialog(RealtimeChartFragment.this);
+
+                } else {
+                    requestStopLogSession();
+                }
+
+                
+            }
+        });
+
+
 
         mChart = (LineChart)v.findViewById(R.id.chart);
         mChart.setOnChartValueSelectedListener(this);
@@ -252,6 +289,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
+            mListener = (OnRealtimeChartFragmentListener)activity;
             if (getArguments() != null) {
                 mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
                 mPort = getArguments().getInt(ARG_PORT);
@@ -260,6 +298,8 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
 
             mRequestQueue = Volley.newRequestQueue(getActivity());
             mGetTemperatureHistoryReq = new GetTemperatureHistoryReq(mRequestQueue, this);
+            mGetActiveLogSession = new GetActiveLogSessionReq(mRequestQueue,this);
+            mStopLogSessionReq = new StopLogSessionReq(mRequestQueue, this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -272,10 +312,23 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         mTemperatureSubject = null;
     }
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mGetTemperatureHistoryReq.cancel();
+        mGetActiveLogSession.cancel();
+        mStopLogSessionReq.cancel();
+        if (mProgress != null) mProgress.dismiss();
+    }
+    @Override
     public void onResume()
     {
         super.onResume();
         fetchHistory();
+        fetchActiveLogSession();
+    }
+
+    private void fetchActiveLogSession() {
+        mGetActiveLogSession.request(mIpAddress, mPort);
     }
 
     private void fetchHistory() {
@@ -289,6 +342,7 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         super.onSaveInstanceState(outState);
         outState.putString(ARG_IP_ADDRESS, mIpAddress);
         outState.putInt(ARG_PORT, mPort);
+        outState.putBoolean(ARG_LOG_SESSION_ACTIVE, mActiveLogSession);
 
     }
 
@@ -301,6 +355,9 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
         super.onStop();
         mTemperatureSubject.unregisterObserver(this);
         mGetTemperatureHistoryReq.cancel();
+        mGetActiveLogSession.cancel();
+        mStopLogSessionReq.cancel();
+        if (mProgress != null) mProgress.dismiss();
     }
 
     @Override
@@ -339,5 +396,55 @@ public class RealtimeChartFragment extends Fragment implements OnChartValueSelec
     @Override
     public void onGetTemperatureHistoryError() {
         Toast.makeText(getActivity(), "Failed to get history...", Toast.LENGTH_SHORT);
+    }
+
+    @Override
+    public void onActiveLogSessionRecv(LogSession logSession) {
+        mActiveLogSession = true;
+        mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_stop));
+        mLogSessionText.setText(getString(R.string.stop_recording));
+    }
+
+    @Override
+    public void onActiveLogSessionError() {
+        mActiveLogSession = false;
+        mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+        mLogSessionText.setText(getString(R.string.start_recording));
+    }
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        mActiveLogSession = false;
+        mGetActiveLogSession.request(mIpAddress, mPort);
+        mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+        mLogSessionText.setText(getString(R.string.start_recording));
+    }
+
+    private void requestStopLogSession() {
+
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setCanceledOnTouchOutside(false);
+        mProgress.setTitle("Please wait");
+        mProgress.setMessage("Finalizing log session...");
+        mStopLogSessionReq.request(mIpAddress, mPort);
+        mProgress.show();
+    }
+
+    @Override
+    public void onStopLogSessionRecv(LogSession session) {
+        mActiveLogSession = false;
+        mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_play));
+        mLogSessionText.setText(getString(R.string.start_recording));
+        mProgress.dismiss();
+    }
+
+    @Override
+    public void onStopLogSessionError() {
+        mGetActiveLogSession.request(mIpAddress,mPort);
+        mProgress.dismiss();
+    }
+
+    public interface OnRealtimeChartFragmentListener
+    {
+        public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener);
     }
 }

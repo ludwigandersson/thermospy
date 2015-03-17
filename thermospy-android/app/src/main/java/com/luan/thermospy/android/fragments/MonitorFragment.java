@@ -59,7 +59,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
     private static final String ARG_TEMPERATURE_STR = "temperature";
     private static final String LOG_TAG = MonitorFragment.class.getSimpleName();
     private static final String ARG_TEMPERATURE_SCALE_STR = "temperature_scale";
-    private static final String ARG_LOG_SESSION_ACTIVE = "logsession_active";
+    private static final String ARG_ACTIVE_TAB = "active_tab";
 
     private String mIpAddress;
     private int mPort;
@@ -84,6 +84,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
 
     private LocalServiceSubject mTemperatureSubject;
     private android.support.v4.app.FragmentTabHost mTabHost;
+    private int mActiveTab = 0;
 
     public static MonitorFragment newInstance(String ip, int port, String alarm, String temperature) {
         MonitorFragment fragment = new MonitorFragment();
@@ -110,7 +111,9 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
             mAlarm = savedInstanceState.getString(ARG_ALARM_STR);
             mTemperatureStr = savedInstanceState.getString(ARG_TEMPERATURE_STR);
             mTemperatureScaleStr = savedInstanceState.getString(ARG_TEMPERATURE_SCALE_STR);
+            mActiveTab = savedInstanceState.getInt(ARG_ACTIVE_TAB);
         }
+
     }
 
     @Override
@@ -146,6 +149,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
 
 
 
+        mTabHost.setCurrentTab(mActiveTab);
         /*mStartStopLogSessionButton = (ToggleButton)v.findViewById(R.id.btnStartStopLogSession);
         mStartStopLogSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -266,7 +270,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
         outState.putString(ARG_ALARM_STR, mAlarm);
         outState.putString(ARG_TEMPERATURE_STR, mTemperatureStr);
         outState.putString(ARG_TEMPERATURE_SCALE_STR, mTemperatureScaleStr);
-
+        outState.putInt(ARG_ACTIVE_TAB, mTabHost.getCurrentTab());
         super.onSaveInstanceState(outState);
     }
 

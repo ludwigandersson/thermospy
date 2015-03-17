@@ -95,6 +95,7 @@ public class AlarmTabFragment extends ListFragment implements AlarmItem.AlarmIte
     public void onAlarmTriggered() {
         AlarmItem item = (AlarmItem)mItems.get(0);
         item.setAlarmEnabled(false);
+        mAdapter.notifyDataSetChanged();
     }
 
 

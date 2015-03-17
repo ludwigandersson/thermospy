@@ -108,14 +108,15 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
 
     @Override
     public void onServiceStatusRecv(ServiceStatus status) {
-        hideProgressDialog();
         onServiceStatusPollerRecv(status);
+        hideProgressDialog();
     }
 
     @Override
     public void onServiceStatusError() {
+        updateControlServiceSwitch(ServerInfoItems.CONTROL_SERVICE_ITEM);
         onServiceStatusPollerError();
-
+        hideProgressDialog();
     }
 
     private interface ServerInfoItems {
@@ -310,12 +311,14 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
     private void updateControlServiceSwitch(int controlServiceItem) {
         SwitchItem switchItem = (SwitchItem)mItems.get(controlServiceItem);
         switchItem.setRunning(mRunning);
+        mAdapter.notifyDataSetChanged();
     }
 
     private void updateSimpleItemValue(int itemId, String value)
     {
         SimpleItem item = (SimpleItem)mItems.get(itemId);
         item.setValue(value);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

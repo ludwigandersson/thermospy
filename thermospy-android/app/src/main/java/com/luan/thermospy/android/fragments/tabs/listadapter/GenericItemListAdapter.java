@@ -28,6 +28,7 @@ import android.widget.ArrayAdapter;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.fragments.tabs.listcontent.generic.ListContent;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,24 +39,30 @@ public class GenericItemListAdapter extends ArrayAdapter<ListContent> {
     private final Context mContext;
     private final List<ListContent> mList;
 
+    private HashMap<Integer, View> mUsedViews = new HashMap<>();
+
     public GenericItemListAdapter(Context context, List<ListContent> objects) {
         super(context, R.layout.fragment_serverinfo_list, objects);
         mList = objects;
         mContext = context;
+
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ListContent content = mList.get(position);
-        if (content != null) {
-            View v = inflater.inflate(content.getContentLayoutId(), parent, false);
-            return content.populateContentView(v);
+
+        if (mUsedViews.get(position) == null) {
+
+            LayoutInflater inflater = (LayoutInflater) mContext
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            ListContent content = mList.get(position);
+            if (content != null) {
+                View v = inflater.inflate(content.getContentLayoutId(), parent, false);
+                mUsedViews.put(position, content.populateContentView(v));
+            } else {
+                return null;
+            }
         }
-        else
-        {
-            return null;
-        }
+        return mUsedViews.get(position);
     }
 }

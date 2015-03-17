@@ -21,7 +21,6 @@ package com.luan.thermospy.android.fragments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -41,7 +40,6 @@ import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
 import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
-import com.luan.thermospy.android.core.rest.ServiceStatusPolling;
 import com.luan.thermospy.android.fragments.tabs.AlarmTabFragment;
 import com.luan.thermospy.android.fragments.tabs.ServerInfoFragment;
 
@@ -53,7 +51,6 @@ import com.luan.thermospy.android.fragments.tabs.ServerInfoFragment;
 public class MonitorFragment extends android.support.v4.app.Fragment implements
         GetServiceStatusReq.OnGetServiceStatus,
         LocalServiceObserver,
-        ServiceStatusPolling.OnServiceStatusListener,
         ServerInfoFragment.OnServerInfoListener,
         AlarmTabFragment.OnAlarmTabListener{
     private static final String ARG_IP_ADDRESS = "ipaddress";
@@ -70,7 +67,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
     private String mTemperatureStr = "";
     private RequestQueue mRequestQueue;
     private TextView mTemperature;
-    private ServiceStatusPolling mStatusPoller;
 
     private TextView mTemperatureScale;
 
@@ -210,8 +206,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
         mRequestQueue = Coordinator.getInstance().getRequestQueue();
         mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
 
-
-        mStatusPoller = new ServiceStatusPolling(mRequestQueue, this);
     }
 
     @Override
@@ -248,8 +242,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
         }
         mServiceStatusReq.cancel();
 
-
-        mStatusPoller.cancel();
     }
 
     @Override
@@ -263,7 +255,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
         }
 
         mServiceStatusReq.cancel();
-        mStatusPoller.cancel();
 
     }
 
@@ -281,10 +272,7 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
 
     @Override
     public void onServiceStatusRecv(ServiceStatus status) {
-        if (!mStatusPoller.isRunning())
-        {
-            mStatusPoller.start();
-        }
+
         if (!status.isRunning()) {
             mTemperature.setText("--");
         }
@@ -293,6 +281,11 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
        mListener.onServiceStatus(status);
     }
 
+
+    @Override
+    public void onServiceStatus(ServiceStatus serviceStatus) {
+        onServiceStatusRecv(serviceStatus);
+    }
 
     public void onServiceStatusError() {
         mProgress.dismiss();
@@ -314,24 +307,6 @@ public class MonitorFragment extends android.support.v4.app.Fragment implements
     @Override
     public void onAlarmTriggered() {
         // Dont care... yet
-    }
-
-    @Override
-    public void onServiceStatusPollerRecv(ServiceStatus status) {
-        if (!status.isRunning()) {
-            mTemperature.setText("--");
-        }
-        mListener.onServiceStatus(status);
-    }
-
-    @Override
-    public void onServiceStatusPollerError() {
-        onServiceStatusError();
-    }
-
-    @Override
-    public void onFragmentInteraction(String id) {
-
     }
 
     @Override

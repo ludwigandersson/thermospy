@@ -474,7 +474,7 @@ public class MainActivity extends ActionBarActivity
             bundle.putInt(TemperatureMonitorService.ServiceArguments.PORT, Coordinator.getInstance().getServerSettings().getPort());
             bundle.putInt(TemperatureMonitorService.ServiceArguments.REFRESH_RATE, interval);
             intent.putExtras(bundle);
-            mService.registerObserver(MainActivity.this);
+            if (mService != null) mService.registerObserver(MainActivity.this);
             startService(intent);
         }
     }

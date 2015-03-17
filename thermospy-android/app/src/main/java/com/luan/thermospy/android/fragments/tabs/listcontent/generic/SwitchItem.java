@@ -47,8 +47,11 @@ public class SwitchItem implements ListContent {
     {
         mRunning = running;
         if (mServiceSwitch != null) {
+            mServiceSwitch.setOnCheckedChangeListener(null);
             mServiceSwitch.setChecked(mRunning);
+            mServiceSwitch.setOnCheckedChangeListener(new CheckedChangeAdapter());
         }
+
     }
 
     @Override
@@ -64,13 +67,16 @@ public class SwitchItem implements ListContent {
         name.setText(mName);
         mServiceSwitch.setChecked(mRunning);
 
-        mServiceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mOnClickListener.onClick(buttonView);
-            }
-        });
+        mServiceSwitch.setOnCheckedChangeListener(new CheckedChangeAdapter());
         
         return view;
+    }
+
+    private class CheckedChangeAdapter implements CompoundButton.OnCheckedChangeListener {
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            mOnClickListener.onClick(buttonView);
+        }
     }
 }

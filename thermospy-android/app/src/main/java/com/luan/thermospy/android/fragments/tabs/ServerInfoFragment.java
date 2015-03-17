@@ -243,6 +243,8 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
             mRunning = status.isRunning();
             updateSimpleItemValue(ServerInfoItems.SERVICE_STATUS_ITEM, mRunning ? "Running" : "Not running");
             updateControlServiceSwitch(ServerInfoItems.CONTROL_SERVICE_ITEM);
+
+            mListener.onServiceStatus(status);
         }
 
         if (!mConnected)
@@ -255,6 +257,7 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
             mServerStatus = status.getError();
             updateSimpleItemValue(ServerInfoItems.SERVER_STATUS_ITEM, mServerStatus.toString());
         }
+
     }
 
     private void initializeAdapter() {
@@ -327,6 +330,7 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
             updateSimpleItemValue(ServerInfoItems.CONNECTION_STATUS_ITEM, "Not connected");
             updateSimpleItemValue(ServerInfoItems.SERVICE_STATUS_ITEM, "Unknown");
         }
+        mListener.onServiceStatusError();
     }
 
     private void hideProgressDialog()
@@ -347,7 +351,8 @@ public class ServerInfoFragment extends ListFragment implements ServiceStatusPol
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnServerInfoListener {
-        public void onFragmentInteraction(String id);
+        public void onServiceStatus(ServiceStatus serviceStatus);
+        public void onServiceStatusError();
     }
 
 }

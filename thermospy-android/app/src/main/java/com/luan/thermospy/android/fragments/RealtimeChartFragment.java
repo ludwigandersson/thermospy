@@ -145,7 +145,7 @@ public class RealtimeChartFragment extends Fragment implements          StopLogS
                     requestStopLogSession();
                 }
 
-                
+
             }
         });
 

@@ -170,6 +170,8 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        mNavigationDrawerFragment.selectItem(0);
+
     }
 
     @Override
@@ -234,7 +236,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onBackPressed()
     {
-        if (mLastSelected > 0) {
+        if (mLastSelected > 0 && Coordinator.getInstance().getServerSettings().isConnected()) {
             mNavigationDrawerFragment.selectItem(0);
         }
         else
@@ -248,7 +250,6 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
 
-        onSectionAttached(position);
         FragmentManager fragmentManager = getSupportFragmentManager();
         final ServerSettings serverSettings = Coordinator.getInstance().getServerSettings();
         final AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
@@ -278,15 +279,16 @@ public class MainActivity extends ActionBarActivity
                 }
                 transaction = getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, fragment);
-            transaction.commit();
+                transaction.commit();
             }
             else
             {
-                android.support.v4.app.FragmentTransaction transaction;
-                // No ip or port available. Show server setup fragment
-                transaction = getSupportFragmentManager().beginTransaction()
-                       .replace(R.id.container, SetupService.newInstance(ip, port));
-                transaction.commit();
+                Toast t = Toast.makeText(this, getString(R.string.not_available_no_connection), Toast.LENGTH_SHORT);
+                t.show();
+
+                mNavigationDrawerFragment.selectItem(1);
+                return;
+
 
             }
         }
@@ -299,22 +301,31 @@ public class MainActivity extends ActionBarActivity
         }
         else if (position == 2)
         {
+            if (serverSettings.isConnected()) {
 
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String dateformat = settings.getString(getString(R.string.pref_key_dateformat), "yyyy-MM-dd");
-            String timeformat = settings.getString(getString(R.string.pref_key_timeformat), "HH");
-            String dateTimeFormat = dateformat+" "+timeformat+":mm:ss";
-            if (timeformat.equals("hh"))
-            {
-                // Show am/pm marker
-                dateTimeFormat += " a";
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+                String dateformat = settings.getString(getString(R.string.pref_key_dateformat), "yyyy-MM-dd");
+                String timeformat = settings.getString(getString(R.string.pref_key_timeformat), "HH");
+                String dateTimeFormat = dateformat + " " + timeformat + ":mm:ss";
+                if (timeformat.equals("hh")) {
+                    // Show am/pm marker
+                    dateTimeFormat += " a";
+                }
+                Intent intent = new Intent(this, LogSessionActivity.class);
+                intent.putExtra(LogSessionActivity.DATEFORMAT, dateTimeFormat);
+                startActivity(intent);
+                return;
             }
-            Intent intent = new Intent(this, LogSessionActivity.class);
-            intent.putExtra(LogSessionActivity.DATEFORMAT, dateTimeFormat);
-            startActivity(intent);
-            return;
+            else
+            {
+                Toast t = Toast.makeText(this, getString(R.string.not_available_no_connection), Toast.LENGTH_SHORT);
+                t.show();
+                mNavigationDrawerFragment.selectItem(1);
+                return;
+            }
         }
 
+        onSectionAttached(position);
         mLastSelected = position;
     }
 

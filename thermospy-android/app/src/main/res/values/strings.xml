@@ -95,5 +95,6 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="control_server">Server control</string>
+    <string name="not_available_no_connection">Not available - please connect to server!</string>
 
 </resources>

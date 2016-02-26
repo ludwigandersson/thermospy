@@ -28,6 +28,9 @@ import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
 import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
 
 
+/**
+ * Make a generic string request.
+ */
 public class GenericStringRequest extends AbstractServerRequest implements Response.Listener<String>, Response.ErrorListener {
     private final int method;
 

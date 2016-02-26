@@ -19,8 +19,10 @@
 
 package com.luan.thermospy.android.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -39,7 +41,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 /**
- * Created by ludde on 15-02-24.
+ * The TemperatureMonitorService is responsible for monitoring the current temperature
+ * and notifing the user about the temperature changes/sounding the alarm etc.
  */
 public class TemperatureMonitorService extends Service {
 
@@ -75,9 +78,10 @@ public class TemperatureMonitorService extends Service {
         public void handleMessage(Message msg) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
+
             long refreshInterval = msg.getData().getInt(ServiceArguments.REFRESH_RATE)*1000;
-            final String ip = msg.getData().getString(ServiceArguments.IP_ADDRESS);
-            final int port = msg.getData().getInt(ServiceArguments.PORT);
+            String ip = msg.getData().getString(ServiceArguments.IP_ADDRESS);
+            int port = msg.getData().getInt(ServiceArguments.PORT);
 
             RequestQueue requestQueue = Volley.newRequestQueue(TemperatureMonitorService.this);
             boolean mAlarmFired =false;
@@ -102,6 +106,8 @@ public class TemperatureMonitorService extends Service {
                 }
             });
 
+            mService.setRunning(true);
+
             while (!mServiceLooper.getThread().isInterrupted()) {
 
                 synchronized (ServiceHandler.this) {
@@ -115,8 +121,11 @@ public class TemperatureMonitorService extends Service {
                 }
                 if (m_error || m_temperature == null)
                 {
+                    mService.onServerError();
                     break;
                 }
+
+                mService.temperatureChanged(m_temperature);
 
                 boolean alarmEnabled = mService.isAlarmEnabled();
 
@@ -127,16 +136,17 @@ public class TemperatureMonitorService extends Service {
                     if (triggerAlarm) {
                         mNotificationHandler.playSound(TemperatureMonitorService.this, m_temperature.toString());
                         mAlarmFired = true;
+                        mService.alarmTriggered();
                     }
                     else
                     {
-                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString());
+                        mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), getColor(alarmCondition, m_temperature.getTemperature(), alarm));
                     }
                 } else {
                     if (mAlarmFired && !alarmEnabled) {
                         mAlarmFired = false;
                     }
-                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString());
+                    mNotificationHandler.update(TemperatureMonitorService.this, m_temperature.toString(), Notification.COLOR_DEFAULT);
                 }
                 synchronized (ServiceHandler.this) {
                     try {
@@ -151,6 +161,20 @@ public class TemperatureMonitorService extends Service {
             temperatureReq.cancel();
             mNotificationHandler.cancel(TemperatureMonitorService.this);
             stopSelf(msg.arg1);
+            mService.setRunning(false);
+        }
+
+        private int getColor(AlarmCondition condition, int temperature, int alarm) {
+
+            double remaining;
+            if (condition == AlarmCondition.GREATER_THAN_OR_EQUAL) remaining = (double)temperature/alarm;
+            else remaining = (double)alarm/temperature;
+
+            if (remaining > 0.8) return Color.RED;
+            else if (remaining > 0.6) return 0xffa500;
+            else if (remaining > 0.3) return 0x32cd32;
+            else return Color.BLUE;
+
         }
 
 
@@ -212,6 +236,7 @@ public class TemperatureMonitorService extends Service {
 
     @Override
     public void onDestroy() {
+
         mServiceLooper.quit();
         mServiceLooper.getThread().interrupt();
 

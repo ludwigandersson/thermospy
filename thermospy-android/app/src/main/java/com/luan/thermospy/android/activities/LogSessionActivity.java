@@ -19,6 +19,7 @@
 
 package com.luan.thermospy.android.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -28,24 +29,39 @@ import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
 import com.luan.thermospy.android.core.pojo.LogSession;
 import com.luan.thermospy.android.fragments.temperaturelog.LogSessionFragment;
-import com.luan.thermospy.android.fragments.temperaturelog.TemperatureGraph;
 
-public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener, TemperatureGraph.OnTemperatureGraphFragmentListener {
+import org.json.JSONException;
+
+
+/**
+ * The LogSessionActivity is responsible for displaying a list of the available Log Sessions from
+ * the server.
+ */
+public class LogSessionActivity extends ActionBarActivity implements LogSessionFragment.OnLogSessionFragmentListener {
 
     private static final String LOG_TAG = LogSessionActivity.class.getSimpleName();
+    public static final String DATEFORMAT = "key_dateformat";
+    private String mDateFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_session);
         setTitle(getString(R.string.temperature_log));
-        if (savedInstanceState == null) {
-            int port = Coordinator.getInstance().getServerSettings().getPort();
-            String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.container, LogSessionFragment.newInstance(ipAddress, port))
-                    .commit();
+
+        if (savedInstanceState != null) {
+            mDateFormat = savedInstanceState.getString(DATEFORMAT);
         }
+        else
+        {
+            mDateFormat = getIntent().getStringExtra(DATEFORMAT);
+        }
+        int port = Coordinator.getInstance().getServerSettings().getPort();
+        String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
+        getFragmentManager().beginTransaction()
+        .replace(R.id.container, LogSessionFragment.newInstance(ipAddress, port, mDateFormat))
+                .commit();
+
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -70,11 +86,23 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
         setTitle(session.getName());
         int port = Coordinator.getInstance().getServerSettings().getPort();
         String ipAddress = Coordinator.getInstance().getServerSettings().getIpAddress();
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, TemperatureGraph.newInstance(ipAddress, port, session.getId()))
-                .addToBackStack(null)
-                .commit();
-        getFragmentManager().executePendingTransactions();
+
+        Intent intent = new Intent(this, LineGraphActivity.class);
+        intent.putExtra(LineGraphActivity.ARG_DATEFORMAT, mDateFormat);
+        intent.putExtra(LineGraphActivity.ARG_IP_ADDRESS, ipAddress);
+        intent.putExtra(LineGraphActivity.ARG_PORT, port);
+        try {
+            intent.putExtra(LineGraphActivity.ARG_SESSION_ID, LogSession.toJson(session).toString());
+        } catch (JSONException e) {
+
+        }
+        startActivity(intent);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
     }
 
     @Override
@@ -96,11 +124,17 @@ public class LogSessionActivity extends ActionBarActivity implements LogSessionF
 
     @Override
     public void onLogSessionListError() {
-        Log.d(LOG_TAG, "An error occured within the log session fragment...");
+        Log.d(LOG_TAG, "An error occurred within the log session fragment...");
     }
 
     @Override
-    public void onError() {
-        Log.d(LOG_TAG, "An error occured within the temperature graph fragment...");
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putString(DATEFORMAT, mDateFormat);
+
+        super.onSaveInstanceState(outState);
     }
+
+
+
 }

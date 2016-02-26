@@ -20,6 +20,9 @@
  */
 package com.luan.thermospy.server.resources;
 
+import com.luan.thermospy.server.core.Boundary;
+import com.luan.thermospy.server.core.ServerStatus;
+import com.luan.thermospy.server.core.ThermospyController;
 import com.luan.thermospy.server.hal.CameraDevice;
 import javax.ws.rs.core.Response;
 
@@ -41,9 +44,10 @@ public class GetLastImage {
 
 
     private final CameraDevice cameraDevice;
-
-    public GetLastImage(CameraDevice controller) {
-        this.cameraDevice = controller;
+    private final ThermospyController controller;
+    public GetLastImage(ThermospyController controller, CameraDevice cameraDevice) {
+        this.cameraDevice = cameraDevice;
+        this.controller = controller;
     }
 
     @GET
@@ -63,6 +67,28 @@ public class GetLastImage {
         // uncomment line below to send non-streamed
         return Response.status(Response.Status.NOT_FOUND).build();
 
+    }
+    
+    @GET
+    @Path("/reset-and-fetch")
+    public Response resetAndFetch()
+    {
+        // Stop service if running
+        if (controller.getServiceStatus())
+        {
+            controller.stop();
+        }
+        
+        controller.setDisplayBoundary(new Boundary());
+        controller.singleshot();
+        
+        if (controller.getServerStatus() == ServerStatus.OK) {
+            return fetch();
+        } else {
+            Log.getLog().warn("Cannot fetch last image because an internal server error occured!");
+            return Response.serverError().build();
+        }
+        
     }
 
 }

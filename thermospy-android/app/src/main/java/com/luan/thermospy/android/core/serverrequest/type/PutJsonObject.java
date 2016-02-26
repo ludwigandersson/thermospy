@@ -32,7 +32,7 @@ import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
 import org.json.JSONObject;
 
 /**
- * Created by ludde on 15-02-01.
+ * Put a json object to the server
  */
 public class PutJsonObject extends AbstractServerRequest implements Response.Listener<JSONObject>, Response.ErrorListener {
     private JSONObject mJsonObject;

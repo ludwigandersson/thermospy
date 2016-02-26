@@ -20,45 +20,46 @@
 package com.luan.thermospy.android.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
+import com.luan.thermospy.android.core.AlarmSettings;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.pojo.LogSession;
-import com.luan.thermospy.android.core.pojo.ServerStatus;
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
-import com.luan.thermospy.android.core.rest.GetActiveLogSessionReq;
+import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
-import com.luan.thermospy.android.core.rest.StopLogSessionReq;
+import com.luan.thermospy.android.fragments.tabs.AlarmTabFragment;
+import com.luan.thermospy.android.fragments.tabs.ServerInfoFragment;
 
 
 /**
  * The monitor fragment is responsible for displaying temperature as well as holding a sub-fragment.
  * The sub-fragment displays some server information etc.
  */
-public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.OnGetActiveLogSessionsListener,ServerControl.OnServerControlListener, GetServiceStatusReq.OnGetServiceStatus, StopLogSessionReq.OnStopLogSessionListener, DialogInterface.OnDismissListener {
+public class MonitorFragment extends android.support.v4.app.Fragment implements
+        GetServiceStatusReq.OnGetServiceStatus,
+        LocalServiceObserver,
+        ServerInfoFragment.OnServerInfoListener,
+        AlarmTabFragment.OnAlarmTabListener{
     private static final String ARG_IP_ADDRESS = "ipaddress";
     private static final String ARG_PORT = "port";
     private static final String ARG_ALARM_STR = "alarm";
     private static final String ARG_TEMPERATURE_STR = "temperature";
     private static final String LOG_TAG = MonitorFragment.class.getSimpleName();
     private static final String ARG_TEMPERATURE_SCALE_STR = "temperature_scale";
-    private static final String ARG_LOG_SESSION_ACTIVE = "logsession_active";
+    private static final String ARG_ACTIVE_TAB = "active_tab";
 
     private String mIpAddress;
     private int mPort;
@@ -66,21 +67,24 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
     private String mTemperatureStr = "";
     private RequestQueue mRequestQueue;
     private TextView mTemperature;
-    private boolean mLogSessionActive = false;
 
     private TextView mTemperatureScale;
 
-    private ToggleButton mStartStopLogSessionButton;
-    private ServerControl mServerControl;
+    //private ToggleButton mStartStopLogSessionButton;
+    //private ServerControl mServerControl;
+
 
     private ProgressDialog mProgress = null;
 
     private OnMonitorFragmentListener mListener;
 
     private GetServiceStatusReq mServiceStatusReq;
-    private StopLogSessionReq mStopLogSessionReq;
+
     private String mTemperatureScaleStr;
-    private GetActiveLogSessionReq mGetActiveLogSession;
+
+    private LocalServiceSubject mTemperatureSubject;
+    private android.support.v4.app.FragmentTabHost mTabHost;
+    private int mActiveTab = 0;
 
     public static MonitorFragment newInstance(String ip, int port, String alarm, String temperature) {
         MonitorFragment fragment = new MonitorFragment();
@@ -107,16 +111,9 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
             mAlarm = savedInstanceState.getString(ARG_ALARM_STR);
             mTemperatureStr = savedInstanceState.getString(ARG_TEMPERATURE_STR);
             mTemperatureScaleStr = savedInstanceState.getString(ARG_TEMPERATURE_SCALE_STR);
-            mLogSessionActive = savedInstanceState.getBoolean(ARG_LOG_SESSION_ACTIVE);
+            mActiveTab = savedInstanceState.getInt(ARG_ACTIVE_TAB);
         }
-    }
 
-    private void loadServerControlPanel(boolean isRunning) {
-        FragmentManager manager = getChildFragmentManager();
-
-        mServerControl = ServerControl.newInstance(mIpAddress, mPort, isRunning, mAlarm);
-
-        manager.beginTransaction().replace(R.id.server_control_container, mServerControl).commit();
     }
 
     @Override
@@ -128,14 +125,32 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
 
         Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/digital-7.ttf");
         mTemperature.setTypeface(typeface);
-        mTemperature.setTextSize(125);
+        mTemperature.setTextSize(21);
         mTemperature.setText(mTemperatureStr);
-        mTemperatureScale.setTextSize(75);
+        mTemperatureScale.setTextSize(16);
 
         mTemperatureScale.setText(mTemperatureScaleStr);
+        View o = v.findViewById(R.id.tabHost);
+        mTabHost = (android.support.v4.app.FragmentTabHost)o;
+        mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
+
+        RealtimeChartFragment realtimeChartFragment = RealtimeChartFragment.newInstance(mIpAddress, mPort);
+        mTabHost.addTab(mTabHost.newTabSpec("realtime").setIndicator("Monitoring"),
+                RealtimeChartFragment.class, realtimeChartFragment.getArguments());
+        //Alarm alarm = Alarm.newInstance(Coordinator.getInstance().getServerSettings(), Coordinator.getInstance().getAlarmSettings());
+        AlarmSettings alarmSettings = Coordinator.getInstance().getAlarmSettings();
+        AlarmTabFragment alarm = AlarmTabFragment.newInstance(alarmSettings.getAlarm(), alarmSettings.getAlarmCondition(), alarmSettings.isAlarmSwitchEnabled());
+        mTabHost.addTab(mTabHost.newTabSpec("alarm").setIndicator("Alarm"),
+                AlarmTabFragment.class, alarm.getArguments());
+        //ServerControl control = ServerControl.newInstance(mIpAddress, mPort, Coordinator.getInstance().getServerSettings().isRunning());
+        ServerInfoFragment infoFragment = ServerInfoFragment.newInstance(mIpAddress, mPort);
+        mTabHost.addTab(mTabHost.newTabSpec("info").setIndicator("Info"),
+                ServerInfoFragment.class, infoFragment.getArguments());
 
 
-        mStartStopLogSessionButton = (ToggleButton)v.findViewById(R.id.btnStartStopLogSession);
+
+        mTabHost.setCurrentTab(mActiveTab);
+        /*mStartStopLogSessionButton = (ToggleButton)v.findViewById(R.id.btnStartStopLogSession);
         mStartStopLogSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -154,21 +169,13 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
             }
         });
         mStartStopLogSessionButton.setChecked(mLogSessionActive);
-        mStartStopLogSessionButton.setText(getString(R.string.start_recording));
+        mStartStopLogSessionButton.setText(getString(R.string.start_recording));*/
 
 
         return v;
     }
 
-    private void requestStopLogSession() {
 
-        mProgress = new ProgressDialog(getActivity());
-        mProgress.setCanceledOnTouchOutside(false);
-        mProgress.setTitle("Please wait");
-        mProgress.setMessage("Finalizing log session...");
-        mStopLogSessionReq.request(mIpAddress, mPort);
-        mProgress.show();
-    }
 
     public void getServerStatus()
     {
@@ -176,15 +183,18 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         mProgress.setCanceledOnTouchOutside(false);
         mProgress.setTitle("Please wait");
         mProgress.setMessage("Fetching server status...");
-        mGetActiveLogSession.request(mIpAddress, mPort);
+        mServiceStatusReq.request(mIpAddress, mPort);
         mProgress.show();
     }
+
+
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
             mListener = (OnMonitorFragmentListener) activity;
+            mTemperatureSubject = (LocalServiceSubject)activity;
             if (getArguments() != null) {
                 mIpAddress = getArguments().getString(ARG_IP_ADDRESS);
                 mPort = getArguments().getInt(ARG_PORT);
@@ -199,8 +209,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         }
         mRequestQueue = Coordinator.getInstance().getRequestQueue();
         mServiceStatusReq = new GetServiceStatusReq(mRequestQueue, this);
-        mGetActiveLogSession = new GetActiveLogSessionReq(mRequestQueue, this);
-        mStopLogSessionReq = new StopLogSessionReq(mRequestQueue, this);
+
     }
 
     @Override
@@ -218,6 +227,7 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
             mTemperatureScaleStr = getString(R.string.temperature_scale_fahrenheit);
         }
         mTemperatureScale.setText(mTemperatureScaleStr);
+        mTemperatureSubject.registerObserver(this);
         getServerStatus();
     }
 
@@ -235,22 +245,20 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
 
         }
         mServiceStatusReq.cancel();
-        mStopLogSessionReq.cancel();
-        mGetActiveLogSession.cancel();
+
     }
 
     @Override
     public void onStop()
     {
         super.onStop();
+        mTemperatureSubject.unregisterObserver(this);
         if (mProgress != null && mProgress.isShowing()) {
             mProgress.dismiss();
 
         }
 
         mServiceStatusReq.cancel();
-        mStopLogSessionReq.cancel();
-        mGetActiveLogSession.cancel();
 
     }
 
@@ -262,95 +270,74 @@ public class MonitorFragment extends Fragment implements GetActiveLogSessionReq.
         outState.putString(ARG_ALARM_STR, mAlarm);
         outState.putString(ARG_TEMPERATURE_STR, mTemperatureStr);
         outState.putString(ARG_TEMPERATURE_SCALE_STR, mTemperatureScaleStr);
-        outState.putBoolean(ARG_LOG_SESSION_ACTIVE, mLogSessionActive);
+        outState.putInt(ARG_ACTIVE_TAB, mTabHost.getCurrentTab());
         super.onSaveInstanceState(outState);
     }
 
-
-
     @Override
-    public void onNewTemperature(String text) {
-        mTemperatureStr = text;
-        mTemperature.setText(text);
-        mListener.onNewTemperature(text);
+    public void onServiceStatusRecv(ServiceStatus status) {
+
+        if (!status.isRunning()) {
+            mTemperature.setText("--");
+        }
+
+       mProgress.dismiss();
+       mListener.onServiceStatus(status);
     }
 
+
     @Override
-    public void onConnectionLost() {
-        mStartStopLogSessionButton.setChecked(false);
-        mStartStopLogSessionButton.setEnabled(true);
+    public void onServiceStatus(ServiceStatus serviceStatus) {
+        onServiceStatusRecv(serviceStatus);
+    }
+
+    public void onServiceStatusError() {
+        mProgress.dismiss();
         Toast t = Toast.makeText(getActivity(), R.string.lost_connection, Toast.LENGTH_SHORT);
         t.show();
         mListener.onServerNotRunning();
     }
 
     @Override
-    public void onServiceStatus(ServiceStatus status) {
-        if (status.getError() != ServerStatus.OK) {
-            mListener.onServerNotRunning();
-        }
-        else {
-            mListener.onServiceStatus(status);
-        }
-
+    public void onTemperatureRecv(Temperature temperature) {
+        mTemperature.setText(temperature.toString());
     }
 
     @Override
-    public void onServiceStatusRecv(ServiceStatus status) {
-       loadServerControlPanel(status.isRunning());
-       mProgress.dismiss();
-       mListener.onServiceStatus(status);
+    public void onServerError() {
+        mTemperature.setText("--");
     }
 
     @Override
-    public void onServiceStatusError() {
-        mProgress.dismiss();
-        mListener.onServerNotRunning();
+    public void onAlarmTriggered() {
+        // Dont care... yet
     }
 
     @Override
-    public void onStopLogSessionRecv(LogSession session) {
-        mStartStopLogSessionButton.setChecked(false);
-        mProgress.dismiss();
+    public void onAlarmEnableSwitchChanged(boolean checked) {
+        mListener.onAlarmEnableSwitchChanged(checked);
     }
 
     @Override
-    public void onStopLogSessionError() {
-
-        Log.d(LOG_TAG, "Failed to stop log session...");
-        mProgress.dismiss();
+    public void onAlarmChanged(int alarm) {
+        mListener.onAlarmChanged(alarm);
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        mGetActiveLogSession.request(mIpAddress, mPort);
-        mStartStopLogSessionButton.setEnabled(false);
-    }
-
-
-
-    @Override
-    public void onActiveLogSessionRecv(LogSession logSession) {
-        mLogSessionActive = true;
-        mStartStopLogSessionButton.setChecked(true);
-        mServiceStatusReq.request(mIpAddress, mPort);
-        mStartStopLogSessionButton.setEnabled(true);
-    }
-
-    @Override
-    public void onActiveLogSessionError() {
-        mLogSessionActive = false;
-        mStartStopLogSessionButton.setChecked(false);
-        mServiceStatusReq.request(mIpAddress, mPort);
-        mStartStopLogSessionButton.setEnabled(true);
+    public void onAlarmConditionChanged(AlarmCondition alarmCondition) {
+        mListener.onAlarmConditionChanged(alarmCondition);
     }
 
     public interface OnMonitorFragmentListener {
         public void onServerNotRunning();
-        public void onNewTemperature(String temperature);
         public void onServiceStatus(ServiceStatus status);
 
-        public void onShowCreateLogSessionDialog(DialogInterface.OnDismissListener dismissListener);
+
+        void onAlarmEnableSwitchChanged(boolean checked);
+
+        void onAlarmChanged(int alarm);
+
+        void onAlarmConditionChanged(AlarmCondition alarmCondition);
     }
 
 }

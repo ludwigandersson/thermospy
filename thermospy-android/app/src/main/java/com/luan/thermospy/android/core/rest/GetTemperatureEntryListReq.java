@@ -42,7 +42,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by ludde on 15-02-17.
+ * Gets a list of temperatures connected to a LogSession
  */
 public class GetTemperatureEntryListReq implements AbstractServerRequest.ServerRequestListener<JSONArray>, RequestControl {
 

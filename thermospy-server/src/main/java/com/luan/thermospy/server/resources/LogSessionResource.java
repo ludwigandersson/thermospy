@@ -24,7 +24,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.luan.thermospy.server.core.ServerStatus;
 import com.luan.thermospy.server.core.ThermospyController;
 
-import com.luan.thermospy.server.db.Session;
+import com.luan.thermospy.server.db.LogSession;
 import com.luan.thermospy.server.db.Temperatureentry;
 
 import com.luan.thermospy.server.db.dao.SessionDAO;
@@ -48,11 +48,11 @@ import org.hibernate.Transaction;
 
 @Path("/thermospy-server/log-session")
 @Produces(MediaType.APPLICATION_JSON)
-public class SessionResource {
+public class LogSessionResource {
     private final SessionDAO sessionDao;
     private final ThermospyController controller;
     private final TemperatureEntryDAO temperatureEntryDao;
-    public SessionResource(SessionDAO dao, TemperatureEntryDAO temperatureEntryDao, ThermospyController controller) {
+    public LogSessionResource(SessionDAO dao, TemperatureEntryDAO temperatureEntryDao, ThermospyController controller) {
         sessionDao = dao;
         this.controller = controller;
         this.temperatureEntryDao = temperatureEntryDao;
@@ -64,7 +64,7 @@ public class SessionResource {
     @UnitOfWork
     @Path("/active")
     public Response getActiveSession() {
-        Session s = controller.getLogSession();
+        LogSession s = controller.getLogSession();
         if (s != null) return Response.ok(s).build();
         else return Response.status(Response.Status.NOT_FOUND).build();
     }
@@ -73,7 +73,7 @@ public class SessionResource {
     @Timed
     @UnitOfWork
     @Path("/{id}")
-    public Session findSessionId(@PathParam("id") IntParam id) {
+    public LogSession findSessionId(@PathParam("id") IntParam id) {
         return sessionDao.findById(id.get());
     }
     
@@ -81,7 +81,7 @@ public class SessionResource {
     @Timed
     @UnitOfWork
     @Path("/list")
-    public List<Session> find() {
+    public List<LogSession> find() {
         return sessionDao.findAll();
     }
     
@@ -91,7 +91,7 @@ public class SessionResource {
     @Path("/{id}")
     public Response delete(@PathParam("id") IntParam id)
     {
-        Session s = controller.getLogSession();
+        LogSession s = controller.getLogSession();
         if (s != null && s.getId() == id.get())
         {
             controller.setLogSession(null);
@@ -102,14 +102,32 @@ public class SessionResource {
         if (result) return Response.ok(id.get()).build();
         else return Response.serverError().build();
     }
-    
+    @POST
+    @Timed
+    @UnitOfWork
+    @Path("/update")
+    public Response update(LogSession s)
+    {
+        LogSession session = sessionDao.create(s);
+        if (session != null) {
+            if (controller.getLogSession() != null && 
+                    controller.getLogSession().getId() == session.getId())
+            {
+               controller.setLogSession(session);
+            }
+            return Response.ok(session).build();
+        }
+        
+        return Response.serverError().build();
+        
+    }
     @POST
     @Timed
     @UnitOfWork
     @Path("/start")
-    public Response startSession(Session session)
+    public Response startSession(LogSession session)
     {
-        Session s = sessionDao.create(session);
+        LogSession s = sessionDao.create(session);
         s.setIsOpen(true);
         s.setStartTimestamp(new Date());
         controller.setLogSession(s);
@@ -122,7 +140,7 @@ public class SessionResource {
     @Path("/stop")
     public Response stopSession()
     {
-        Session s = controller.getLogSession();
+        LogSession s = controller.getLogSession();
         controller.setLogSession(null);
         if (s != null) {
             s.setEndTimestamp(new Date());
@@ -145,14 +163,14 @@ public class SessionResource {
         try {
             dbSession = controller.getSessionFactory().openSession();
             Transaction tx = null;
-            final List<Session> list = new LinkedList<>();
+            final List<LogSession> list = new LinkedList<>();
             try {
 
                 tx = dbSession.beginTransaction();
-                Query q = dbSession.createQuery("FROM Session S WHERE isOpen = TRUE");
+                Query q = dbSession.createQuery("FROM LogSession S WHERE isOpen = TRUE");
 
                 q.list().stream().forEach((o) -> {
-                    list.add((Session)o);
+                    list.add((LogSession)o);
                 });
 
                 tx.commit();
@@ -162,14 +180,14 @@ public class SessionResource {
                     tx.rollback();
             }
             dbSession.close();
-                
+            dbSession = null;    
             // Update 
             if (list.size() > 0) {
                 dbSession = controller.getSessionFactory().openSession();
                 try {
                     tx = dbSession.beginTransaction();
-                    for (Session session : list) {
-                        String hql = "UPDATE Session set isOpen = false "  +
+                    for (LogSession session : list) {
+                        String hql = "UPDATE LogSession set isOpen = false "  +
                                 "WHERE id = :session_id";
                         Query query = dbSession.createQuery(hql);
                         query.setParameter("session_id", session.getId());

@@ -19,18 +19,28 @@
 
 package com.luan.thermospy.android.service;
 
+import com.luan.thermospy.android.core.LocalServiceObserver;
+import com.luan.thermospy.android.core.LocalServiceSubject;
+import com.luan.thermospy.android.core.pojo.Temperature;
 import com.luan.thermospy.android.fragments.AlarmCondition;
 
+import java.util.ArrayList;
 import java.util.Observable;
 
 /**
- * Created by ludde on 15-02-24.
+ * The local service is an object that is shared between the TemperatureMonitorService and the
+ * MainActivity.
  */
-public class LocalService extends Observable {
+public class LocalService extends Observable implements LocalServiceSubject {
     private volatile int mRefreshInterval = 5;
     private volatile int mAlarm = 0;
     private AlarmCondition alarmCondition = AlarmCondition.GREATER_THAN_OR_EQUAL;
     private boolean alarmEnabled = false;
+    private ArrayList<LocalServiceObserver> mObservers = new ArrayList<>();
+    private Temperature mTemperatureEntry = null;
+    private int port = 0;
+    private String ipAddress = "";
+    private boolean running = false;
 
     synchronized public int getRefreshInterval() {
         return mRefreshInterval;
@@ -84,5 +94,78 @@ public class LocalService extends Observable {
             notifyObservers();
         }
 
+    }
+
+    @Override
+    synchronized public void registerObserver(LocalServiceObserver listener) {
+        if (mTemperatureEntry != null) {
+            listener.onTemperatureRecv(mTemperatureEntry);
+        }
+        if (!mObservers.contains(listener))
+            mObservers.add(listener);
+    }
+
+    @Override
+    synchronized public void unregisterObserver(LocalServiceObserver listener) {
+        mObservers.remove(listener);
+    }
+
+    @Override
+    synchronized public void temperatureChanged(Temperature temperatureEntry) {
+        mTemperatureEntry = temperatureEntry;
+        for (LocalServiceObserver observer : mObservers)
+        {
+            observer.onTemperatureRecv(temperatureEntry);
+        }
+    }
+
+    @Override
+    public void alarmTriggered() {
+        for (LocalServiceObserver observer : mObservers)
+        {
+            observer.onAlarmTriggered();
+        }
+    }
+
+    synchronized public void setIpAddress(String ipAddress) {
+        if (!this.ipAddress.equals(ipAddress))
+        {
+            this.ipAddress = ipAddress;
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    synchronized public void setPort (int port) {
+        if (this.port != port) {
+            this.port = port;
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    synchronized public String getIpAddress() {
+        return ipAddress;
+    }
+
+    synchronized public int getPort()
+    {
+        return port;
+    }
+
+    synchronized public boolean isRunning() {
+        return running;
+    }
+    
+    synchronized  public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+
+    public void onServerError() {
+        for (LocalServiceObserver observer : mObservers)
+        {
+            observer.onServerError();
+        }
     }
 }

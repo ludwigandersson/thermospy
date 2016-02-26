@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Created by ludde on 15-02-17.
+ * Gets the active log session object
  */
 public class GetActiveLogSessionReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 

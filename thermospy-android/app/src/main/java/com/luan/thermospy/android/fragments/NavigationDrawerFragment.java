@@ -96,7 +96,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         // Select either the default item (0) or the last selected item.
-        selectItem(mCurrentSelectedPosition);
+       // selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -125,7 +125,6 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(com.luan.thermospy.android.R.string.title_section1),
                         getString(com.luan.thermospy.android.R.string.title_section2),
                         getString(com.luan.thermospy.android.R.string.title_section3),
-                        getString(com.luan.thermospy.android.R.string.title_section4),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;

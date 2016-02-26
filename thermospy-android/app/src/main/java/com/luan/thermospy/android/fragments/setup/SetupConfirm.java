@@ -20,9 +20,10 @@
 package com.luan.thermospy.android.fragments.setup;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +45,9 @@ import com.luan.thermospy.android.core.rest.GetTemperatureReq;
  * received from the server is valid. If the user accepts a request is sent to start the
  * photo service in continuous mode. If cancelled the user is sent back to the Setup view.
  */
-public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTemperatureListener, CameraControlReq.OnCameraControlListener {
+public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTemperatureListener,
+                                                      CameraControlReq.OnCameraControlListener, 
+                                                      DialogInterface.OnCancelListener {
 
     private static final String PARAM_TEMPERATURE = "temperature";
     private static final String LOG_TAG = SetupConfirm.class.getSimpleName();
@@ -79,6 +82,7 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
 
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -87,10 +91,11 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
         mTemperature = (TextView)v.findViewById(R.id.txtViewTemperature);
         Button btnAbort = (Button) v.findViewById(R.id.buttonRetry);
         Button btnOk = (Button) v.findViewById(R.id.buttonConfirm);
+        Button btnResetBounds = (Button)v.findViewById(R.id.buttonResetBounds);
         btnAbort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.abortSetup();
+                mListener.onSetupServerAborted();
             }
         });
 
@@ -98,6 +103,13 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
             @Override
             public void onClick(View v) {
                 requestStartService();
+            }
+        });
+
+        btnResetBounds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onResetBounds();
             }
         });
 
@@ -125,7 +137,10 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
 
     private void showProgressAndTakePhoto()
     {
-        mProgress = new ProgressDialog(getActivity());
+        if (mProgress == null) {
+            mProgress = new ProgressDialog(getActivity());
+            mProgress.setOnCancelListener(this);
+        }
         mProgress.setTitle(R.string.please_wait);
         mProgress.setMessage(getString(R.string.progress_fetching_temperature));
         mProgress.setCanceledOnTouchOutside(false);
@@ -136,10 +151,13 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
 
     private void requestStartService()
     {
-        mProgress = new ProgressDialog(getActivity());
+        if (mProgress == null) {
+            mProgress = new ProgressDialog(getActivity());
+            mProgress.setOnCancelListener(this);
+        }
+        mProgress.setCanceledOnTouchOutside(false);
         mProgress.setTitle(R.string.please_wait);
         mProgress.setMessage(getString(R.string.progress_starting_service));
-        mProgress.setCanceledOnTouchOutside(false);
         mProgress.show();
         // Start server
         mCameraControlReq.setCameraControlAction(new Action(CameraControlAction.START));
@@ -206,7 +224,7 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
     @Override
     public void onTemperatureError() {
         hideProgress();
-        mListener.abortSetup();
+        mListener.onSetupServerAborted();
     }
 
     @Override
@@ -221,20 +239,20 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
             } else {
                 Log.w(LOG_TAG, "Received action that was not expected. Type: " + action.getActionId());
                 mProgress.hide();
-                mListener.abortSetup();
+                mListener.onSetupServerAborted();
             }
         }
         else {
             Log.w(LOG_TAG, "Received action that was not expected. Type: " + action.getActionId());
             mProgress.hide();
-            mListener.abortSetup();
+            mListener.onSetupServerAborted();
         }
     }
 
     @Override
     public void onCameraControlError() {
         hideProgress();
-        mListener.abortSetup();
+        mListener.onSetupServerAborted();
     }
 
     private void hideProgress() {
@@ -243,9 +261,15 @@ public class SetupConfirm extends Fragment implements GetTemperatureReq.OnGetTem
         }
     }
 
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        mListener.onSetupServerAborted();
+    }
+
     public interface OnThermoSpySetupConfirmedListener {
         public void setupConfirmed(String s);
-        public void abortSetup();
+        public void onSetupServerAborted();
+        public void onResetBounds();
     }
 
 }

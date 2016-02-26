@@ -21,9 +21,11 @@ package com.luan.thermospy.android.core.serverrequest.type;
 
 import android.graphics.Bitmap;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.luan.thermospy.android.core.serverrequest.AbstractServerRequest;
@@ -33,13 +35,22 @@ import com.luan.thermospy.android.core.serverrequest.UrlRequestType;
  * Request an image from the server
  */
 public class GetImage extends AbstractServerRequest<ImageRequest, Bitmap> implements Response.Listener<Bitmap>, Response.ErrorListener {
+    private final RetryPolicy mRetryPolicy;
+
+    public GetImage(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType type, RetryPolicy retryPolicy) {
+        super(requestQueue, listener, type);
+        mRetryPolicy = retryPolicy;
+    }
     public GetImage(RequestQueue requestQueue, ServerRequestListener listener, UrlRequestType type) {
         super(requestQueue, listener, type);
+        mRetryPolicy = new DefaultRetryPolicy();
     }
 
     @Override
     public Request createRequest(String url) {
-        return new com.android.volley.toolbox.ImageRequest(url, this, 0, 0, Bitmap.Config.ALPHA_8, this );
+        Request r = new com.android.volley.toolbox.ImageRequest(url, this, 0, 0, Bitmap.Config.ALPHA_8, this );
+        r.setRetryPolicy(mRetryPolicy);
+        return r;
     }
     @Override
     public void onResponse(Bitmap response) {

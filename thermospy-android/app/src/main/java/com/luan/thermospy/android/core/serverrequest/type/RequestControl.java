@@ -20,7 +20,7 @@
 package com.luan.thermospy.android.core.serverrequest.type;
 
 /**
- * Interface for controlling a
+ * Interface for controlling a request
  */
 public interface RequestControl {
     void request(final String ip, final int port);

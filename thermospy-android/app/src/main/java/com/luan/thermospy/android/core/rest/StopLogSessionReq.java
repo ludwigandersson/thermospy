@@ -40,7 +40,7 @@ import java.lang.reflect.Type;
 import java.util.Date;
 
 /**
- * Created by ludde on 15-02-17.
+ * Request that stops a current log session
  */
 public class StopLogSessionReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 

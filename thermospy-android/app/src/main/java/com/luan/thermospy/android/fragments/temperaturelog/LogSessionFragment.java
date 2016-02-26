@@ -21,7 +21,9 @@ package com.luan.thermospy.android.fragments.temperaturelog;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -33,8 +35,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
@@ -54,13 +55,15 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnLogSessionFragmentListener}
  * interface.
  */
-public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener, GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener {
+public class LogSessionFragment extends Fragment implements AbsListView.OnItemClickListener,
+        GetLogSessionListReq.OnGetLogSessionsListener, DeleteLogSessionReq.OnGetLogSessionTypesListener, EditLogSessionDialogFragment.OnEditLogSessionListener, DialogInterface.OnCancelListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM_IP_ADDRESS = "ipaddress";
     private static final String ARG_PARAM_PORT = "port";
     private static final String LOG_TAG = LogSessionFragment.class.getSimpleName();
+    private static final String ARG_DATEFORMAT = "dateformat";
 
     // TODO: Rename and change types of parameters
     private String mIpAddress;
@@ -85,16 +88,19 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private ArrayAdapter mAdapter;
+
     private RequestQueue mRequestQueue;
     private DeleteLogSessionReq mDeleteLogSessionReq;
+    private String mDateFormat;
 
     // TODO: Rename and change types of parameters
-    public static LogSessionFragment newInstance(String ipAddress, int port) {
+    public static LogSessionFragment newInstance(String ipAddress, int port, String dateformat) {
         LogSessionFragment fragment = new LogSessionFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM_IP_ADDRESS, ipAddress);
         args.putInt(ARG_PARAM_PORT, port);
+        args.putString(ARG_DATEFORMAT,dateformat);
         fragment.setArguments(args);
         return fragment;
     }
@@ -110,16 +116,17 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mIpAddress = getArguments().getString(ARG_PARAM_IP_ADDRESS);
-            mPort = getArguments().getInt(ARG_PARAM_PORT);
+        if (savedInstanceState != null) {
+            mIpAddress = savedInstanceState.getString(ARG_PARAM_IP_ADDRESS);
+            mPort = savedInstanceState.getInt(ARG_PARAM_PORT);
+            mDateFormat = savedInstanceState.getString(ARG_DATEFORMAT);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_logsession, container, false);
+        View view = inflater.inflate(R.layout.fragment_logsession_list, container, false);
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -153,13 +160,28 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         int menuItemIndex = item.getItemId();
 
         LogSession logSession = mLogSessionList.get(info.position);
-        if (menuItemIndex == 0) {
-            mListener.onShowTemperatureList(logSession);
-        } else if (menuItemIndex == 1)
+        switch (menuItemIndex)
         {
-            mToBeDeleted = logSession;
-            mDeleteLogSessionReq.setLogSessionTypeId(logSession.getId());
-            mDeleteLogSessionReq.request(mIpAddress, mPort);
+            case 0: {
+                mListener.onShowTemperatureList(logSession);
+            }
+                break;
+
+            case 1: {
+                FragmentManager fm = getFragmentManager();
+                EditLogSessionDialogFragment editLogSessionDialog = EditLogSessionDialogFragment.newInstance(Coordinator.getInstance().getServerSettings(), logSession);
+                editLogSessionDialog.setTargetFragment(this, 1);
+                editLogSessionDialog.show(fm, "fragment_edit_logsession");
+            }
+            break;
+            case 2: {
+                mToBeDeleted = logSession;
+                mDeleteLogSessionReq.setLogSessionTypeId(logSession.getId());
+                mDeleteLogSessionReq.request(mIpAddress, mPort);
+            }
+                break;
+            default:
+                return false;
         }
         return true;
     }
@@ -214,19 +236,6 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         }
     }
 
-    /**
-     * The default content for this Fragment has a TextView that is shown when
-     * the list is empty. If you would like to change the text, call this method
-     * to supply the text it should use.
-     */
-    public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
-
-        if (emptyView instanceof TextView) {
-            ((TextView) emptyView).setText(emptyText);
-        }
-    }
-
     @Override
     public void onLogSessionsRecv(List<LogSession> logSessionList) {
 
@@ -249,6 +258,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     @Override
     public void onResume() {
         super.onResume();
+
         requestLogSessionItems();
     }
 
@@ -280,7 +290,7 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
         if (mToBeDeleted != null && mToBeDeleted.getId() == id)
         {
             mLogSessionList.remove(mToBeDeleted);
-            mListView.invalidateViews();
+            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -288,6 +298,49 @@ public class LogSessionFragment extends Fragment implements AbsListView.OnItemCl
     public void onLogSessionTypeError() {
         mToBeDeleted = null;
         Log.d(LOG_TAG, "Failed to delete log session.");
+    }
+
+    @Override
+    public void onDone(LogSession session) {
+        LogSession inList = null;
+        for (LogSession l : mLogSessionList)
+        {
+            if (session.getId() == l.getId())
+            {
+                inList = l;
+                break;
+            }
+        }
+        if (inList != null)
+        {
+            mLogSessionList.remove(inList);
+            mLogSessionList.add(0, session);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putString(ARG_PARAM_IP_ADDRESS, mIpAddress);
+        outState.putInt(ARG_PARAM_PORT, mPort);
+        outState.putString(ARG_DATEFORMAT, mDateFormat);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onError() {
+        Toast t = Toast.makeText(getActivity(), getString(R.string.failed_to_update_logsession), Toast.LENGTH_SHORT);
+        t.show();
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog)
+    {
+        mDeleteLogSessionReq.cancel();
+        mGetLogSessionListReq.cancel();
+        mListener.onLogSessionListError();
     }
 
     /**

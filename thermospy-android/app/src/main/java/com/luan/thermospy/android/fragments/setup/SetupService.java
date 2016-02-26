@@ -20,10 +20,10 @@
 package com.luan.thermospy.android.fragments.setup;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,13 +33,8 @@ import android.widget.EditText;
 import com.android.volley.RequestQueue;
 import com.luan.thermospy.android.R;
 import com.luan.thermospy.android.core.Coordinator;
-import com.luan.thermospy.android.core.pojo.Action;
-import com.luan.thermospy.android.core.pojo.Boundary;
-import com.luan.thermospy.android.core.pojo.CameraControlAction;
 import com.luan.thermospy.android.core.pojo.ServiceStatus;
-import com.luan.thermospy.android.core.rest.CameraControlReq;
 import com.luan.thermospy.android.core.rest.GetServiceStatusReq;
-import com.luan.thermospy.android.core.rest.SetImgBoundsReq;
 
 /**
  * The setup service class is responsible for user input of IP and port.
@@ -49,7 +44,7 @@ import com.luan.thermospy.android.core.rest.SetImgBoundsReq;
  * If successful the view will notify its listener and the wizard will continue.
  *
  */
-public class SetupService extends Fragment implements GetServiceStatusReq.OnGetServiceStatus, CameraControlReq.OnCameraControlListener, SetImgBoundsReq.OnSetImgBoundsListener {
+public class SetupService extends Fragment implements GetServiceStatusReq.OnGetServiceStatus, DialogInterface.OnCancelListener {
     private static final String LOG_TAG = SetupService.class.getSimpleName();
 
     private static final String ARG_IP_ADDRESS = "ipaddress";
@@ -64,8 +59,6 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
     private RequestQueue requestQueue = null;
 
     private GetServiceStatusReq mServerStatusReq;
-    private CameraControlReq mCameraControlReq;
-    private SetImgBoundsReq mSetImageBoundsReq;
 
     private OnSetupServerListener mListener;
     private String mIpAddress;
@@ -108,15 +101,6 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
         outState.putString(ARG_IP_ADDRESS, mIpAddress);
     }
 
-    private void requestStopService()
-    {
-        final String ip = editIp.getText().toString();
-        final int port = Integer.parseInt(editPort.getText().toString());
-
-        mCameraControlReq.setCameraControlAction(new Action(CameraControlAction.STOP));
-        mCameraControlReq.request(ip, port);
-    }
-
     private void requestServerStatus()
     {
         mIpAddress = editIp.getText().toString();
@@ -130,18 +114,6 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
             editPort.setText("");
         }
 
-    }
-
-    private void requestResetImgBoundary()
-    {
-
-        mSetImageBoundsReq.request(mIpAddress, mPort);
-    }
-
-    private void takePhoto()
-    {
-        mCameraControlReq.setCameraControlAction(new Action(CameraControlAction.RUNONCE));
-        mCameraControlReq.request(mIpAddress, mPort);
     }
 
     @Override
@@ -160,6 +132,7 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
             public void onClick(View v) {
                 // do something
                 mProgress = new ProgressDialog(getActivity());
+                mProgress.setOnCancelListener(SetupService.this);
                 mProgress.setCanceledOnTouchOutside(false);
                 mProgress.setTitle("Please wait");
                 mProgress.setMessage("Trying to connect to server...");
@@ -185,8 +158,6 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
             mListener = (OnSetupServerListener) activity;
             requestQueue = Coordinator.getInstance().getRequestQueue();
             mServerStatusReq = new GetServiceStatusReq(requestQueue, this);
-            mCameraControlReq = new CameraControlReq(requestQueue, this, new Action(CameraControlAction.RUNONCE));
-            mSetImageBoundsReq = new SetImgBoundsReq(requestQueue, this, new Boundary(0,0,0,0));
 
             if (getArguments() != null)
             {
@@ -212,7 +183,7 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
             mProgress.dismiss();
 
         }
-        requestQueue.cancelAll(this);
+        mServerStatusReq.cancel();
     }
 
     @Override
@@ -223,43 +194,19 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
             mProgress.dismiss();
 
         }
-        requestQueue.cancelAll(this);
+        mServerStatusReq.cancel();
     }
 
-    @Override
-    public void onCameraControlResp(Action action) {
-        if (action.getActionId() == mCameraControlReq.getAction().getActionId()) {
-            if (action.getActionId() == CameraControlAction.RUNONCE) {
-                mProgress.dismiss();
-                mListener.onSetupServerConnectionEstablished(mIpAddress, mPort, true);
-            } else if (action.getActionId() == CameraControlAction.STOP)
-            {
-                requestResetImgBoundary();
-            }
-        }
-    }
 
-    @Override
-    public void onCameraControlError() {
-        hideProgress();
-        mListener.onSetupServerFailed();
-    }
+
+
 
     @Override
     public void onServiceStatusRecv(ServiceStatus status) {
         mPort = Integer.parseInt(editPort.getText().toString());
         mIpAddress = editIp.getText().toString();
 
-        try {
-
-            if (status.isRunning()) {
-                requestStopService();
-            } else {
-                requestResetImgBoundary();
-            }
-        } catch (Exception e) {
-            mProgress.dismiss();
-        }
+        mListener.onSetupServerConnectionEstablished(mIpAddress, mPort, true);
 
     }
 
@@ -269,26 +216,7 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
         mListener.onSetupServerFailed();
     }
 
-    @Override
-    public void onSetImgBoundsRecv(Boundary imgBounds) {
-        if (imgBounds.getHeight() == 0 &&
-                imgBounds.getWidth() == 0 &&
-                imgBounds.getX() == 0 &&
-                imgBounds.getY() == 0) {
-            takePhoto();
-        } else
-        {
-            Log.e(LOG_TAG, "Image bounds not set to all ZERO. Abort setup!");
-            mListener.onSetupServerFailed();
-        }
 
-    }
-
-    @Override
-    public void onSetImgBoundsError() {
-        hideProgress();
-        mListener.onSetupServerFailed();
-    }
 
 
     private void hideProgress() {
@@ -296,6 +224,13 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
         {
             mProgress.hide();
         }
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        hideProgress();
+        mServerStatusReq.cancel();
+        mListener.onSetupServerAborted();
     }
 
     /**
@@ -312,6 +247,8 @@ public class SetupService extends Fragment implements GetServiceStatusReq.OnGetS
         // TODO: Update argument type and name
         public void onSetupServerConnectionEstablished(String ipAddress, int port, boolean running);
         public void onSetupServerFailed();
+        public void onSetupServerAborted();
     }
+
 
 }

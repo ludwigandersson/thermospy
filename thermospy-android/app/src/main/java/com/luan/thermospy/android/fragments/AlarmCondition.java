@@ -20,7 +20,7 @@
 package com.luan.thermospy.android.fragments;
 
 /**
- * Created by ludde on 15-02-03.
+ * Alarm condition enum. Used when
  */
 public enum AlarmCondition {
 

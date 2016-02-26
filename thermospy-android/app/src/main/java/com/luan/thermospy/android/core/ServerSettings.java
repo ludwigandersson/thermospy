@@ -23,9 +23,16 @@ package com.luan.thermospy.android.core;
  * Holds information about the thermospy server
  */
 public class ServerSettings {
+
     public boolean isValid() {
         return this.ipAddress != null && !ipAddress.isEmpty() &&port > 0;
     }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
+
+    public boolean isConnected() { return this.connected; }
 
     static interface ServerSettingsStrings
     {
@@ -33,6 +40,7 @@ public class ServerSettings {
         String PORT = "port";
         String SERVER_RUNNING = "running";
     }
+    private boolean connected;
     private boolean running;
     private int port;
     private String ipAddress;
@@ -42,6 +50,7 @@ public class ServerSettings {
         this.port = port;
         this.ipAddress = ipAddress;
         this.running = running;
+        this.connected = false;
     }
 
     public int getPort() {

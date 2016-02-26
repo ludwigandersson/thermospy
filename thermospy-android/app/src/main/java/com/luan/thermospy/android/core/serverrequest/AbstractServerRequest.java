@@ -87,7 +87,9 @@ public abstract class AbstractServerRequest<T, R> implements RequestControl {
     }
     public void cancel()
     {
-        this.mRequestQueue.cancelAll(this);
+        if (mRequestQueue != null) {
+            this.mRequestQueue.cancelAll(this);
+        }
     }
 
 }

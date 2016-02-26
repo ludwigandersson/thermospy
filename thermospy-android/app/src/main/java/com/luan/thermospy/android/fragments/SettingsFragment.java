@@ -28,7 +28,7 @@ import android.util.Log;
 import com.luan.thermospy.android.R;
 
 /**
- * Created by ludde on 15-02-03.
+ * Handels application wide settings.
  */
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 

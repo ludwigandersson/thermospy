@@ -37,7 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by ludde on 15-02-01.
+ * Sets the image bounds to be used by the server when taking photos
  */
 public class SetImgBoundsReq implements AbstractServerRequest.ServerRequestListener<JSONObject>, RequestControl {
 

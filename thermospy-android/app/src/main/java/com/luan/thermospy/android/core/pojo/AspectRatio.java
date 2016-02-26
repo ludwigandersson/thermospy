@@ -19,11 +19,16 @@
 
 package com.luan.thermospy.android.core.pojo;
 
+/**
+ * Enum class. Used when specifying the boundary for the image. Currently the following
+ * ratios are supported:
+ */
 public enum AspectRatio {
     ASPECT_RATIO_UNKNOWN(0,0,0),
-    ASPECT_RATIO_1_1(1,1,1),
-    ASPECT_RATIO_2_1(2,2,1),
-    ASPECT_RATIO_4_3(3,4,3);
+    ASPECT_RATIO_NONE(1,0,0),
+    ASPECT_RATIO_1_1(2,1,1),
+    ASPECT_RATIO_2_1(3,2,1),
+    ASPECT_RATIO_4_3(4,4,3);
 
     private final int x;
     private final int y;
@@ -39,7 +44,6 @@ public enum AspectRatio {
     {
         return id;
     }
-
     public int getX() {return x;}
     public int getY() {return y;}
 
@@ -47,10 +51,12 @@ public enum AspectRatio {
     {
         switch(string) {
             case "1":
-                return ASPECT_RATIO_1_1;
+                return ASPECT_RATIO_NONE;
             case "2":
-                return ASPECT_RATIO_2_1;
+                return ASPECT_RATIO_1_1;
             case "3":
+                return ASPECT_RATIO_2_1;
+            case "4":
                 return ASPECT_RATIO_4_3;
             default:
                 return ASPECT_RATIO_UNKNOWN;
@@ -62,10 +68,12 @@ public enum AspectRatio {
         switch (id)
         {
             case 1:
-                return ASPECT_RATIO_1_1;
+                return ASPECT_RATIO_NONE;
             case 2:
-                return ASPECT_RATIO_2_1;
+                return ASPECT_RATIO_1_1;
             case 3:
+                return ASPECT_RATIO_2_1;
+            case 4:
                 return ASPECT_RATIO_4_3;
             default:
                 return ASPECT_RATIO_UNKNOWN;

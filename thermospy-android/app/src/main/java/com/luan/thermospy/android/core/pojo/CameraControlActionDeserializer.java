@@ -30,7 +30,7 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 
 /**
- * Created by ludde on 15-02-01.
+ * A specialized de/serializer of the CameraControlAction enum.
  */
 public class CameraControlActionDeserializer implements JsonDeserializer<CameraControlAction>, JsonSerializer<CameraControlAction> {
     @Override
